@@ -1,4 +1,4 @@
-package com.hotelswave.nazmul.hotelswave.controller;
+package com.launch.nazmul.launch.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

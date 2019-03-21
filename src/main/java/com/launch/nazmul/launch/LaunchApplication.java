@@ -1,12 +1,12 @@
-package com.hotelswave.nazmul.hotelswave;
+package com.launch.nazmul.launch;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class HotelswaveApplication {
+public class LaunchApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(HotelswaveApplication.class, args);
+		SpringApplication.run(LaunchApplication.class, args);
 	}
 }
