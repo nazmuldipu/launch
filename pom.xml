@@ -8,11 +8,11 @@
 		<version>1.5.10.RELEASE</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.launch.nazmul</groupId>
-	<artifactId>hotelswave</artifactId>
+	<groupId>com.ship.nazmul</groupId>
+	<artifactId>ship</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
-	<name>hotelswave</name>
+	<name>ship</name>
 	<description>Demo project for Spring Boot</description>
 
 	<properties>
