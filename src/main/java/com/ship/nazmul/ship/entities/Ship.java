@@ -267,7 +267,6 @@ public class Ship extends BaseEntity {
                 ", hotelswavePercentage=" + hotelswavePercentage +
                 ", imagePaths=" + imagePaths +
                 ", shipFacilities=" + shipFacilities +
-                ", categoryList=" + categoryList +
                 ", user=" + user +
                 '}';
     }

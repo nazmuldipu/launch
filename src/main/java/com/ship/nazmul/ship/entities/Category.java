@@ -8,6 +8,7 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -74,6 +75,19 @@ public class Category extends BaseEntity {
 
     public void setShip(Ship ship) {
         this.ship = ship;
+    }
+
+    public void addImagePath(String imagePath) {
+        if (this.imagePaths == null) this.imagePaths = new ArrayList<>();
+        this.imagePaths.add(imagePath);
+    }
+
+    public CategoryFacilities getCategoryFacilities() {
+        return categoryFacilities;
+    }
+
+    public void setCategoryFacilities(CategoryFacilities categoryFacilities) {
+        this.categoryFacilities = categoryFacilities;
     }
 
     @Override
