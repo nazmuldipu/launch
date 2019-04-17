@@ -1,7 +1,9 @@
 package com.ship.nazmul.ship.controller.api.category;
 
 import com.ship.nazmul.ship.entities.Category;
+import com.ship.nazmul.ship.exceptions.forbidden.ForbiddenException;
 import com.ship.nazmul.ship.exceptions.invalid.ImageInvalidException;
+import com.ship.nazmul.ship.exceptions.invalid.InvalidException;
 import com.ship.nazmul.ship.exceptions.notfound.NotFoundException;
 import com.ship.nazmul.ship.services.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,12 +45,12 @@ public class CategoryAdminController {
     }
 
     @PostMapping("/{shipId}")
-    private ResponseEntity<Category> saveCategory(@PathVariable("shipId") Long shipId, @RequestBody Category category) throws NotFoundException {
+    private ResponseEntity<Category> saveCategory(@PathVariable("shipId") Long shipId, @RequestBody Category category) throws NotFoundException, ForbiddenException, InvalidException {
         return ResponseEntity.ok(this.categoryService.save(shipId, category));
     }
 
     @PutMapping("/{shipId}/category/{categoryId}")
-    private ResponseEntity<Category> updateCategory(@PathVariable("shipId") Long shipId, @PathVariable("categoryId") Long categoryId, @RequestBody Category category) throws NotFoundException {
+    private ResponseEntity<Category> updateCategory(@PathVariable("shipId") Long shipId, @PathVariable("categoryId") Long categoryId, @RequestBody Category category) throws NotFoundException, ForbiddenException, InvalidException {
         category.setId(categoryId);
         return ResponseEntity.ok(this.categoryService.save(shipId, category));
     }

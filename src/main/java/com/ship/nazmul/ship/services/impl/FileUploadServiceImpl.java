@@ -46,7 +46,7 @@ public class FileUploadServiceImpl implements FileUploadService {
 
     private void applyWatermark(File imageFile) {
         File output = new File(imageFile.getAbsolutePath());
-        String text = "hotelswave.com";
+        String text = "ship.com";
         try {
             ImageUtils.addTextWatermark(text, "png", imageFile, output);
         } catch (IOException e) {

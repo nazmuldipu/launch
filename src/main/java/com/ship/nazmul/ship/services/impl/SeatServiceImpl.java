@@ -1,0 +1,181 @@
+package com.ship.nazmul.ship.services.impl;
+
+import com.ship.nazmul.ship.commons.PageAttr;
+import com.ship.nazmul.ship.commons.utils.DateUtil;
+import com.ship.nazmul.ship.config.security.SecurityConfig;
+import com.ship.nazmul.ship.entities.Category;
+import com.ship.nazmul.ship.entities.Seat;
+import com.ship.nazmul.ship.entities.Ship;
+import com.ship.nazmul.ship.entities.User;
+import com.ship.nazmul.ship.exceptions.forbidden.ForbiddenException;
+import com.ship.nazmul.ship.exceptions.invalid.InvalidException;
+import com.ship.nazmul.ship.exceptions.notfound.NotFoundException;
+import com.ship.nazmul.ship.repositories.SeatRepository;
+import com.ship.nazmul.ship.services.CategoryService;
+import com.ship.nazmul.ship.services.SeatService;
+import com.ship.nazmul.ship.services.ShipService;
+import netscape.security.ForbiddenTargetException;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Service;
+
+import java.util.*;
+
+
+@Service
+public class SeatServiceImpl implements SeatService {
+    private final SeatRepository seatRepository;
+    private final ShipService shipService;
+    private final CategoryService categoryService;
+
+    @Autowired
+    public SeatServiceImpl(SeatRepository seatRepository, ShipService shipService, CategoryService categoryService) {
+        this.seatRepository = seatRepository;
+        this.shipService = shipService;
+        this.categoryService = categoryService;
+    }
+
+    @Override
+    public Seat save(long shipId, Seat seat) throws NotFoundException, ForbiddenException, InvalidException {
+        Ship ship = this.shipService.getOne(shipId);
+        if (ship == null) throw new NotFoundException("Ship with id : " + ship + " not found");
+
+        Category category = this.categoryService.getOne(seat.getCategory().getId());
+        if (ship.getId() != category.getShip().getId()) throw new ForbiddenException("Access denied");
+
+        seat.setShip(ship);
+        return this.seatRepository.save(seat);
+    }
+
+    @Override
+    public Seat getOne(long seatId) throws NotFoundException {
+        Seat seat = this.seatRepository.getOne(seatId);
+        if (seat == null) throw new NotFoundException("Seat with id : " + seatId + " not found");
+        return seat;
+    }
+
+    @Override
+    public List<Seat> getAll() {
+        User user = SecurityConfig.getCurrentUser();
+        if (!user.isAdmin()) throw new ForbiddenTargetException("Access denied");
+        return this.seatRepository.findAll();
+    }
+
+    @Override
+    public Page<Seat> getAll(int page) {
+        User user = SecurityConfig.getCurrentUser();
+        if (!user.isAdmin()) throw new ForbiddenTargetException("Access denied");
+
+        return this.seatRepository.findAll(PageAttr.getPageRequest(page));
+    }
+
+    @Override
+    public boolean exists(long id) {
+        return this.seatRepository.exists(id);
+    }
+
+    @Override
+    public void delete(long id) {
+        this.seatRepository.delete(id);
+    }
+
+    @Override
+    public List<Seat> getSeatListByShipId(long shipId) {
+        return this.seatRepository.findByShipId(shipId);
+    }
+
+    @Override
+    public Page<Seat> getSeatListByShipId(long shipId, int page) {
+        return this.seatRepository.findByShipId(shipId, PageAttr.getPageRequest(page));
+    }
+
+    @Override
+    public List<Seat> findByCategoryId(Long categoryId) {
+        return this.seatRepository.findByCategoryId(categoryId);
+    }
+
+    @Override
+    public Page<Seat> getSeatListByCategoryId(long categoryId, int page) {
+        return this.seatRepository.findByCategoryId(categoryId, PageAttr.getPageRequest(page));
+    }
+
+    @Override
+    public List<Seat> getSeatListByCategoryId(long categoryId) {
+        return this.seatRepository.findByCategoryId(categoryId);
+    }
+
+    @Override
+    public List<Seat> getAvailableSeatByShipId(Long shipId, Date date) throws NotFoundException {
+        List<Seat> seatList = this.seatRepository.findByShipIdOrderBySeatNumber(shipId);
+        return this.getSeatAvailabilityFormSeatList(seatList, date);
+    }
+
+    @Override
+    public List<Seat> getAvailableSeatByCategoryAndShipId(Long shipId, Long categoryId, Date date) throws NotFoundException {
+
+        List<Seat> seatList = this.seatRepository.findByShipIdAndCategoryIdOrderBySeatNumber(shipId, categoryId);
+
+        return this.getSeatAvailabilityFormSeatList(seatList, date);
+    }
+
+    private List<Seat> getSeatAvailabilityFormSeatList(List<Seat> seatList, Date date) throws NotFoundException {
+        for (int i = 0; i < seatList.size(); i++) {
+            seatList.get(i).setAvailable(true);
+        }
+        for (int j = 0; j < seatList.size(); j++) {
+            if (!this.checkSeatAvailability(seatList.get(j).getId(), date)) {
+                seatList.get(j).setAvailable(false);
+            }
+        }
+
+        return seatList;
+    }
+
+    @Override
+    public List<JSONObject> getSeatListWithBookingIdByShipId(Long shipId, Date date) throws JSONException, NotFoundException {
+        List<Seat> seatList = this.seatRepository.findByShipIdOrderBySeatNumber(shipId);
+
+        List<JSONObject> list = new ArrayList<JSONObject>();
+        for (Seat seat : seatList) {
+            JSONObject obj = new JSONObject();
+            obj.put("id", seat.getId());
+            obj.put("seatNumber", seat.getSeatNumber());
+            if (!this.checkSeatAvailability(seat.getId(), date)) {
+                obj.put("bookingId", seat.getBookingIdMap().get(date));
+                obj.put("status", seat.getSeatStatusMap().get(date));
+            } else {
+                obj.put("bookingId", 0);
+                obj.put("status", Seat.EStatus.ROOM_FREE.toString());
+            }
+            list.add(obj);
+        }
+        return list;
+    }
+
+    @Override
+    public Map<Date, Integer> getFareMap(Long roomId,Date startDate, Date endDate) throws NotFoundException {
+        Seat seat = this.getOne(roomId);
+        List<Date> dates = DateUtil.getDatesBetween(startDate, endDate);
+        Map<Date, Integer> fareMap = new HashMap<>();
+//        for (int i = 0; i < dates.size(); i++) {
+//            Integer discount = seat.getDiscountMap().get(dates.get(i));
+//            if (discount == null) {
+//                discount = 0;
+//            }
+//            fareMap.put(dates.get(i), (seat.getFare() - discount));
+//        }
+        return fareMap;
+    }
+
+
+    @Override
+    public boolean checkSeatAvailability(Long seatId, Date date) throws NotFoundException {
+        Seat seat = this.getOne(seatId);
+        Seat.EStatus status = seat.getSeatStatusMap().get(date);
+        if (status == null || status == Seat.EStatus.ROOM_FREE)
+            return true;
+        return false;
+    }
+}

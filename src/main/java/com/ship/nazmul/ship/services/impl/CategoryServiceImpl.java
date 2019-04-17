@@ -1,10 +1,15 @@
 package com.ship.nazmul.ship.services.impl;
 
 import com.ship.nazmul.ship.commons.PageAttr;
+import com.ship.nazmul.ship.commons.utils.DateUtil;
 import com.ship.nazmul.ship.commons.utils.ImageValidator;
 import com.ship.nazmul.ship.entities.Category;
+import com.ship.nazmul.ship.entities.Seat;
+import com.ship.nazmul.ship.entities.Ship;
 import com.ship.nazmul.ship.entities.pojo.UploadProperties;
+import com.ship.nazmul.ship.exceptions.forbidden.ForbiddenException;
 import com.ship.nazmul.ship.exceptions.invalid.ImageInvalidException;
+import com.ship.nazmul.ship.exceptions.invalid.InvalidException;
 import com.ship.nazmul.ship.exceptions.notfound.NotFoundException;
 import com.ship.nazmul.ship.repositories.CategoryRepository;
 import com.ship.nazmul.ship.services.CategoryService;
@@ -17,7 +22,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.naming.LimitExceededException;
 import java.io.IOException;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class CategoryServiceImpl implements CategoryService {
@@ -33,12 +41,25 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Category save(Long shipId, Category category) throws NotFoundException {
-        category.setShip(this.shipService.getOne(shipId));
+    public Category save(Long shipId, Category category) throws NotFoundException, ForbiddenException, InvalidException {
+        Ship ship = this.shipService.getOne(shipId);
+        if (ship == null) throw new NotFoundException("Ship with id : " + ship + " not found");
+
+        category.setShip(ship);
         if(category.getId() != null){
             category.setImagePaths(this.getOne(category.getId()).getImagePaths());
         }
+        ship = this.updateStartsFrom(ship,category);
+
         return this.categoryRepo.save(category);
+    }
+
+    private Ship updateStartsFrom(Ship ship, Category category) throws InvalidException, NotFoundException, ForbiddenException {
+        if ((ship.getStartsFrom() == 0) || (ship.getStartsFrom() > (category.getFare() - category.getDiscount()))) {
+            ship.setStartsFrom(category.getFare() - category.getDiscount());
+            ship = this.shipService.save(ship);
+        }
+        return ship;
     }
 
     @Override
@@ -64,6 +85,26 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public List<Category> getCategoryByShipId(Long id) {
         return this.categoryRepo.findByShipId(id);
+    }
+
+    @Override
+    public Integer getFare(Long categoryId, Date date) {
+        Category category = this.getOne(categoryId);
+        Integer discount = category.getDiscountMap().get(date);
+        return category.getFare() - discount;
+    }
+
+    @Override
+    public Map<Date, Integer> getFareMap(Long categoryId, Date startDate, Date endDate) throws NotFoundException {
+        Category category = this.getOne(categoryId);
+        List<Date> dates = DateUtil.getDatesBetween(startDate, endDate);
+        Map<Date, Integer> fareMap = new HashMap<>();
+        for (int i = 0; i < dates.size(); i++) {
+            Integer discount = category.getDiscountMap().get(dates.get(i));
+            if (discount == null) discount = 0;
+            fareMap.put(dates.get(i), (category.getFare() - discount));
+        }
+        return fareMap;
     }
 
     @Override

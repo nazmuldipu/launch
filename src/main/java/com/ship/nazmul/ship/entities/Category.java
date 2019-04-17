@@ -4,12 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ship.nazmul.ship.entities.base.BaseEntity;
 import org.hibernate.annotations.Cascade;
 
-import javax.persistence.ElementCollection;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Entity
 public class Category extends BaseEntity {
@@ -17,6 +16,9 @@ public class Category extends BaseEntity {
     private String description;
     private String seatQuality;
     private int floorNumber;
+    private int fare;
+    private int discount;
+    private int agentDiscount;
 
     @JsonIgnore
     @ElementCollection
@@ -28,6 +30,12 @@ public class Category extends BaseEntity {
 
     @ManyToOne
     private Ship ship;
+
+    @JsonIgnore
+    @ElementCollection(fetch = FetchType.EAGER)
+    @MapKeyColumn(name = "date")
+    private Map<Date, Integer> discountMap;
+
 
     public String getName() {
         return name;
@@ -82,12 +90,47 @@ public class Category extends BaseEntity {
         this.imagePaths.add(imagePath);
     }
 
+
+    public Map<Date, Integer> getDiscountMap() {
+        return discountMap;
+    }
+
+    public void setDiscountMap(Map<Date, Integer> discountMap) {
+        this.discountMap = discountMap;
+    }
+
+
+
     public CategoryFacilities getCategoryFacilities() {
         return categoryFacilities;
     }
 
     public void setCategoryFacilities(CategoryFacilities categoryFacilities) {
         this.categoryFacilities = categoryFacilities;
+    }
+
+    public int getFare() {
+        return fare;
+    }
+
+    public void setFare(int fare) {
+        this.fare = fare;
+    }
+
+    public int getDiscount() {
+        return discount;
+    }
+
+    public void setDiscount(int discount) {
+        this.discount = discount;
+    }
+
+    public int getAgentDiscount() {
+        return agentDiscount;
+    }
+
+    public void setAgentDiscount(int agentDiscount) {
+        this.agentDiscount = agentDiscount;
     }
 
     @Override
@@ -97,6 +140,9 @@ public class Category extends BaseEntity {
                 ", description='" + description + '\'' +
                 ", seatQuality='" + seatQuality + '\'' +
                 ", floorNumber=" + floorNumber +
+                ", fare=" + fare +
+                ", discount=" + discount +
+                ", agentDiscount=" + agentDiscount +
                 ", imagePaths=" + imagePaths +
                 ", categoryFacilities=" + categoryFacilities +
                 ", ship=" + ship +
