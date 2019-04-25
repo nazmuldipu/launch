@@ -9,6 +9,7 @@ import java.util.List;
 
 @Entity
 public class Ship extends BaseEntity {
+    private String shipNumber;
     private String name;
     @Column(length = 10000)
     private String description;
@@ -19,6 +20,7 @@ public class Ship extends BaseEntity {
     private String size;//Square feet
     private String startingPoint;
     private String droppingPoint;
+    private String startTime;
     private String route;
     private boolean ac;
     private boolean containCabin;
@@ -49,6 +51,13 @@ public class Ship extends BaseEntity {
     @OneToMany(cascade = CascadeType.ALL)
     private List<User> user;
 
+    public String getShipNumber() {
+        return shipNumber;
+    }
+
+    public void setShipNumber(String shipNumber) {
+        this.shipNumber = shipNumber;
+    }
 
     public String getName() {
         return name;
@@ -120,6 +129,14 @@ public class Ship extends BaseEntity {
 
     public void setDroppingPoint(String droppingPoint) {
         this.droppingPoint = droppingPoint;
+    }
+
+    public String getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(String startTime) {
+        this.startTime = startTime;
     }
 
     public String getRoute() {
@@ -245,7 +262,8 @@ public class Ship extends BaseEntity {
     @Override
     public String toString() {
         return "Ship{" +
-                "name='" + name + '\'' +
+                "shipNumber='" + shipNumber + '\'' +
+                ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", kidsPolicy='" + kidsPolicy + '\'' +
                 ", phoneNumber='" + phoneNumber + '\'' +
@@ -254,6 +272,7 @@ public class Ship extends BaseEntity {
                 ", size='" + size + '\'' +
                 ", startingPoint='" + startingPoint + '\'' +
                 ", droppingPoint='" + droppingPoint + '\'' +
+                ", startTime='" + startTime + '\'' +
                 ", route='" + route + '\'' +
                 ", ac=" + ac +
                 ", containCabin=" + containCabin +

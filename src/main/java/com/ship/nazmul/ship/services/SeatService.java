@@ -1,5 +1,6 @@
 package com.ship.nazmul.ship.services;
 
+import com.ship.nazmul.ship.entities.Booking;
 import com.ship.nazmul.ship.entities.Seat;
 import com.ship.nazmul.ship.exceptions.forbidden.ForbiddenException;
 import com.ship.nazmul.ship.exceptions.invalid.InvalidException;
@@ -8,6 +9,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.data.domain.Page;
 
+import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -44,4 +46,6 @@ public interface SeatService {
     Map<Date, Integer> getFareMap(Long roomId, Date startDate, Date endDate) throws NotFoundException;
 
     boolean checkSeatAvailability(Long seatId, Date date) throws NotFoundException;
+
+    Seat updateSeatStatusAndBookingMap(Long roomId, Date date, Seat.EStatus status, Booking booking) throws NotFoundException, ForbiddenException, ParseException;
 }

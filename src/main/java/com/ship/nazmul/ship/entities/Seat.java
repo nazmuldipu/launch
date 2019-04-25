@@ -40,10 +40,10 @@ public class Seat extends BaseEntity{
     private Map<Date, Long> bookingIdMap;
 
     public enum EStatus {
-        ROOM_BLOCKED("Blocked"),
-        ROOM_RESERVED("Reserved"),
-        ROOM_SOLD("Sold"),
-        ROOM_FREE("Free");
+        SEAT_BLOCKED("Blocked"),
+        SEAT_RESERVED("Reserved"),
+        SEAT_SOLD("Sold"),
+        SEAT_FREE("Free");
 
         String value;
 

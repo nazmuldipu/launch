@@ -84,4 +84,15 @@ public abstract class BaseEntity {
     public void setCreated(Date created) {
         this.created = created;
     }
+
+    @Override
+    public String toString() {
+        return "BaseEntity{" +
+                "id=" + id +
+                ", created=" + created +
+                ", lastUpdated=" + lastUpdated +
+                ", createdBy=" + createdBy +
+                ", updatedBy=" + updatedBy +
+                '}';
+    }
 }

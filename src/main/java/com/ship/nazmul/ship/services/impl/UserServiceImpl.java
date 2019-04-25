@@ -107,11 +107,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findByUsernameOrPhone(String usernameOrPhone) throws UserNotFoundException {
+        if (usernameOrPhone == null) throw new UserNotFoundException("Username or Phone number can not be null!");
         User user = this.userRepo.findByUsername(usernameOrPhone);
         if (user == null)
             user = this.userRepo.findByPhoneNumber(usernameOrPhone);
-        if (user == null)
-            throw new UserNotFoundException("Could not find user with username or email " + usernameOrPhone);
+//        if (user == null)
+//            throw new UserNotFoundException("Could not find user with username or email " + usernameOrPhone);
         return user;
     }
 

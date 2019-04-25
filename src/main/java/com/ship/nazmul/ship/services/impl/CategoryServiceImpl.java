@@ -3,9 +3,11 @@ package com.ship.nazmul.ship.services.impl;
 import com.ship.nazmul.ship.commons.PageAttr;
 import com.ship.nazmul.ship.commons.utils.DateUtil;
 import com.ship.nazmul.ship.commons.utils.ImageValidator;
+import com.ship.nazmul.ship.config.security.SecurityConfig;
 import com.ship.nazmul.ship.entities.Category;
 import com.ship.nazmul.ship.entities.Seat;
 import com.ship.nazmul.ship.entities.Ship;
+import com.ship.nazmul.ship.entities.User;
 import com.ship.nazmul.ship.entities.pojo.UploadProperties;
 import com.ship.nazmul.ship.exceptions.forbidden.ForbiddenException;
 import com.ship.nazmul.ship.exceptions.invalid.ImageInvalidException;
@@ -95,6 +97,12 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    public Integer getDiscount(Long categoryId, Date date) {
+        Category category = this.getOne(categoryId);
+        return category.getDiscountMap().get(date);
+    }
+
+    @Override
     public Map<Date, Integer> getFareMap(Long categoryId, Date startDate, Date endDate) throws NotFoundException {
         Category category = this.getOne(categoryId);
         List<Date> dates = DateUtil.getDatesBetween(startDate, endDate);
@@ -105,6 +113,36 @@ public class CategoryServiceImpl implements CategoryService {
             fareMap.put(dates.get(i), (category.getFare() - discount));
         }
         return fareMap;
+    }
+
+    @Override
+    public Map<Date, Integer> getDiscountMap(Long categoryId, Date startDate, Date endDate) throws NotFoundException {
+        Category category = this.getOne(categoryId);
+        List<Date> dates = DateUtil.getDatesBetween(startDate, endDate);
+        Map<Date, Integer> discountMap = new HashMap<>();
+        for (int i = 0; i < dates.size(); i++) {
+            Integer discount = category.getDiscountMap().get(dates.get(i));
+            if (discount == null) discount = 0;
+            discountMap.put(dates.get(i),  discount);
+        }
+        return discountMap;
+    }
+
+    @Override
+    public Map<String, String> updateCategoryDiscount(Long categoryId, Date startDate, Date endDate, int discountAmount) throws ForbiddenException {
+        User user = SecurityConfig.getCurrentUser();
+        Category category = this.getOne(categoryId);
+        if (user.isOnlyUser() || (!user.isAdmin() && user.getShip().getId() != category.getShip().getId()))
+            throw new ForbiddenException("Access denied");
+
+        List<Date> dates = DateUtil.getDatesBetween(startDate, endDate);
+        for (int i = 0; i < dates.size(); i++) {
+            category.getDiscountMap().put(dates.get(i), discountAmount);
+        }
+        category = this.categoryRepo.save(category);
+        Map<String, String> response = new HashMap<>();
+        response.put("response", "success");
+        return response;
     }
 
     @Override

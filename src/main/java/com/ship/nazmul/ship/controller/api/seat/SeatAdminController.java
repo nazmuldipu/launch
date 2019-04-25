@@ -47,9 +47,8 @@ public class SeatAdminController {
 
     @GetMapping("/available/{shipId}")
     private ResponseEntity getAllAvailableSeatForUser(@PathVariable("shipId") Long shipId,
-                                                      @RequestParam(value = "categoryId", required = false) Long categoryId,
                                                       @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date date) throws NotFoundException {
-        return ResponseEntity.ok(this.seatService.getAvailableSeatByCategoryAndShipId(shipId, categoryId, date));
+        return ResponseEntity.ok(this.seatService.getAvailableSeatByShipId(shipId, date));
     }
 
     @GetMapping("/statusList/{shipId}")
@@ -57,13 +56,6 @@ public class SeatAdminController {
                                                     @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date date
     ) throws NotFoundException, JSONException {
         return ResponseEntity.ok(this.seatService.getSeatListWithBookingIdByShipId(shipId, date).toString());
-    }
-
-    @GetMapping("/priceMap/{seatId}")
-    private ResponseEntity seatPriceMap(@PathVariable("seatId") Long seatId,
-                                        @RequestParam("startDate")@DateTimeFormat(pattern = "yyyy-MM-dd")  Date startDate,
-                                        @RequestParam("endDate")@DateTimeFormat(pattern = "yyyy-MM-dd")  Date endDate) throws NotFoundException {
-        return ResponseEntity.ok(this.seatService.getFareMap(seatId, startDate, endDate));
     }
 
     @PutMapping("/update/{shipId}/{seatId}")

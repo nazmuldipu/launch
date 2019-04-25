@@ -4,10 +4,12 @@ import com.ship.nazmul.ship.entities.Seat;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
 
+@Repository
 public interface SeatRepository extends JpaRepository<Seat, Long> {
     List<Seat> findByShipAndSeatNumberContainingIgnoreCase(Seat hotel, String query);
 

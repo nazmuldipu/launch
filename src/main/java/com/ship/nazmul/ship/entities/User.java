@@ -68,6 +68,17 @@ public class User extends BaseEntity implements UserDetails {
 //        this.hotel = hotel;
 //    }
 
+
+    public User() {
+    }
+
+    public User(String name, String username, String phoneNumber, String password) {
+        this.name = name;
+        this.username = username;
+        this.phoneNumber = phoneNumber;
+        this.password = password;
+    }
+
     @PrePersist
     private void onPrePersist() {
 //        if (roles == null || roles.isEmpty())

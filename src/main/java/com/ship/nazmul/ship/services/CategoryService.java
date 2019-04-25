@@ -29,7 +29,13 @@ public interface CategoryService {
 
     Integer getFare(Long categoryId, Date date);
 
+    Integer getDiscount(Long categoryId, Date date);
+
     Map<Date, Integer> getFareMap(Long categoryId, Date startDate, Date endDate) throws NotFoundException;
+
+    Map<Date, Integer> getDiscountMap(Long categoryId, Date startDate, Date endDate) throws NotFoundException;
+
+    Map<String, String> updateCategoryDiscount(Long categoryId, Date startDate, Date endDate, int discountAmount) throws ForbiddenException;
 
     boolean exists(Long id);
 

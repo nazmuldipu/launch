@@ -3,10 +3,7 @@ package com.ship.nazmul.ship.services.impl;
 import com.ship.nazmul.ship.commons.PageAttr;
 import com.ship.nazmul.ship.commons.utils.DateUtil;
 import com.ship.nazmul.ship.config.security.SecurityConfig;
-import com.ship.nazmul.ship.entities.Category;
-import com.ship.nazmul.ship.entities.Seat;
-import com.ship.nazmul.ship.entities.Ship;
-import com.ship.nazmul.ship.entities.User;
+import com.ship.nazmul.ship.entities.*;
 import com.ship.nazmul.ship.exceptions.forbidden.ForbiddenException;
 import com.ship.nazmul.ship.exceptions.invalid.InvalidException;
 import com.ship.nazmul.ship.exceptions.notfound.NotFoundException;
@@ -21,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
 import java.util.*;
 
 
@@ -147,7 +145,7 @@ public class SeatServiceImpl implements SeatService {
                 obj.put("status", seat.getSeatStatusMap().get(date));
             } else {
                 obj.put("bookingId", 0);
-                obj.put("status", Seat.EStatus.ROOM_FREE.toString());
+                obj.put("status", Seat.EStatus.SEAT_FREE.toString());
             }
             list.add(obj);
         }
@@ -174,8 +172,20 @@ public class SeatServiceImpl implements SeatService {
     public boolean checkSeatAvailability(Long seatId, Date date) throws NotFoundException {
         Seat seat = this.getOne(seatId);
         Seat.EStatus status = seat.getSeatStatusMap().get(date);
-        if (status == null || status == Seat.EStatus.ROOM_FREE)
+        if (status == null || status == Seat.EStatus.SEAT_BLOCKED)
             return true;
         return false;
+    }
+
+    @Override
+    public Seat updateSeatStatusAndBookingMap(Long roomId, Date date, Seat.EStatus status, Booking booking) throws NotFoundException, ForbiddenException, ParseException {
+        User user = SecurityConfig.getCurrentUser();
+        Seat seat = this.getOne(roomId);
+        if (user.isOnlyUser() && booking.getUser().getId() != user.getId())
+            throw new ForbiddenException("Access denied");
+        date = DateUtil.truncateTimeFromDate(date);
+        seat.getSeatStatusMap().put(date, status);
+        seat.getBookingIdMap().put(date, booking.getId());
+        return this.seatRepository.save(seat);
     }
 }
