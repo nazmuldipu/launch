@@ -100,18 +100,14 @@ public class BookingServiceImpl implements BookingService {
         // 1 ) pay first
         // 2 ) update room booking map
         // 3 ) update ledger for hotel
-        System.out.println("D1 "  + booking.toString());
         if (user.hasRole(Role.ERole.ROLE_ADMIN.toString())) {
             booking = this.save(booking);
             if (this.confirmBooking(booking)) {
-                System.out.println("D2 "  + booking.toString());
                 booking.setConfirmed(true);
                 booking.setApproved(true);
                 booking.setPaid(true);
                 booking = this.save(booking);
                 this.adminSellRoomsAccounting(booking, false);
-                System.out.println(booking.getId());
-                System.out.println("D3 "  + booking.toString());
                 return booking;
             }
         }
@@ -193,15 +189,12 @@ public class BookingServiceImpl implements BookingService {
         List<SubBooking> newSubBookingList = new ArrayList<>();
 
         for (SubBooking subBooking : subBookingList) {
-            System.out.println("D8 : " + subBooking.getSeat().getId());
             Seat seat = this.seatService.getOne(subBooking.getSeat().getId());
             // 3) Create SubBooking for each room and each date
             SubBooking newSubBooking = new SubBooking(DateUtil.truncateTimeFromDate(subBooking.getDate()), subBooking.getDiscount(), subBooking.getCommission(), seat);
-            System.out.println("D5 : " + newSubBooking.getSeat().getId());
             // 4) Calculate each subBooking and add to subBookingList
             newSubBooking = this.calculateSubBooking(newSubBooking);
             newSubBookingList.add(newSubBooking);
-            System.out.println("D6 : " + newSubBooking.getSeat().getId());
         }
         return newSubBookingList;
     }

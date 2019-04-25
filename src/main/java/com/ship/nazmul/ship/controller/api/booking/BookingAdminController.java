@@ -31,13 +31,7 @@ public class BookingAdminController {
 
     @PostMapping("/sell")
     private ResponseEntity createBooking(@RequestBody Booking booking) throws UserInvalidException, ForbiddenException, ParseException, NullPasswordException, NotFoundException, UserAlreadyExistsException {
-        Booking myBooking = this.bookingService.createAdminBooking(booking);
-        System.out.println(myBooking.getId());
-        for(SubBooking sb : myBooking.getSubBookingList()){
-            System.out.println(sb.toString());
-            System.out.println(sb.getSeat().getId());
-        }
-        return ResponseEntity.ok(myBooking);
+        return ResponseEntity.ok(this.bookingService.createAdminBooking(booking));
     }
 
     @GetMapping("/mySells")

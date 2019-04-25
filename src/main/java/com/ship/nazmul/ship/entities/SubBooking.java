@@ -1,6 +1,8 @@
 package com.ship.nazmul.ship.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Embeddable;
@@ -19,7 +21,8 @@ public class SubBooking implements Serializable {
     private boolean paid;
 
     @OneToOne
-    @JsonIgnore
+    @JsonBackReference
+//    @JsonIgnore
     private Seat seat;
 
 
