@@ -95,7 +95,9 @@ public class BookingServiceImpl implements BookingService {
         // 2) Add subBookingList to booking and Calculate Booking
         booking.setSubBookingList(this.calculateSubBookingList(booking.getSubBookingList()));
         booking = this.calculateBooking(booking);
-
+        booking.setShip(booking.getSubBookingList().get(0).getSeat().getCategory().getShip());
+        booking.setShipName(booking.getShip().getName());
+        booking.setCategoryName(booking.getSubBookingList().get(0).getSeat().getCategory().getName() );
         //7) To confirm a booking user need to go following steps
         // 1 ) pay first
         // 2 ) update room booking map
@@ -201,9 +203,9 @@ public class BookingServiceImpl implements BookingService {
 
     SubBooking calculateSubBooking(SubBooking subBooking){
         subBooking.setFare(subBooking.getSeat().getCategory().getFare());
-        int discount = subBooking.getDiscount();
-        if (discount == 0) {
-            discount = this.categoryService.getDiscount(subBooking.getSeat().getCategory().getId(), subBooking.getDate());
+        Integer discount = this.categoryService.getDiscount(subBooking.getSeat().getCategory().getId(), subBooking.getDate());//subBooking.getDiscount();
+        if (discount == null) {
+            discount = subBooking.getDiscount();
         }
         subBooking.setDiscount(discount);
         subBooking.setPayablePrice(subBooking.getFare() - subBooking.getDiscount());

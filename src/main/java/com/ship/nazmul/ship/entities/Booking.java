@@ -15,6 +15,8 @@ public class Booking extends BaseEntity {
     private Ship ship;
 
     private String refBy;
+    private String shipName;
+    private String categoryName;
     private int totalFare;
     private int totalDiscount;
     private int totalCommission;
@@ -60,6 +62,22 @@ public class Booking extends BaseEntity {
 
     public void setRefBy(String refBy) {
         this.refBy = refBy;
+    }
+
+    public String getShipName() {
+        return shipName;
+    }
+
+    public void setShipName(String shipName) {
+        this.shipName = shipName;
+    }
+
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
     }
 
     public int getTotalFare() {
@@ -196,6 +214,8 @@ public class Booking extends BaseEntity {
                 "subBookingList=" + subBookingList +
                 ", ship=" + ship +
                 ", refBy='" + refBy + '\'' +
+                ", shipName='" + shipName + '\'' +
+                ", categoryName='" + categoryName + '\'' +
                 ", totalFare=" + totalFare +
                 ", totalDiscount=" + totalDiscount +
                 ", totalCommission=" + totalCommission +

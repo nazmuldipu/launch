@@ -14,6 +14,7 @@ import java.util.Date;
 @Embeddable
 public class SubBooking implements Serializable {
     private Date date;
+    private String seatNumber;
     private int fare;
     private int discount;
     private int commission;
@@ -39,6 +40,8 @@ public class SubBooking implements Serializable {
         this.discount = discount;
         this.commission = commission;
         this.seat = seat;
+        this.seatNumber = seat.getSeatNumber();
+
     }
 
     public Date getDate() {
@@ -47,6 +50,14 @@ public class SubBooking implements Serializable {
 
     public void setDate(Date date) {
         this.date = date;
+    }
+
+    public String getSeatNumber() {
+        return seatNumber;
+    }
+
+    public void setSeatNumber(String seatNumber) {
+        this.seatNumber = seatNumber;
     }
 
     public int getFare() {
