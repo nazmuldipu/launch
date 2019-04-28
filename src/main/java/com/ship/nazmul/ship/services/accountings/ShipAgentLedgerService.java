@@ -1,6 +1,8 @@
 package com.ship.nazmul.ship.services.accountings;
 
 import com.ship.nazmul.ship.entities.accountings.ShipAgentLedger;
+import com.ship.nazmul.ship.exceptions.forbidden.ForbiddenException;
+import com.ship.nazmul.ship.exceptions.notfound.UserNotFoundException;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -24,7 +26,7 @@ public interface ShipAgentLedgerService {
 
     ShipAgentLedger updateBalanceAndSave(Long agentId, ShipAgentLedger shipAgentLedger);
 
-    ShipAgentLedger addBalanceToShipAgent(Long agentId, int amount);
+    ShipAgentLedger addBalanceToShipAgent(Long agentId, int amount) throws UserNotFoundException, ForbiddenException;
 
     ShipAgentLedger getAgentLastLedger(Long agentId);
 

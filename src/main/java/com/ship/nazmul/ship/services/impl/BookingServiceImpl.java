@@ -4,6 +4,8 @@ import com.ship.nazmul.ship.commons.PageAttr;
 import com.ship.nazmul.ship.commons.utils.DateUtil;
 import com.ship.nazmul.ship.config.security.SecurityConfig;
 import com.ship.nazmul.ship.entities.*;
+import com.ship.nazmul.ship.entities.accountings.AdminCashbook;
+import com.ship.nazmul.ship.entities.accountings.AdminShipLedger;
 import com.ship.nazmul.ship.exceptions.exists.UserAlreadyExistsException;
 import com.ship.nazmul.ship.exceptions.forbidden.ForbiddenException;
 import com.ship.nazmul.ship.exceptions.invalid.UserInvalidException;
@@ -15,6 +17,8 @@ import com.ship.nazmul.ship.services.BookingService;
 import com.ship.nazmul.ship.services.CategoryService;
 import com.ship.nazmul.ship.services.SeatService;
 import com.ship.nazmul.ship.services.UserService;
+import com.ship.nazmul.ship.services.accountings.AdminCashbookService;
+import com.ship.nazmul.ship.services.accountings.AdminShipLedgerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -22,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -31,14 +36,18 @@ public class BookingServiceImpl implements BookingService {
     private final UserService userService;
     private final CategoryService categoryService;
     private final SeatService seatService;
+    private final AdminCashbookService adminCashbookService;
+    private final AdminShipLedgerService adminShipLedgerService;
 
 
     @Autowired
-    public BookingServiceImpl(BookingRepository bookingRepository, UserService userService, CategoryService categoryService, SeatService seatService) {
+    public BookingServiceImpl(BookingRepository bookingRepository, UserService userService, CategoryService categoryService, SeatService seatService, AdminCashbookService adminCashbookService, AdminShipLedgerService adminShipLedgerService) {
         this.bookingRepository = bookingRepository;
         this.userService = userService;
         this.categoryService = categoryService;
         this.seatService = seatService;
+        this.adminCashbookService = adminCashbookService;
+        this.adminShipLedgerService = adminShipLedgerService;
     }
 
     @Override
@@ -50,14 +59,14 @@ public class BookingServiceImpl implements BookingService {
 
     User getUser(User user) throws UserNotFoundException, UserAlreadyExistsException, NullPasswordException, UserInvalidException {
         User u = this.userService.findByUsernameOrPhone(user.getPhoneNumber());
-        if(u == null){
+        if (u == null) {
             u = new User(user.getName(), user.getPhoneNumber(), user.getPhoneNumber(), user.getPhoneNumber().substring(user.getPhoneNumber().length() - 6));
             if (user.getEmail() != null && user.getEmail().length() < 3) {
                 u.setEmail(user.getEmail());
             }
             u = this.userService.save(u);
         }
-        return  u;
+        return u;
     }
 
     @Override
@@ -97,7 +106,7 @@ public class BookingServiceImpl implements BookingService {
         booking = this.calculateBooking(booking);
         booking.setShip(booking.getSubBookingList().get(0).getSeat().getCategory().getShip());
         booking.setShipName(booking.getShip().getName());
-        booking.setCategoryName(booking.getSubBookingList().get(0).getSeat().getCategory().getName() );
+        booking.setCategoryName(booking.getSubBookingList().get(0).getSeat().getCategory().getName());
         //7) To confirm a booking user need to go following steps
         // 1 ) pay first
         // 2 ) update room booking map
@@ -105,11 +114,13 @@ public class BookingServiceImpl implements BookingService {
         if (user.hasRole(Role.ERole.ROLE_ADMIN.toString())) {
             booking = this.save(booking);
             if (this.confirmBooking(booking)) {
-                booking.setConfirmed(true);
-                booking.setApproved(true);
-                booking.setPaid(true);
-                booking = this.save(booking);
-                this.adminSellRoomsAccounting(booking, false);
+                if(booking.geteStatus() == Seat.EStatus.SEAT_SOLD) {
+                    booking.setConfirmed(true);
+                    booking.setApproved(true);
+                    booking.setPaid(true);
+                    booking = this.save(booking);
+                    this.adminSellRoomsAccounting(booking, false);
+                }
                 return booking;
             }
         }
@@ -117,7 +128,6 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private boolean confirmBooking(Booking booking) throws NotFoundException, ForbiddenException, ParseException {
-        List<SubBooking> subBookingList = booking.getSubBookingList();
         //Update room status map and booking map
         for (SubBooking subBooking : booking.getSubBookingList()) {
             boolean av = this.seatService.checkSeatAvailability(subBooking.getSeat().getId(), subBooking.getDate());
@@ -131,44 +141,35 @@ public class BookingServiceImpl implements BookingService {
     }
 
     /*1) Admin_Cashbook debit total booking amount
-     * 2) Admin_Hotel_Ledger credit ( total amount - hotelswave discount)
+     * 2) Admin_Ship_Ledger credit ( total amount - hotelswave discount)
      * */
     private void adminSellRoomsAccounting(Booking booking, boolean cancel) throws NotFoundException {
         //1) Admin_Cashbook debit total booking amount
+        Ship ship = booking.getShip();
         String explanation = (cancel ? "Cancel " : "") + "Booking for booking id " + booking.getId();
-//        AdminCashbook adminCashbook;
-//        if (!cancel) {
-//            adminCashbook = new AdminCashbook(new Date(), explanation, booking.getTotalAdvance(), 0);
-//        } else {
-//            adminCashbook = new AdminCashbook(new Date(), explanation, 0, booking.getTotalAdvance());
-//        }
-//        adminCashbook.setApproved(true);
-//        adminCashbook.setRef(booking.getId().toString());
-//        this.adminCashbookService.updateBalanceAndSave(adminCashbook);
-//
-//        //2) Admin_Hotel_Ledger credit ( total amount - hotelswave discount)
-//        for (Hotel hotel : booking.getHotels()) {
-//            int totalPayable = 0;
-//            int totalAdvance = 0;
-//            for (SubBooking subBooking : booking.getSubBookingList()) {
-//                Room room = this.roomService.getOne(subBooking.getRoom().getId());
-//                if (room.getHotel().getId() == hotel.getId()) {
-//                    totalPayable += subBooking.getPayablePrice();
-//                    totalAdvance += subBooking.getAdvance();
-//                }
-//            }
-//            int hotelswavePercentages = (int) (totalPayable * hotel.getHotelswavePercentage() / 100.00);
-//            int amount = totalAdvance - hotelswavePercentages; //deduct hotels wave percentages;
-//            AdminHotelLedger adminHotelLedger;
-//            if (!cancel) {
-//                adminHotelLedger = new AdminHotelLedger(hotel, new Date(), explanation, 0, amount);
-//            } else {
-//                adminHotelLedger = new AdminHotelLedger(hotel, new Date(), explanation, amount, 0);
-//            }
-//            adminHotelLedger.setApproved(true);
-//            adminHotelLedger.setRef(booking.getId().toString());
-//            this.adminHotelLedgerService.updateAdminHotelLedger(hotel.getId(), adminHotelLedger);
-//        }
+        AdminCashbook adminCashbook;
+        if (!cancel) {
+            adminCashbook = new AdminCashbook(new Date(), explanation, booking.getTotalPayablePrice(), 0);
+        } else {
+            adminCashbook = new AdminCashbook(new Date(), explanation, 0, booking.getTotalPayablePrice());
+        }
+        adminCashbook.setApproved(true);
+        adminCashbook.setRef(booking.getId().toString());
+        this.adminCashbookService.updateBalanceAndSave(adminCashbook);
+
+        //2) Admin_Hotel_Ledger credit ( total amount - hotelswave discount)
+        int hotelswavePercentages = (int) (booking.getTotalPayablePrice() * ship.getHotelswavePercentage() / 100.00);
+        int amount = booking.getTotalPayablePrice() - hotelswavePercentages; //deduct hotels wave percentages;
+        AdminShipLedger adminShipLedger;
+        if (!cancel) {
+            adminShipLedger = new AdminShipLedger(ship, new Date(), explanation, 0, amount);
+        } else {
+            adminShipLedger = new AdminShipLedger(ship, new Date(), explanation, amount, 0);
+        }
+        adminShipLedger.setApproved(true);
+        adminShipLedger.setRef(booking.getId().toString());
+        this.adminShipLedgerService.updateAdminShipLedger(ship.getId(), adminShipLedger);
+
     }
 
     private Booking calculateBooking(Booking booking) {
@@ -201,7 +202,7 @@ public class BookingServiceImpl implements BookingService {
         return newSubBookingList;
     }
 
-    SubBooking calculateSubBooking(SubBooking subBooking){
+    SubBooking calculateSubBooking(SubBooking subBooking) {
         subBooking.setFare(subBooking.getSeat().getCategory().getFare());
         Integer discount = this.categoryService.getDiscount(subBooking.getSeat().getCategory().getId(), subBooking.getDate());//subBooking.getDiscount();
         if (discount == null) {
