@@ -30,19 +30,19 @@ public class AccountingAdminController {
     }
 
     @GetMapping("/adminAgentLedger/{userId}")
-    private ResponseEntity getHotelAgentLeger(@PathVariable("userId") Long userId, @RequestParam(value = "page", defaultValue = "0") Integer page) {
+    private ResponseEntity getShipAgentLeger(@PathVariable("userId") Long userId, @RequestParam(value = "page", defaultValue = "0") Integer page) {
         return ResponseEntity.ok(this.adminAgentLedgerService.getAdminAgentLedgerByAgentId(userId, page));
     }
 
     @GetMapping("/cashbook")
     private ResponseEntity getAdminCashbook(@RequestParam(value = "page", defaultValue = "0") Integer page) {
-        //TODO: HIDE Hotel information from response info
+        //TODO: HIDE Ship information from response info
         return ResponseEntity.ok(this.adminCashbookService.getAllAdminCashbook(page));
     }
 
-    @GetMapping("/hotelLedger/{hotelId}")
-    private ResponseEntity getHotelLedger(@PathVariable("hotelId") Long hotelId, @RequestParam(value = "page", defaultValue = "0") Integer page) {
-        return ResponseEntity.ok(this.adminShipLedgerService.getAdminShipLedgerByShipId(hotelId, page));
+    @GetMapping("/shipLedger/{shipId}")
+    private ResponseEntity getShipLedger(@PathVariable("shipId") Long shipId, @RequestParam(value = "page", defaultValue = "0") Integer page) {
+        return ResponseEntity.ok(this.adminShipLedgerService.getAdminShipLedgerByShipId(shipId, page));
     }
 
     @PutMapping("/addIncome")
@@ -55,8 +55,8 @@ public class AccountingAdminController {
         return ResponseEntity.ok(this.adminCashbookService.addAdminCashbookEntry(0, credit, explanation));
     }
 
-    @PutMapping("/payHotel/{hotelId}")
-    private ResponseEntity payToHotel(@PathVariable("hotelId") Long hotelId, @RequestParam("amount") Integer amount) throws NotFoundException, ForbiddenException {
-        return ResponseEntity.ok(this.adminShipLedgerService.payToShip(hotelId, amount));
+    @PutMapping("/payShip/{shipId}")
+    private ResponseEntity payToShip(@PathVariable("shipId") Long shipId, @RequestParam("amount") Integer amount) throws NotFoundException, ForbiddenException {
+        return ResponseEntity.ok(this.adminShipLedgerService.payToShip(shipId, amount));
     }
 }

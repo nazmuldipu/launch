@@ -140,6 +140,7 @@ public class SeatServiceImpl implements SeatService {
             JSONObject obj = new JSONObject();
             obj.put("id", seat.getId());
             obj.put("seatNumber", seat.getSeatNumber());
+            obj.put("category", seat.getCategory().getName());
             if (!this.checkSeatAvailability(seat.getId(), date)) {
                 obj.put("bookingId", seat.getBookingIdMap().get(date));
                 obj.put("status", seat.getSeatStatusMap().get(date));
@@ -172,7 +173,7 @@ public class SeatServiceImpl implements SeatService {
     public boolean checkSeatAvailability(Long seatId, Date date) throws NotFoundException {
         Seat seat = this.getOne(seatId);
         Seat.EStatus status = seat.getSeatStatusMap().get(date);
-        if (status == null || status == Seat.EStatus.SEAT_BLOCKED)
+        if (status == null || status == Seat.EStatus.SEAT_FREE)
             return true;
         return false;
     }
@@ -187,5 +188,30 @@ public class SeatServiceImpl implements SeatService {
         seat.getSeatStatusMap().put(date, status);
         seat.getBookingIdMap().put(date, booking.getId());
         return this.seatRepository.save(seat);
+    }
+
+    @Override
+    public Seat updateStatusMap(Long seatId, Date date, Seat.EStatus status) throws NotFoundException, ParseException {
+        Seat seat = this.getOne(seatId);
+        date = DateUtil.truncateTimeFromDate(date);
+        seat.getSeatStatusMap().put(date, status);
+        seat = this.seatRepository.save(seat);
+        return seat;
+    }
+
+    @Override
+    public void clearSeatStatusAndBookingIdMap(Long seatId, Date date, Booking booking) throws ForbiddenException, NotFoundException, ParseException {
+        User currentUser = SecurityConfig.getCurrentUser();
+        if (!currentUser.isAdmin() && (currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()) && booking.getShip().equals(currentUser.getShip())))
+            throw new ForbiddenException("Access denied");
+        this.removeBookingMap(seatId, date);
+        this.updateStatusMap(seatId, date, Seat.EStatus.SEAT_FREE);
+    }
+
+    @Override
+    public void removeBookingMap(Long seatId, Date date) throws NotFoundException {
+        Seat seat = this.getOne(seatId);
+        seat.getBookingIdMap().remove(date);
+        this.seatRepository.save(seat);
     }
 }

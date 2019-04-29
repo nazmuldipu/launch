@@ -85,8 +85,13 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    public Page<Booking> getAllBookingsWithoutCanceled(int page) {
+        return this.bookingRepository.findByCancelledFalse(PageAttr.getPageRequest(page));
+    }
+
+    @Override
     public Page<Booking> getBookingsByShipId(Long shipId, int page) {
-        return this.bookingRepository.findByShipId(shipId, PageAttr.getPageRequest(page));
+        return this.bookingRepository.findByShipIdAndCancelledFalse(shipId, PageAttr.getPageRequest(page));
     }
 
     @Override
@@ -114,17 +119,38 @@ public class BookingServiceImpl implements BookingService {
         if (user.hasRole(Role.ERole.ROLE_ADMIN.toString())) {
             booking = this.save(booking);
             if (this.confirmBooking(booking)) {
-                if(booking.geteStatus() == Seat.EStatus.SEAT_SOLD) {
-                    booking.setConfirmed(true);
-                    booking.setApproved(true);
-                    booking.setPaid(true);
-                    booking = this.save(booking);
-                    this.adminSellRoomsAccounting(booking, false);
+                if (booking.geteStatus() == Seat.EStatus.SEAT_SOLD) {
+                   booking = this.approveBooking(booking);
+//                    booking.setConfirmed(true);
+//                    booking.setApproved(true);
+//                    booking.setPaid(true);
+//                    booking = this.save(booking);
+//                    this.adminSellRoomsAccounting(booking, false);
                 }
                 return booking;
             }
         }
         return null;
+    }
+
+    @Override
+    public Booking confirmReservation(Long bookingId) throws NotFoundException, UserAlreadyExistsException, NullPasswordException, UserInvalidException, ParseException {
+        Booking booking = this.getOne(bookingId);
+        return this.approveBooking(booking);
+    }
+
+    private Booking approveBooking(Booking booking) throws NotFoundException, UserAlreadyExistsException, NullPasswordException, UserInvalidException, ParseException {
+        booking.seteStatus(Seat.EStatus.SEAT_SOLD);
+        for (SubBooking subBooking : booking.getSubBookingList()) {
+            this.seatService.updateStatusMap(subBooking.getSeat().getId(),subBooking.getDate(), booking.geteStatus());
+        }
+
+        booking.setConfirmed(true);
+        booking.setApproved(true);
+        booking.setPaid(true);
+        booking = this.save(booking);
+        this.adminSellRoomsAccounting(booking, false);
+        return booking;
     }
 
     private boolean confirmBooking(Booking booking) throws NotFoundException, ForbiddenException, ParseException {
@@ -230,6 +256,55 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public Page<Booking> getMySells(int page) {
-        return this.bookingRepository.findByCreatedById(SecurityConfig.getCurrentUser().getId(), PageAttr.getPageRequest(page));
+        return this.bookingRepository.findByCreatedByIdAndCancelledFalse(SecurityConfig.getCurrentUser().getId(), PageAttr.getPageRequest(page));
+    }
+
+    @Override
+    public void cancelReservation(Long bookingId) throws ParseException, NotFoundException, ForbiddenException, UserAlreadyExistsException, NullPasswordException, UserInvalidException {
+        Booking booking = this.getOne(bookingId);
+        booking.setCancelled(true);
+        this.clearBooking(booking);
+        this.save(booking);
+    }
+
+    @Override
+    public void cancelBooking(Long bookingId) throws ForbiddenException, NotFoundException, ParseException {
+        User currentUser = SecurityConfig.getCurrentUser();
+        Booking booking = this.getOne(bookingId);
+        if (!booking.isCancelled()) {
+            if (booking.getCreatedBy().hasRole(Role.ERole.ROLE_ADMIN.toString())) {
+                if (!currentUser.isAdmin()) throw new ForbiddenException("Access denied");
+                {
+                    this.adminSellRoomsAccounting(booking, true);
+                }
+//            } else if (booking.getCreatedBy().hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString())) {
+//                if (!currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()))
+//                    throw new ForbiddenException("Access denied");
+//                this.addAdvanceToServiceAdminHotelCashbook(booking, true);
+//            } else if (booking.getCreatedBy().hasRole(Role.ERole.ROLE_AGENT.toString())) {
+//                if (!currentUser.isAdmin()) throw new ForbiddenException("Access denied");
+//                this.subtractFromAdminAgentLedger(booking, true);
+//            } else if (booking.getCreatedBy().hasRole(Role.ERole.ROLE_SERVICE_AGENT.toString())) {
+//                if (!currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()))
+//                    throw new ForbiddenException("Access denied");
+//                this.subtractFromServiceAgentLedger(booking, true);
+//            } else if (booking.getCreatedBy().hasRole(Role.ERole.ROLE_USER.toString())) {
+//                if (!currentUser.isAdmin()) throw new ForbiddenException("Access denied");
+//                this.userPaymentAccounting(booking, true);
+//            }
+
+                this.clearBooking(booking);
+
+                booking.setCancelled(true);
+                this.bookingRepository.save(booking);
+            }
+        }
+    }
+
+    private void clearBooking(Booking booking) throws ParseException, NotFoundException, ForbiddenException {
+        for (SubBooking subBooking : booking.getSubBookingList()) {
+            //Clear Booking and Status map
+            this.seatService.clearSeatStatusAndBookingIdMap(subBooking.getSeat().getId(), subBooking.getDate(), booking);
+        }
     }
 }

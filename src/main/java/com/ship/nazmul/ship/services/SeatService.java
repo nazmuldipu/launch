@@ -47,5 +47,11 @@ public interface SeatService {
 
     boolean checkSeatAvailability(Long seatId, Date date) throws NotFoundException;
 
-    Seat updateSeatStatusAndBookingMap(Long roomId, Date date, Seat.EStatus status, Booking booking) throws NotFoundException, ForbiddenException, ParseException;
+    Seat updateSeatStatusAndBookingMap(Long seatId, Date date, Seat.EStatus status, Booking booking) throws NotFoundException, ForbiddenException, ParseException;
+
+    Seat updateStatusMap(Long seatId, Date date, Seat.EStatus status) throws NotFoundException, ParseException;
+
+    void clearSeatStatusAndBookingIdMap(Long seatId, Date date, Booking booking) throws ForbiddenException, NotFoundException, ParseException;
+
+    public void removeBookingMap(Long seatId, Date date) throws NotFoundException;
 }

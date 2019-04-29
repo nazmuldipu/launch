@@ -21,11 +21,15 @@ public interface BookingService {
 
     List<Booking> getAllBookings();
 
+    Page<Booking> getAllBookingsWithoutCanceled(int page);
+
     Page<Booking> getBookingsByShipId(Long shipId, int page);
 
     Booking createBooking(Booking booking);
 
     Booking createAdminBooking(Booking booking) throws ForbiddenException, NotFoundException, ParseException, UserAlreadyExistsException, NullPasswordException, UserInvalidException;
+
+    Booking confirmReservation(Long bookingId) throws NotFoundException, UserAlreadyExistsException, NullPasswordException, UserInvalidException, ParseException;
 
     Booking createAdminAgentBooking(Booking booking);
 
@@ -34,6 +38,10 @@ public interface BookingService {
     Booking createServiceAgentBooking(Booking booking);
 
     Page<Booking> getMySells(int page);
+
+    void cancelReservation(Long bookingId) throws ParseException, NotFoundException, ForbiddenException, UserAlreadyExistsException, NullPasswordException, UserInvalidException;
+
+    void cancelBooking(Long bookingId) throws ForbiddenException, NotFoundException, ParseException;
 
 
 }

@@ -11,16 +11,17 @@ import java.util.List;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
+    Page<Booking> findByCancelledFalse(Pageable pageable);
 
     Page<Booking> findByUserId(Long userId, Pageable pageable);
 
-    Page<Booking> findByCreatedById(Long userId, Pageable pageable);
+    Page<Booking> findByCreatedByIdAndCancelledFalse(Long userId, Pageable pageable);
 
     List<Booking> findByUserIdAndConfirmedFalse(Long userId);
 
     Page<Booking> findByUserIdAndConfirmedTrueAndPaidTrue(Long userId, Pageable pageable);
 
-    Page<Booking> findByShipId(Long shipId, Pageable pageable);
+    Page<Booking> findByShipIdAndCancelledFalse(Long shipId, Pageable pageable);
 
     List<Booking> findByShipIdAndCreatedBetween(Long shipId, Date begin, Date end);
 
