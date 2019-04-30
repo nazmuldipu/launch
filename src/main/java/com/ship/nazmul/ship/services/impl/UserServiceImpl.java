@@ -169,6 +169,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User changePassword(Long userId, String password) throws ForbiddenException, NullPasswordException {
+        User user = SecurityConfig.getCurrentUser();
+        if(user == null || user.getId() != userId) throw new ForbiddenException("A slap on your face, idiot");
+        user.setPassword(PasswordUtil.encryptPassword(password, PasswordUtil.EncType.BCRYPT_ENCODER, null));
+        return this.userRepo.save(user);
+    }
+
+    @Override
     public User createAdminAgent(User user) throws ForbiddenException, NullPasswordException {
         //Security check
         User adminUser = SecurityConfig.getCurrentUser();

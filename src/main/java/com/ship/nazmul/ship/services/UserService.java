@@ -39,6 +39,7 @@ public interface UserService {
 
     User toggleUser(Long id, boolean enabled) throws UserAlreadyExistsException, NullPasswordException, UserInvalidException, UserNotFoundException;
 
+    User changePassword(Long userId, String password) throws ForbiddenException, NullPasswordException;
     // *******************************ADMIN MODULES ****************************************
     User createAdminAgent(User user) throws ForbiddenException, NullPasswordException;
 
