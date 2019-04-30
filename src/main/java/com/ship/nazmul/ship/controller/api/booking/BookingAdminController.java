@@ -51,6 +51,7 @@ public class BookingAdminController {
     private ResponseEntity getBookingById(@PathVariable("bookingId")Long bookingId){
         return ResponseEntity.ok(this.bookingService.getOne(bookingId));
     }
+
     @GetMapping("/mySells")
     private ResponseEntity getAdminSells(@RequestParam(value = "page", defaultValue = "0") Integer page){
         return ResponseEntity.ok(this.bookingService.getMySells(page));

@@ -2,14 +2,19 @@ package com.ship.nazmul.ship.services.impl;
 
 import com.ship.nazmul.ship.commons.PageAttr;
 import com.ship.nazmul.ship.commons.utils.PasswordUtil;
+import com.ship.nazmul.ship.config.security.SecurityConfig;
 import com.ship.nazmul.ship.entities.Role;
+import com.ship.nazmul.ship.entities.Ship;
 import com.ship.nazmul.ship.entities.User;
 import com.ship.nazmul.ship.exceptions.exists.UserAlreadyExistsException;
+import com.ship.nazmul.ship.exceptions.forbidden.ForbiddenException;
 import com.ship.nazmul.ship.exceptions.invalid.UserInvalidException;
+import com.ship.nazmul.ship.exceptions.notfound.NotFoundException;
 import com.ship.nazmul.ship.exceptions.notfound.UserNotFoundException;
 import com.ship.nazmul.ship.exceptions.nullpointer.NullPasswordException;
 import com.ship.nazmul.ship.repositories.UserRepository;
 import com.ship.nazmul.ship.services.RoleService;
+import com.ship.nazmul.ship.services.ShipService;
 import com.ship.nazmul.ship.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +27,7 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepo;
     private final RoleService roleService;
+    private final ShipService shipService;
 
     @Value("${baseUrlApi}")
     private String baseUrlApi;
@@ -31,9 +37,10 @@ public class UserServiceImpl implements UserService {
     private String adminPhone2;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepo, RoleService roleService) {
+    public UserServiceImpl(UserRepository userRepo, RoleService roleService, ShipService shipService) {
         this.userRepo = userRepo;
         this.roleService = roleService;
+        this.shipService = shipService;
     }
 
     @Override
@@ -49,7 +56,9 @@ public class UserServiceImpl implements UserService {
             throw new UserInvalidException("Password cannot be null or length must be at least 6 or more!");
 
         // set Roles
-        user.grantRole(this.roleService.findRole(Role.ERole.ROLE_USER));
+        if(user.getRoles() == null || user.getRoles().size() == 0){
+            user.grantRole(this.roleService.findRole(Role.ERole.ROLE_USER));
+        }
 
         // Execute only when user is being registered
         if (user.getId() == null) {
@@ -131,6 +140,96 @@ public class UserServiceImpl implements UserService {
         }
         return this.userRepo.findByUsername(user.getUsername()) != null
                 || this.userRepo.findByPhoneNumber(user.getPhoneNumber()) != null || email;
+    }
+
+    @Override
+    public User setRoles(Long id, String[] roles) throws UserNotFoundException, UserAlreadyExistsException, NullPasswordException, UserInvalidException {
+        User user = this.getOne(id);
+        boolean isAdmin = user.isAdmin(); // check if user admin
+        user.getRoles().clear();
+        if (isAdmin)  // set admin role explicitly after clearing roles
+            return user;
+//            user.getRoles().add(this.roleService.findRole(Role.ERole.ROLE_ADMIN));
+        // add roles
+        for (String roleName : roles) {
+            Role role = this.roleService.findRole(Role.getERoleFromRoleName(roleName));
+            if (role != null)
+                user.grantRole(role);
+        }
+        System.out.println(user.getRoles());
+        return this.save(user);
+    }
+
+    @Override
+    public User toggleUser(Long id, boolean enabled) throws UserAlreadyExistsException, NullPasswordException, UserInvalidException, UserNotFoundException {
+        User user = this.getOne(id);
+        user.setEnabled(enabled);
+        user = this.save(user);
+        return user;
+    }
+
+    @Override
+    public User createAdminAgent(User user) throws ForbiddenException, NullPasswordException {
+        //Security check
+        User adminUser = SecurityConfig.getCurrentUser();
+        if (!adminUser.isAdmin()) throw new ForbiddenException("Access Denied");
+
+        //If user exists and user doesn't belongs to my hotel then access denied
+        User oldUser = this.userRepo.findByPhoneNumber(user.getPhoneNumber());
+        if (oldUser != null && !oldUser.isOnlyUser() && !oldUser.hasRole(Role.ERole.ROLE_AGENT.toString()))
+            throw new ForbiddenException("Access denied");
+
+        if (oldUser != null) {
+            oldUser.setName(user.getName());
+            oldUser.setEmail(user.getEmail());
+            oldUser.changeRole(this.roleService.findRole(Role.ERole.ROLE_AGENT));
+            return this.userRepo.save(oldUser);
+        } else {
+            user.setUsername(user.getPhoneNumber());
+            user.setPassword(user.getPhoneNumber().substring(user.getPhoneNumber().length() - 6));
+            user.setPassword(PasswordUtil.encryptPassword(user.getPassword(), PasswordUtil.EncType.BCRYPT_ENCODER, null));
+            user.changeRole(this.roleService.findRole(Role.ERole.ROLE_AGENT));
+            return this.userRepo.save(user);
+        }
+    }
+
+    @Override
+    public Page<User> getAdminAgents(int page) {
+        return this.userRepo.findByRolesName( Role.ERole.ROLE_AGENT.getValue(), PageAttr.getPageRequest(page));
+    }
+
+    @Override
+    public User removeAdminAgent(Long userId) throws ForbiddenException, UserNotFoundException {
+        // Security check
+        User adminUser = SecurityConfig.getCurrentUser();
+        if (!adminUser.isAdmin()) throw new ForbiddenException("Access Denied");
+
+        User user = this.getOne(userId);
+        if(user.isOnlyUser()) {return user;}
+        else if(user.hasRole(Role.ERole.ROLE_AGENT.toString())){
+            user.changeRole(this.roleService.findRole(Role.ERole.ROLE_USER));
+            user.setShip(null);
+            return this.userRepo.save(user);
+        }
+        return null;
+    }
+
+    @Override
+    public User changeUserPasswordByAdmin(Long userId, String password) throws UserNotFoundException, NullPasswordException {
+        User user = this.getOne(userId);
+        user.setPassword(PasswordUtil.encryptPassword(password, PasswordUtil.EncType.BCRYPT_ENCODER, null));
+        return this.userRepo.save(user);
+    }
+
+    @Override
+    public User assignShipAndRole(Long userId, Long shipId, Role.ERole role) throws NotFoundException {
+        User user = this.getOne(userId);
+        Ship ship  = this.shipService.getOne(shipId);
+        user.setShip(ship);
+        Role r = this.roleService.findRole(role);
+        user.changeRole(r);
+        user = this.userRepo.save(user);
+        return user;
     }
 
     @Override
