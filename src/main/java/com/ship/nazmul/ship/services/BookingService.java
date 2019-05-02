@@ -10,6 +10,7 @@ import com.ship.nazmul.ship.exceptions.nullpointer.NullPasswordException;
 import org.springframework.data.domain.Page;
 
 import java.text.ParseException;
+import java.util.Date;
 import java.util.List;
 
 public interface BookingService {
@@ -21,7 +22,11 @@ public interface BookingService {
 
     List<Booking> getAllBookings();
 
+    List<Booking> getByCreateDateWithoutCanceled(Date date);
+
     Page<Booking> getAllBookingsWithoutCanceled(int page);
+
+    List<Booking> getBookingsByShipIdAndCreateDate(Long shipId, Date date);
 
     Page<Booking> getBookingsByShipId(Long shipId, int page);
 

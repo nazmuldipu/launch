@@ -23,8 +23,10 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     Page<Booking> findByShipIdAndCancelledFalse(Long shipId, Pageable pageable);
 
+    List<Booking> findByShipIdAndCreatedBetweenAndCancelledFalse(Long shipId, Date begin, Date end);
+
     List<Booking> findByShipIdAndCreatedBetween(Long shipId, Date begin, Date end);
 
-    List<Booking> findByCreatedBetween(Date begin, Date end);
+    List<Booking> findByCreatedBetweenAndCancelledFalse(Date begin, Date end);
 
 }

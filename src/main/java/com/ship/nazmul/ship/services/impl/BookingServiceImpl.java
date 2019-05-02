@@ -85,8 +85,22 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    public List<Booking> getByCreateDateWithoutCanceled(Date date) {
+        Date begin = DateUtil.getDayStart(date);
+        Date end = DateUtil.getDayEnd(date);
+        return this.bookingRepository.findByCreatedBetweenAndCancelledFalse(begin, end);
+    }
+
+    @Override
     public Page<Booking> getAllBookingsWithoutCanceled(int page) {
         return this.bookingRepository.findByCancelledFalse(PageAttr.getPageRequest(page));
+    }
+
+    @Override
+    public List<Booking> getBookingsByShipIdAndCreateDate(Long shipId, Date date) {
+        Date begin = DateUtil.getDayStart(date);
+        Date end = DateUtil.getDayEnd(date);
+        return this.bookingRepository.findByShipIdAndCreatedBetweenAndCancelledFalse(shipId, begin, end);
     }
 
     @Override
