@@ -33,6 +33,8 @@ public interface UserService {
 
     List<User> findByRole(String role);
 
+    List<User> getUserListByShipId(Long shipId);
+
     boolean exists(User user);
 
     User setRoles(Long id, String[] roles) throws UserNotFoundException, UserAlreadyExistsException, NullPasswordException, UserInvalidException;
@@ -40,6 +42,7 @@ public interface UserService {
     User toggleUser(Long id, boolean enabled) throws UserAlreadyExistsException, NullPasswordException, UserInvalidException, UserNotFoundException;
 
     User changePassword(Long userId, String password) throws ForbiddenException, NullPasswordException;
+
     // *******************************ADMIN MODULES ****************************************
     User createAdminAgent(User user) throws ForbiddenException, NullPasswordException;
 
@@ -50,5 +53,14 @@ public interface UserService {
     User changeUserPasswordByAdmin(Long userId, String password) throws UserNotFoundException, NullPasswordException;
 
     User assignShipAndRole(Long userId, Long shipId, Role.ERole role) throws NotFoundException;
+
+    // **************************** Service admin modules **********************************
+    User addServiceAdminUser(User user) throws UserAlreadyExistsException, NullPasswordException, UserInvalidException;
+
+    User createServiceAdminAgent(User user) throws ForbiddenException, NullPasswordException;
+
+    Page<User> getServiceAdminAgents(int page) throws ForbiddenException;
+
+    User removeServiceAdminAgent(Long userId) throws ForbiddenException, UserNotFoundException;
 
 }

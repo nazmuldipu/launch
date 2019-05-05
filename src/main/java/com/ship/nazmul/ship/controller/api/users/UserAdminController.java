@@ -14,6 +14,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/admin/users")
 public class UserAdminController {
@@ -76,6 +78,12 @@ public class UserAdminController {
     private ResponseEntity<Page<User>> getAdminAgentPage(@RequestParam(value = "page", defaultValue = "0") Integer page) throws ForbiddenException {
         return ResponseEntity.ok(this.userService.getAdminAgents(page));
     }
+
+    @GetMapping("/searchByShipId/{shipId}")
+    private ResponseEntity<List<User>> getUserListByShipId(@PathVariable("shipId")Long shipId){
+        return ResponseEntity.ok(this.userService.getUserListByShipId(shipId));
+    }
+
 
     //Remove Service admin Agent
     @PutMapping("/removeAgent/{userId}")
