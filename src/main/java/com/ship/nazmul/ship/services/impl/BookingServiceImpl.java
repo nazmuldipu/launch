@@ -6,6 +6,7 @@ import com.ship.nazmul.ship.config.security.SecurityConfig;
 import com.ship.nazmul.ship.entities.*;
 import com.ship.nazmul.ship.entities.accountings.AdminCashbook;
 import com.ship.nazmul.ship.entities.accountings.AdminShipLedger;
+import com.ship.nazmul.ship.entities.accountings.ShipCashBook;
 import com.ship.nazmul.ship.exceptions.exists.UserAlreadyExistsException;
 import com.ship.nazmul.ship.exceptions.forbidden.ForbiddenException;
 import com.ship.nazmul.ship.exceptions.invalid.UserInvalidException;
@@ -19,6 +20,7 @@ import com.ship.nazmul.ship.services.SeatService;
 import com.ship.nazmul.ship.services.UserService;
 import com.ship.nazmul.ship.services.accountings.AdminCashbookService;
 import com.ship.nazmul.ship.services.accountings.AdminShipLedgerService;
+import com.ship.nazmul.ship.services.accountings.ShipCashBookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -38,16 +40,18 @@ public class BookingServiceImpl implements BookingService {
     private final SeatService seatService;
     private final AdminCashbookService adminCashbookService;
     private final AdminShipLedgerService adminShipLedgerService;
+    private final ShipCashBookService shipCashBookService;
 
 
     @Autowired
-    public BookingServiceImpl(BookingRepository bookingRepository, UserService userService, CategoryService categoryService, SeatService seatService, AdminCashbookService adminCashbookService, AdminShipLedgerService adminShipLedgerService) {
+    public BookingServiceImpl(BookingRepository bookingRepository, UserService userService, CategoryService categoryService, SeatService seatService, AdminCashbookService adminCashbookService, AdminShipLedgerService adminShipLedgerService, ShipCashBookService shipCashBookService) {
         this.bookingRepository = bookingRepository;
         this.userService = userService;
         this.categoryService = categoryService;
         this.seatService = seatService;
         this.adminCashbookService = adminCashbookService;
         this.adminShipLedgerService = adminShipLedgerService;
+        this.shipCashBookService = shipCashBookService;
     }
 
     @Override
@@ -126,20 +130,11 @@ public class BookingServiceImpl implements BookingService {
         booking.setShip(booking.getSubBookingList().get(0).getSeat().getCategory().getShip());
         booking.setShipName(booking.getShip().getName());
         booking.setCategoryName(booking.getSubBookingList().get(0).getSeat().getCategory().getName());
-        //7) To confirm a booking user need to go following steps
-        // 1 ) pay first
-        // 2 ) update room booking map
-        // 3 ) update ledger for hotel
         if (user.hasRole(Role.ERole.ROLE_ADMIN.toString())) {
             booking = this.save(booking);
             if (this.confirmBooking(booking)) {
                 if (booking.geteStatus() == Seat.EStatus.SEAT_SOLD) {
-                   booking = this.approveBooking(booking);
-//                    booking.setConfirmed(true);
-//                    booking.setApproved(true);
-//                    booking.setPaid(true);
-//                    booking = this.save(booking);
-//                    this.adminSellRoomsAccounting(booking, false);
+                    booking = this.approveBooking(booking);
                 }
                 return booking;
             }
@@ -156,14 +151,18 @@ public class BookingServiceImpl implements BookingService {
     private Booking approveBooking(Booking booking) throws NotFoundException, UserAlreadyExistsException, NullPasswordException, UserInvalidException, ParseException {
         booking.seteStatus(Seat.EStatus.SEAT_SOLD);
         for (SubBooking subBooking : booking.getSubBookingList()) {
-            this.seatService.updateStatusMap(subBooking.getSeat().getId(),subBooking.getDate(), booking.geteStatus());
+            this.seatService.updateStatusMap(subBooking.getSeat().getId(), subBooking.getDate(), booking.geteStatus());
         }
 
         booking.setConfirmed(true);
         booking.setApproved(true);
         booking.setPaid(true);
         booking = this.save(booking);
-        this.adminSellRoomsAccounting(booking, false);
+        if (SecurityConfig.getCurrentUser().hasRole(Role.ERole.ROLE_ADMIN.toString())) {
+            this.adminSellRoomsAccounting(booking, false);
+        } else if (SecurityConfig.getCurrentUser().hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString())) {
+            this.serviceAdminSellRoomsAccounting(booking, false);
+        }
         return booking;
     }
 
@@ -210,6 +209,21 @@ public class BookingServiceImpl implements BookingService {
         adminShipLedger.setRef(booking.getId().toString());
         this.adminShipLedgerService.updateAdminShipLedger(ship.getId(), adminShipLedger);
 
+    }
+
+    private void serviceAdminSellRoomsAccounting(Booking booking, boolean cancel) {
+        Ship ship = booking.getShip();
+        String explanation = (cancel ? "Cancel" : "") + "Booking for booking id " + booking.getId();
+        //1)Add amount to shipCashbook
+        ShipCashBook shipCashBook;
+        if (!cancel) {
+            shipCashBook = new ShipCashBook(ship, new Date(), explanation, booking.getTotalPayablePrice(), 0);
+        } else {
+            shipCashBook = new ShipCashBook(ship, new Date(), explanation, 0, booking.getTotalPayablePrice());
+        }
+        shipCashBook.setApproved(true);
+        shipCashBook = this.shipCashBookService.debitAmount(shipCashBook);
+        return;
     }
 
     private Booking calculateBooking(Booking booking) {
@@ -259,7 +273,27 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Booking createServiceAdminBooking(Booking booking) {
+    public Booking createServiceAdminBooking(Booking booking) throws ForbiddenException, NotFoundException, ParseException, UserAlreadyExistsException, NullPasswordException, UserInvalidException {
+        //1) Security check if user has sufficient permission for this action
+        User user = SecurityConfig.getCurrentUser();
+        if (!user.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString())) throw new ForbiddenException("Access denied");
+
+        // 2) Add subBookingList to booking and Calculate Booking
+        booking.setSubBookingList(this.calculateSubBookingList(booking.getSubBookingList()));
+        booking = this.calculateBooking(booking);
+        booking.setShip(booking.getSubBookingList().get(0).getSeat().getCategory().getShip());
+        booking.setShipName(booking.getShip().getName());
+        booking.setCategoryName(booking.getSubBookingList().get(0).getSeat().getCategory().getName());
+
+        if (user.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString())) {
+            booking = this.save(booking);
+            if (this.confirmBooking(booking)) {
+                if (booking.geteStatus() == Seat.EStatus.SEAT_SOLD) {
+                    booking = this.approveBooking(booking);
+                }
+                return booking;
+            }
+        }
         return null;
     }
 
@@ -288,13 +322,11 @@ public class BookingServiceImpl implements BookingService {
         if (!booking.isCancelled()) {
             if (booking.getCreatedBy().hasRole(Role.ERole.ROLE_ADMIN.toString())) {
                 if (!currentUser.isAdmin()) throw new ForbiddenException("Access denied");
-                {
-                    this.adminSellRoomsAccounting(booking, true);
-                }
-//            } else if (booking.getCreatedBy().hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString())) {
-//                if (!currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()))
-//                    throw new ForbiddenException("Access denied");
-//                this.addAdvanceToServiceAdminHotelCashbook(booking, true);
+                this.adminSellRoomsAccounting(booking, true);
+            } else if (booking.getCreatedBy().hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString())) {
+                if (!currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()))
+                    throw new ForbiddenException("Access denied");
+                this.serviceAdminSellRoomsAccounting(booking, true);
 //            } else if (booking.getCreatedBy().hasRole(Role.ERole.ROLE_AGENT.toString())) {
 //                if (!currentUser.isAdmin()) throw new ForbiddenException("Access denied");
 //                this.subtractFromAdminAgentLedger(booking, true);

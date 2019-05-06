@@ -38,7 +38,7 @@ public interface BookingService {
 
     Booking createAdminAgentBooking(Booking booking);
 
-    Booking createServiceAdminBooking(Booking booking);
+    Booking createServiceAdminBooking(Booking booking) throws ForbiddenException, NotFoundException, ParseException, UserAlreadyExistsException, NullPasswordException, UserInvalidException;
 
     Booking createServiceAgentBooking(Booking booking);
 

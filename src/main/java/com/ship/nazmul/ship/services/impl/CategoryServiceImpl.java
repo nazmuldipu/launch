@@ -132,7 +132,7 @@ public class CategoryServiceImpl implements CategoryService {
     public Map<String, String> updateCategoryDiscount(Long categoryId, Date startDate, Date endDate, int discountAmount) throws ForbiddenException {
         User user = SecurityConfig.getCurrentUser();
         Category category = this.getOne(categoryId);
-        if (user.isOnlyUser() || (!user.isAdmin() && user.getShip().getId() != category.getShip().getId()))
+        if (user.isOnlyUser() || (!user.isAdmin() && !user.getShips().contains(category.getShip())))
             throw new ForbiddenException("Access denied");
 
         List<Date> dates = DateUtil.getDatesBetween(startDate, endDate);

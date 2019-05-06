@@ -1,10 +1,13 @@
 package com.ship.nazmul.ship.entities.accountings;
 
+import com.ship.nazmul.ship.entities.Ship;
 import com.ship.nazmul.ship.entities.User;
 import com.ship.nazmul.ship.entities.base.BaseEntity;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import java.util.Date;
 
 @Entity
@@ -19,10 +22,14 @@ public class ShipAgentLedger extends BaseEntity {
     private int balance;
     private boolean approved;
 
+    @OneToOne(fetch = FetchType.EAGER)
+    private Ship ship;
+
     public ShipAgentLedger() {
     }
 
-    public ShipAgentLedger(User agent, Date date, String explanation, int debit, int credit) {
+    public ShipAgentLedger(Ship ship, User agent, Date date, String explanation, int debit, int credit) {
+        this.ship = ship;
         this.agent = agent;
         this.date = date;
         this.explanation = explanation;
@@ -92,6 +99,14 @@ public class ShipAgentLedger extends BaseEntity {
 
     public void setApproved(boolean approved) {
         this.approved = approved;
+    }
+
+    public Ship getShip() {
+        return ship;
+    }
+
+    public void setShip(Ship ship) {
+        this.ship = ship;
     }
 
     @Override

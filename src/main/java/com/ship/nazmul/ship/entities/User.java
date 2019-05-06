@@ -12,9 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 @Entity
 @Table(name = "h_users", uniqueConstraints = {
@@ -48,11 +46,12 @@ public class User extends BaseEntity implements UserDetails {
     private String password;
 
     @ManyToMany(fetch = FetchType.EAGER)
-//    @JsonIgnore
     private List<Role> roles;
 
-    @ManyToOne
-    private Ship ship;
+    @JsonIgnore
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+//    @(fetch = FetchType.EAGER)
+    private Set<Ship> ships = new HashSet<Ship>();
 
     private boolean enabled = true;
     private boolean accountNonExpired = true;
@@ -247,12 +246,12 @@ public class User extends BaseEntity implements UserDetails {
         this.phoneNumber = phoneNumber;
     }
 
-    public Ship getShip() {
-        return ship;
+    public Set<Ship> getShips() {
+        return ships;
     }
 
-    public void setShip(Ship ship) {
-        this.ship = ship;
+    public void setShips(Set<Ship> ships) {
+        this.ships = ships;
     }
 
     @Override
@@ -264,6 +263,7 @@ public class User extends BaseEntity implements UserDetails {
                 ", phoneNumber='" + phoneNumber + '\'' +
                 ", password='" + password + '\'' +
                 ", roles=" + roles +
+                ", ships=" + ships +
                 ", enabled=" + enabled +
                 ", accountNonExpired=" + accountNonExpired +
                 ", accountNonLocked=" + accountNonLocked +

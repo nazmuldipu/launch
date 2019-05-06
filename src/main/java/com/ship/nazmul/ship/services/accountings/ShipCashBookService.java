@@ -2,6 +2,7 @@ package com.ship.nazmul.ship.services.accountings;
 
 import com.ship.nazmul.ship.entities.accountings.ShipCashBook;
 import com.ship.nazmul.ship.exceptions.forbidden.ForbiddenException;
+import com.ship.nazmul.ship.exceptions.notfound.NotFoundException;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -15,9 +16,9 @@ public interface ShipCashBookService {
 
     Page<ShipCashBook> getAllShipCashBook(int page);
 
-    List<ShipCashBook> getAllShipCashbookForServiceAdmin() throws ForbiddenException;
+    List<ShipCashBook> getShipCashbookForServiceAdmin(Long shipId) throws ForbiddenException;
 
-    Page<ShipCashBook> getAllShipCashbookForServiceAdmin(Integer page) throws ForbiddenException;
+    Page<ShipCashBook> getShipCashbookForServiceAdmin(Long shpId, Integer page) throws ForbiddenException;
 
     void deleteShipCashBook(Long id);
 
@@ -27,5 +28,5 @@ public interface ShipCashBookService {
 
     ShipCashBook creditAmount(ShipCashBook shipCashBook);
 
-    ShipCashBook addShipCashbookEntry(Integer debit, Integer credit, String explanation) throws ForbiddenException;
+    ShipCashBook addShipCashbookEntry(Long shipId, Integer debit, Integer credit, String explanation) throws ForbiddenException, NotFoundException;
 }

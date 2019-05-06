@@ -7,6 +7,7 @@ import com.ship.nazmul.ship.exceptions.notfound.NotFoundException;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
+import java.util.Set;
 
 public interface ShipService {
     Ship save(Ship ship) throws ForbiddenException, InvalidException, NotFoundException;
@@ -22,4 +23,7 @@ public interface ShipService {
     void delete(long id) throws NotFoundException, ForbiddenException, InvalidException;
 
     Page<Ship> searchShip(String query, int page);
+
+    // ************************ SERVICE ADMIN MODULES ******************
+    Set<Ship> getMyShips();
 }

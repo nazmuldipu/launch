@@ -3,6 +3,7 @@ package com.ship.nazmul.ship.controller.api.accounting;
 import com.ship.nazmul.ship.config.security.SecurityConfig;
 import com.ship.nazmul.ship.entities.User;
 import com.ship.nazmul.ship.exceptions.forbidden.ForbiddenException;
+import com.ship.nazmul.ship.exceptions.notfound.NotFoundException;
 import com.ship.nazmul.ship.exceptions.notfound.UserNotFoundException;
 import com.ship.nazmul.ship.services.accountings.AdminShipLedgerService;
 import com.ship.nazmul.ship.services.accountings.ShipAgentLedgerService;
@@ -26,20 +27,20 @@ public class AccountingServiceAdminController {
     }
 
     @PutMapping("/addAgentBalance/{agentId}")
-    private ResponseEntity addAgentBalance(@PathVariable("agentId")Long agentId, @RequestParam("amount")int amount) throws UserNotFoundException, ForbiddenException {
+    private ResponseEntity addAgentBalance(@PathVariable("agentId")Long agentId, @RequestParam("amount")int amount) throws NotFoundException, ForbiddenException {
         return ResponseEntity.ok(this.shipAgentLedgerService.addBalanceToShipAgent(agentId, amount));
     }
 
-    @GetMapping("/shipCashbook")
-    private ResponseEntity getHotelCashbook(@RequestParam(value = "page", defaultValue = "0") Integer page) throws ForbiddenException {
+    @GetMapping("/shipCashbook/{shipId}")
+    private ResponseEntity getHotelCashbook(@PathVariable("shipId")Long shipId, @RequestParam(value = "page", defaultValue = "0") Integer page) throws ForbiddenException {
         //TODO: HIDE Hotel information from response info
-        return ResponseEntity.ok(this.shipCashBookService.getAllShipCashbookForServiceAdmin(page));
+        return ResponseEntity.ok(this.shipCashBookService.getShipCashbookForServiceAdmin(shipId, page));
     }
 
-    @GetMapping("/hotelswaveLedger")
-    private ResponseEntity getHotelswaveLedger(@RequestParam(value = "page", defaultValue = "0") Integer page){
+    @GetMapping("/hotelswaveLedger/{shipId}")
+    private ResponseEntity getHotelswaveLedger(@PathVariable("shipId")Long shipId, @RequestParam(value = "page", defaultValue = "0") Integer page){
         User user = SecurityConfig.getCurrentUser();
-        return ResponseEntity.ok((this.adminShipLedgerService.getAdminShipLedgerByShipId(user.getShip().getId(), page)));
+        return ResponseEntity.ok((this.adminShipLedgerService.getAdminShipLedgerByShipId(shipId, page)));
     }
 
     @GetMapping("/shipAgentLedger/{userId}")
@@ -47,13 +48,13 @@ public class AccountingServiceAdminController {
         return ResponseEntity.ok(this.shipAgentLedgerService.getShipAgentLedgerByAgentId(userId, page));
     }
 
-    @PutMapping("/addIncome")
-    private ResponseEntity addIncome(@RequestParam("credit")Integer debit, @RequestParam("explanation")String explanation) throws ForbiddenException {
-        return ResponseEntity.ok(this.shipCashBookService.addShipCashbookEntry(debit,0,explanation));
+    @PutMapping("/addIncome/{shipId}")
+    private ResponseEntity addIncome(@PathVariable("shipId")Long shipId, @RequestParam("credit")Integer debit, @RequestParam("explanation")String explanation) throws ForbiddenException, NotFoundException {
+        return ResponseEntity.ok(this.shipCashBookService.addShipCashbookEntry(shipId,debit,0,explanation));
     }
 
-    @PutMapping("/addExpense")
-    private ResponseEntity addExpense(@RequestParam("credit")Integer credit, @RequestParam("explanation")String explanation) throws ForbiddenException {
-        return ResponseEntity.ok(this.shipCashBookService.addShipCashbookEntry(0,credit,explanation));
+    @PutMapping("/addExpense/{shipId}")
+    private ResponseEntity addExpense(@PathVariable("shipId")Long shipId, @RequestParam("credit")Integer credit, @RequestParam("explanation")String explanation) throws ForbiddenException, NotFoundException {
+        return ResponseEntity.ok(this.shipCashBookService.addShipCashbookEntry(shipId,0,credit,explanation));
     }
 }

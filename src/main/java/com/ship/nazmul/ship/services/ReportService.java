@@ -18,7 +18,7 @@ public interface ReportService {
     List<ServiceAdminSellsReport> getAdminReservationReportByShipId(Date date, Long shipId) throws ForbiddenException;
 
     /************************************Service Admin modules***************************************/
-    List<ServiceAdminSellsReport> getServiceAdminSellsReport(Date date) throws ForbiddenException, ParseException;
+    List<ServiceAdminSellsReport> getServiceAdminSellsReport(Long shipId, Date date) throws ForbiddenException, ParseException;
 
-    List<ServiceAdminSellsReport> getServiceAdminReservationReport(Date date) throws ForbiddenException;
+    List<ServiceAdminSellsReport> getServiceAdminReservationReport(Long shipId, Date date) throws ForbiddenException;
 }

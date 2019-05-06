@@ -15,7 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import javax.transaction.Transactional;
+import java.util.*;
 
 @Service
 public class ShipServiceImpl implements ShipService {
@@ -31,7 +32,7 @@ public class ShipServiceImpl implements ShipService {
         //Security check
         if (ship == null) throw new InvalidException("Ship can not be null");
         User user = SecurityConfig.getCurrentUser();
-        if (!user.isAdmin() && !(user.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()) && user.getShip().getId() == ship.getId()))
+        if (!user.isAdmin())
             throw new ForbiddenException("Access denied");
 
         if (ship.getShipFacilities() == null) ship.setShipFacilities(new ShipFacilities());
@@ -75,5 +76,24 @@ public class ShipServiceImpl implements ShipService {
     @Override
     public Page<Ship> searchShip(String query, int page) {
         return this.shipRepository.findDistinctByNameContainingIgnoreCaseOrStartingPointContainingIgnoreCaseOrDroppingPointContainingIgnoreCaseAndDeletedFalse(query, query, query, PageAttr.getPageRequest(page));
+    }
+
+    @Override
+    @Transactional
+    public Set<Ship> getMyShips() {
+        User user = SecurityConfig.getCurrentUser();
+        if (user.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()) || user.hasRole(Role.ERole.ROLE_SERVICE_AGENT.toString())) {
+            List<Ship> shipSet = new ArrayList<>();
+            Iterator<Ship> shipIterator = user.getShips().iterator();
+            while(shipIterator.hasNext()){
+                Ship ship = shipIterator.next();
+                ship.setImagePaths(null);
+                ship.setCategoryList(null);
+                shipSet.add(ship);
+            }
+
+            return user.getShips();
+        }
+        return null;
     }
 }

@@ -59,22 +59,22 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public List<ServiceAdminSellsReport> getServiceAdminSellsReport(Date date) throws ForbiddenException, ParseException {
+    public List<ServiceAdminSellsReport> getServiceAdminSellsReport(Long shipId, Date date) throws ForbiddenException, ParseException {
         User user = SecurityConfig.getCurrentUser();
-        if (user.getShip() == null || !user.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()))
+        if (user.getShips() == null || !user.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()))
             throw new ForbiddenException("Access denied");
 
-        List<Booking> bookingList = this.bookingService.getBookingsByShipIdAndCreateDate(user.getShip().getId(), date);
+        List<Booking> bookingList = this.bookingService.getBookingsByShipIdAndCreateDate(shipId, date);
         return this.getAdminBookingReportFromBookingList(bookingList);
     }
 
     @Override
-    public List<ServiceAdminSellsReport> getServiceAdminReservationReport(Date date) throws ForbiddenException {
+    public List<ServiceAdminSellsReport> getServiceAdminReservationReport(Long shipId, Date date) throws ForbiddenException {
         User user = SecurityConfig.getCurrentUser();
-        if (user.getShip() == null || !user.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()))
+        if (user.getShips() == null || !user.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()))
             throw new ForbiddenException("Access denied");
 
-        List<Seat> roomList = this.seatService.getSeatListByShipId(user.getShip().getId());
+        List<Seat> roomList = this.seatService.getSeatListByShipId(shipId);
         return this.getAdminBookingReportFromSeatList(roomList, date, false);
     }
 

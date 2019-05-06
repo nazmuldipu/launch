@@ -11,7 +11,7 @@ import java.util.List;
 
 @Repository
 public interface ShipRepository extends JpaRepository<Ship, Long> {
-    Ship findByUser(User user);
+//    Ship findByUser(User user);
 
     List<Ship> findByDeletedFalse();
 

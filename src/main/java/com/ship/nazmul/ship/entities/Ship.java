@@ -36,7 +36,7 @@ public class Ship extends BaseEntity {
     private Integer hotelswavePercentage;
 
     @JsonIgnore
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.LAZY)
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
     private List<String> imagePaths;
 
@@ -47,9 +47,9 @@ public class Ship extends BaseEntity {
     @JsonIgnore
     private List<Category> categoryList;
 
-    @JsonIgnore
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<User> user;
+//    @JsonIgnore
+//    @OneToMany(cascade = CascadeType.ALL)
+//    private List<User> user;
 
     public String getShipNumber() {
         return shipNumber;
@@ -251,13 +251,13 @@ public class Ship extends BaseEntity {
         this.categoryList = categoryList;
     }
 
-    public List<User> getUser() {
-        return user;
-    }
-
-    public void setUser(List<User> user) {
-        this.user = user;
-    }
+//    public List<User> getUser() {
+//        return user;
+//    }
+//
+//    public void setUser(List<User> user) {
+//        this.user = user;
+//    }
 
     @Override
     public String toString() {
@@ -286,7 +286,6 @@ public class Ship extends BaseEntity {
                 ", hotelswavePercentage=" + hotelswavePercentage +
                 ", imagePaths=" + imagePaths +
                 ", shipFacilities=" + shipFacilities +
-                ", user=" + user +
                 '}';
     }
 }

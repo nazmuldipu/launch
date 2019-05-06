@@ -1,9 +1,11 @@
 package com.ship.nazmul.ship.services.accountings.impl;
 
 import com.ship.nazmul.ship.commons.PageAttr;
+import com.ship.nazmul.ship.entities.Ship;
 import com.ship.nazmul.ship.entities.User;
 import com.ship.nazmul.ship.entities.accountings.ShipAgentLedger;
 import com.ship.nazmul.ship.exceptions.forbidden.ForbiddenException;
+import com.ship.nazmul.ship.exceptions.notfound.NotFoundException;
 import com.ship.nazmul.ship.exceptions.notfound.UserNotFoundException;
 import com.ship.nazmul.ship.repositories.accountings.ShipAgentLedgerRepository;
 import com.ship.nazmul.ship.services.UserService;
@@ -86,15 +88,16 @@ public class ShipAgentLedgerServiceImpl implements ShipAgentLedgerService {
      * */
     @Override
     @Transactional
-    public ShipAgentLedger addBalanceToShipAgent(Long agentId, int amount) throws UserNotFoundException, ForbiddenException {
+    public ShipAgentLedger addBalanceToShipAgent(Long agentId, int amount) throws ForbiddenException, NotFoundException {
         User user = this.userService.getOne(agentId);
-        if(user == null) throw new ForbiddenException("A slap on you left face, idiot");
+        Ship ship = user.getShips().iterator().next();
+        if(user == null || ship == null) throw new ForbiddenException("A slap on you left face, idiot");
 
         //1) Add amount debit to ship cashbook
-        this.shipCashBookService.addShipCashbookEntry(amount, 0,"Add balance for Agent : " + user.getName() );
+        this.shipCashBookService.addShipCashbookEntry(ship.getId(), amount, 0,"Add balance for Agent : " + user.getName() );
 
         // 2) Add amount credit to ship agent ledger
-        ShipAgentLedger shipAgentLedger = new ShipAgentLedger(user, new Date(), "Add balance", 0, amount);
+        ShipAgentLedger shipAgentLedger = new ShipAgentLedger(ship, user, new Date(), "Add balance", 0, amount);
         shipAgentLedger = this.updateBalanceAndSave(agentId, shipAgentLedger);
 
         return shipAgentLedger;
