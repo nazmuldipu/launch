@@ -1,6 +1,7 @@
 package com.ship.nazmul.ship.services.impl;
 
 import com.ship.nazmul.ship.commons.PageAttr;
+import com.ship.nazmul.ship.commons.Validator;
 import com.ship.nazmul.ship.commons.utils.DateUtil;
 import com.ship.nazmul.ship.config.security.SecurityConfig;
 import com.ship.nazmul.ship.entities.*;
@@ -202,7 +203,8 @@ public class SeatServiceImpl implements SeatService {
     @Override
     public void clearSeatStatusAndBookingIdMap(Long seatId, Date date, Booking booking) throws ForbiddenException, NotFoundException, ParseException {
         User currentUser = SecurityConfig.getCurrentUser();
-        if (!currentUser.isAdmin() && !(currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()) && currentUser.getShips().contains(booking.getShip())))
+        System.out.println("D4: " + currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()) + currentUser.getRoles() );
+        if (!currentUser.isAdmin() && !(currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()) && Validator.containsShip(currentUser.getShips(), booking.getShip())))
             throw new ForbiddenException("Access denied");
         this.removeBookingMap(seatId, date);
         this.updateStatusMap(seatId, date, Seat.EStatus.SEAT_FREE);

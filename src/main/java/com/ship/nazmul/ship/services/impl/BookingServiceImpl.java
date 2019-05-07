@@ -1,6 +1,7 @@
 package com.ship.nazmul.ship.services.impl;
 
 import com.ship.nazmul.ship.commons.PageAttr;
+import com.ship.nazmul.ship.commons.Validator;
 import com.ship.nazmul.ship.commons.utils.DateUtil;
 import com.ship.nazmul.ship.config.security.SecurityConfig;
 import com.ship.nazmul.ship.entities.*;
@@ -76,6 +77,16 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public Booking getOne(Long id) {
         return this.bookingRepository.findOne(id);
+    }
+
+    @Override
+    public Booking getServiceAdminBooking(Long id) {
+        Booking booking = this.getOne(id);
+        User currentUser = SecurityConfig.getCurrentUser();
+        if(currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()) && Validator.containsShip(currentUser.getShips(), booking.getShip()) && !booking.isCancelled())
+            return booking;
+
+        return null;
     }
 
     @Override
@@ -319,6 +330,8 @@ public class BookingServiceImpl implements BookingService {
     public void cancelBooking(Long bookingId) throws ForbiddenException, NotFoundException, ParseException {
         User currentUser = SecurityConfig.getCurrentUser();
         Booking booking = this.getOne(bookingId);
+        System.out.println(booking.getCreatedBy().getName() + ":" + booking.getCreatedBy().getRoles());
+        System.out.println(currentUser.getRoles());
         if (!booking.isCancelled()) {
             if (booking.getCreatedBy().hasRole(Role.ERole.ROLE_ADMIN.toString())) {
                 if (!currentUser.isAdmin()) throw new ForbiddenException("Access denied");
@@ -326,6 +339,7 @@ public class BookingServiceImpl implements BookingService {
             } else if (booking.getCreatedBy().hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString())) {
                 if (!currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()))
                     throw new ForbiddenException("Access denied");
+                System.out.println("D1 : OK I AM HERE");
                 this.serviceAdminSellRoomsAccounting(booking, true);
 //            } else if (booking.getCreatedBy().hasRole(Role.ERole.ROLE_AGENT.toString())) {
 //                if (!currentUser.isAdmin()) throw new ForbiddenException("Access denied");
@@ -338,9 +352,9 @@ public class BookingServiceImpl implements BookingService {
 //                if (!currentUser.isAdmin()) throw new ForbiddenException("Access denied");
 //                this.userPaymentAccounting(booking, true);
 //            }
-
+                System.out.println("D2: I AM ALSO HERE");
                 this.clearBooking(booking);
-
+                System.out.println("D3: TELL ME WHERE I AM");
                 booking.setCancelled(true);
                 this.bookingRepository.save(booking);
             }

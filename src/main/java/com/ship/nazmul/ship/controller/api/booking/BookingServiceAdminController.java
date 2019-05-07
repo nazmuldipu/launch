@@ -10,10 +10,7 @@ import com.ship.nazmul.ship.services.BookingService;
 import com.ship.nazmul.ship.services.SeatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
 
@@ -32,5 +29,27 @@ public class BookingServiceAdminController {
     @PostMapping("/sell")
     private ResponseEntity createBooking(@RequestBody Booking booking) throws ParseException, NotFoundException, ForbiddenException, UserAlreadyExistsException, NullPasswordException, UserInvalidException {
         return ResponseEntity.ok(this.bookingService.createServiceAdminBooking(booking));
+    }
+
+    @GetMapping("/{bookingId}")
+    private ResponseEntity getBookingById(@PathVariable("bookingId")Long bookingId){
+        return ResponseEntity.ok(this.bookingService.getServiceAdminBooking(bookingId));
+    }
+
+    @PutMapping("/confirmReservation/{bookingId}")
+    private ResponseEntity confirmReservation(@PathVariable("bookingId")Long bookingId) throws NullPasswordException, UserAlreadyExistsException, UserInvalidException, NotFoundException, ParseException {
+
+        return ResponseEntity.ok(this.bookingService.confirmReservation(bookingId));
+    }
+
+    @DeleteMapping("/cancelBooking/{bookingId}")
+    private ResponseEntity cancelBooking(@PathVariable("bookingId")Long bookingId) throws NotFoundException, ForbiddenException, ParseException {
+        this.bookingService.cancelBooking(bookingId);
+        return ResponseEntity.ok().build();
+    }
+    @DeleteMapping("/cancelReservation/{bookingId}")
+    private ResponseEntity cancelReservation(@PathVariable("bookingId")Long bookingId) throws UserInvalidException, ForbiddenException, ParseException, NullPasswordException, NotFoundException, UserAlreadyExistsException {
+        this.bookingService.cancelReservation(bookingId);
+        return ResponseEntity.ok().build();
     }
 }

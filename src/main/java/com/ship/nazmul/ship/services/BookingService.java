@@ -18,6 +18,8 @@ public interface BookingService {
 
     Booking getOne(Long id);
 
+    Booking getServiceAdminBooking(Long id);
+
     Page<Booking> getAllBookings(int page);
 
     List<Booking> getAllBookings();
