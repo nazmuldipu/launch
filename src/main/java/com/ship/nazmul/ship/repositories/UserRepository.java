@@ -29,7 +29,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Page<User> findByUsernameContaining(String query, Pageable pageable);
 
-    Page<User> findByShipsIdInAndRolesName(Long shipsId, String role, Pageable pageable);
+    Page<User> findByShipsIdAndRolesName(Long shipsId, String role, Pageable pageable);
 
     @Query("SELECT u FROM User u WHERE u.name LIKE %:query% OR u.username LIKE %:query%")
     Page<User> searchByNameOrUsername(@Param("query") String query, Pageable pageable);

@@ -88,7 +88,7 @@ public class ShipAgentLedgerServiceImpl implements ShipAgentLedgerService {
      * */
     @Override
     @Transactional
-    public ShipAgentLedger addBalanceToShipAgent(Long agentId, int amount) throws ForbiddenException, NotFoundException {
+    public ShipAgentLedger addBalanceToShipAgent(Long agentId,  Long shipId, int amount) throws ForbiddenException, NotFoundException {
         User user = this.userService.getOne(agentId);
         Ship ship = user.getShips().iterator().next();
         if(user == null || ship == null) throw new ForbiddenException("A slap on you left face, idiot");

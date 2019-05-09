@@ -27,8 +27,8 @@ public class AccountingServiceAdminController {
     }
 
     @PutMapping("/addAgentBalance/{agentId}")
-    private ResponseEntity addAgentBalance(@PathVariable("agentId")Long agentId, @RequestParam("amount")int amount) throws NotFoundException, ForbiddenException {
-        return ResponseEntity.ok(this.shipAgentLedgerService.addBalanceToShipAgent(agentId, amount));
+    private ResponseEntity addAgentBalance(@PathVariable("agentId")Long agentId,@RequestParam("shipId")Long shipId, @RequestParam("amount")int amount) throws NotFoundException, ForbiddenException {
+        return ResponseEntity.ok(this.shipAgentLedgerService.addBalanceToShipAgent(agentId, shipId, amount));
     }
 
     @GetMapping("/shipCashbook/{shipId}")
@@ -49,7 +49,7 @@ public class AccountingServiceAdminController {
     }
 
     @PutMapping("/addIncome/{shipId}")
-    private ResponseEntity addIncome(@PathVariable("shipId")Long shipId, @RequestParam("credit")Integer debit, @RequestParam("explanation")String explanation) throws ForbiddenException, NotFoundException {
+    private ResponseEntity addIncome(@PathVariable("shipId")Long shipId, @RequestParam("debit")Integer debit, @RequestParam("explanation")String explanation) throws ForbiddenException, NotFoundException {
         return ResponseEntity.ok(this.shipCashBookService.addShipCashbookEntry(shipId,debit,0,explanation));
     }
 

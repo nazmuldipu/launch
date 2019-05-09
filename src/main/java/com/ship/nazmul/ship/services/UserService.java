@@ -59,7 +59,7 @@ public interface UserService {
 
     User createServiceAdminAgent(User user) throws ForbiddenException, NullPasswordException;
 
-    Page<User> getServiceAdminAgents(int page) throws ForbiddenException;
+    Page<User> getServiceAdminAgents(Long shipId, int page) throws ForbiddenException;
 
     User removeServiceAdminAgent(Long userId) throws ForbiddenException, UserNotFoundException;
 

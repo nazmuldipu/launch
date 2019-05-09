@@ -35,9 +35,9 @@ public class UserServiceAdminController {
     }
 
     //Get Service Admin Agent Page
-    @GetMapping("/myAgents")
-    private ResponseEntity<Page<User>> getServiceAdminAgentPage(@RequestParam(value = "page", defaultValue = "0") Integer page) throws ForbiddenException {
-        return ResponseEntity.ok(this.userService.getServiceAdminAgents(page));
+    @GetMapping("/myAgents/{shipId}")
+    private ResponseEntity<Page<User>> getServiceAdminAgentPage(@PathVariable("shipId")Long shipId, @RequestParam(value = "page", defaultValue = "0") Integer page) throws ForbiddenException {
+        return ResponseEntity.ok(this.userService.getServiceAdminAgents(shipId, page));
     }
 
     //Remove Service admin Agent

@@ -27,7 +27,7 @@ public interface ShipAgentLedgerService {
 
     ShipAgentLedger updateBalanceAndSave(Long agentId, ShipAgentLedger shipAgentLedger);
 
-    ShipAgentLedger addBalanceToShipAgent(Long agentId, int amount) throws NotFoundException, ForbiddenException;
+    ShipAgentLedger addBalanceToShipAgent(Long agentId, Long shipId, int amount) throws NotFoundException, ForbiddenException;
 
     ShipAgentLedger getAgentLastLedger(Long agentId);
 

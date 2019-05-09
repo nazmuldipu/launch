@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -57,7 +58,7 @@ public class UserServiceImpl implements UserService {
             throw new UserInvalidException("Password cannot be null or length must be at least 6 or more!");
 
         // set Roles
-        if(user.getRoles() == null || user.getRoles().size() == 0){
+        if (user.getRoles() == null || user.getRoles().size() == 0) {
             user.grantRole(this.roleService.findRole(Role.ERole.ROLE_USER));
         }
 
@@ -78,6 +79,7 @@ public class UserServiceImpl implements UserService {
 
         return this.userRepo.save(user);
     }
+
     private boolean isValid(User user) {
         return user != null && user.getPassword() != null;
     }
@@ -172,7 +174,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User changePassword(Long userId, String password) throws ForbiddenException, NullPasswordException {
         User user = SecurityConfig.getCurrentUser();
-        if(user == null || user.getId() != userId) throw new ForbiddenException("A slap on your face, idiot");
+        if (user == null || user.getId() != userId) throw new ForbiddenException("A slap on your face, idiot");
         user.setPassword(PasswordUtil.encryptPassword(password, PasswordUtil.EncType.BCRYPT_ENCODER, null));
         return this.userRepo.save(user);
     }
@@ -204,7 +206,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Page<User> getAdminAgents(int page) {
-        return this.userRepo.findByRolesName( Role.ERole.ROLE_AGENT.getValue(), PageAttr.getPageRequest(page));
+        return this.userRepo.findByRolesName(Role.ERole.ROLE_AGENT.getValue(), PageAttr.getPageRequest(page));
     }
 
     @Override
@@ -214,8 +216,9 @@ public class UserServiceImpl implements UserService {
         if (!adminUser.isAdmin()) throw new ForbiddenException("Access Denied");
 
         User user = this.getOne(userId);
-        if(user.isOnlyUser()) {return user;}
-        else if(user.hasRole(Role.ERole.ROLE_AGENT.toString())){
+        if (user.isOnlyUser()) {
+            return user;
+        } else if (user.hasRole(Role.ERole.ROLE_AGENT.toString())) {
             user.changeRole(this.roleService.findRole(Role.ERole.ROLE_USER));
             user.setShips(null);
             return this.userRepo.save(user);
@@ -233,7 +236,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User assignShipAndRole(Long userId, Long shipId, Role.ERole role) throws NotFoundException {
         User user = this.getOne(userId);
-        Ship ship  = this.shipService.getOne(shipId);
+        Ship ship = this.shipService.getOne(shipId);
         user.getShips().add(ship);
         Role r = this.roleService.findRole(role);
         user.changeRole(r);
@@ -259,11 +262,12 @@ public class UserServiceImpl implements UserService {
         //Security check
         User serviceUser = SecurityConfig.getCurrentUser();
         Set<Ship> ships = serviceUser.getShips();
-        if (ships == null || !serviceUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString())) throw new ForbiddenException("Access Denied");
+        if (ships == null || !serviceUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()))
+            throw new ForbiddenException("Access Denied");
 
         //If user exists and user doesn't belongs to my hotel then access denied
         User oldUser = this.userRepo.findByPhoneNumber(user.getPhoneNumber());
-        if (oldUser != null && !oldUser.isOnlyUser() && oldUser.getShips() != null )
+        if (oldUser != null && !oldUser.isOnlyUser() && oldUser.getShips() != null)
             throw new ForbiddenException("Access denied");
 
 
@@ -284,11 +288,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<User> getServiceAdminAgents(int page) throws ForbiddenException {
-        Set<Ship> ships  = SecurityConfig.getCurrentUser().getShips();
-        if (ships == null || !SecurityConfig.getCurrentUser().hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString())) throw new ForbiddenException("Access denied");
-
-        return this.userRepo.findByShipsIdInAndRolesName(ships.iterator().next().getId(), Role.ERole.ROLE_SERVICE_AGENT.getValue(), PageAttr.getPageRequest(page));
+    public Page<User> getServiceAdminAgents(Long shipId, int page) throws ForbiddenException {
+        Set<Ship> ships = SecurityConfig.getCurrentUser().getShips();
+        if (ships == null || !SecurityConfig.getCurrentUser().hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()))
+            throw new ForbiddenException("Access denied");
+        return this.userRepo.findByShipsIdAndRolesName(shipId, Role.ERole.ROLE_SERVICE_AGENT.getValue(), PageAttr.getPageRequest(page));
     }
 
     @Override
@@ -299,8 +303,9 @@ public class UserServiceImpl implements UserService {
         if (ships == null) throw new ForbiddenException("Hotel cannot be null");
 
         User user = this.getOne(userId);
-        if(user.isOnlyUser()) {return user;}
-        else if(user.hasRole(Role.ERole.ROLE_SERVICE_AGENT.toString()) && user.getShips() != null && user.getShips().removeAll(ships)){
+        if (user.isOnlyUser()) {
+            return user;
+        } else if (user.hasRole(Role.ERole.ROLE_SERVICE_AGENT.toString()) && user.getShips() != null && user.getShips().removeAll(ships)) {
             user.changeRole(this.roleService.findRole(Role.ERole.ROLE_USER));
             user.setShips(null);
             user.getShips().clear();

@@ -2,6 +2,8 @@ package com.ship.nazmul.ship.services;
 
 import com.ship.nazmul.ship.entities.pojo.ServiceAdminSellsReport;
 import com.ship.nazmul.ship.exceptions.forbidden.ForbiddenException;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.text.ParseException;
 import java.util.Date;
@@ -21,4 +23,6 @@ public interface ReportService {
     List<ServiceAdminSellsReport> getServiceAdminSellsReport(Long shipId, Date date) throws ForbiddenException, ParseException;
 
     List<ServiceAdminSellsReport> getServiceAdminReservationReport(Long shipId, Date date) throws ForbiddenException;
+
+    JSONObject getServiceAdminDashboardReport(Date date) throws JSONException, ForbiddenException;
 }

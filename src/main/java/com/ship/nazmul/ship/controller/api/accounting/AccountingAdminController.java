@@ -46,7 +46,7 @@ public class AccountingAdminController {
     }
 
     @PutMapping("/addIncome")
-    private ResponseEntity addIncome(@RequestParam("credit") Integer debit, @RequestParam("explanation") String explanation) throws ForbiddenException {
+    private ResponseEntity addIncome(@RequestParam("debit") Integer debit, @RequestParam("explanation") String explanation) throws ForbiddenException {
         return ResponseEntity.ok(this.adminCashbookService.addAdminCashbookEntry(debit, 0, explanation));
     }
 

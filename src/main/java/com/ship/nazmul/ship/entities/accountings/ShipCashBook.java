@@ -19,8 +19,6 @@ public class ShipCashBook extends BaseEntity {
     private int balance;
     private boolean approved;
 
-
-
     public ShipCashBook() {
     }
 

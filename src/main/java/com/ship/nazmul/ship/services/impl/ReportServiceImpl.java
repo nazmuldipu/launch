@@ -1,13 +1,15 @@
 package com.ship.nazmul.ship.services.impl;
 
-import com.ship.nazmul.ship.commons.utils.DateUtil;
 import com.ship.nazmul.ship.config.security.SecurityConfig;
 import com.ship.nazmul.ship.entities.*;
 import com.ship.nazmul.ship.entities.pojo.ServiceAdminSellsReport;
 import com.ship.nazmul.ship.exceptions.forbidden.ForbiddenException;
 import com.ship.nazmul.ship.services.BookingService;
+import com.ship.nazmul.ship.services.CategoryService;
 import com.ship.nazmul.ship.services.ReportService;
 import com.ship.nazmul.ship.services.SeatService;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,11 +22,13 @@ import java.util.List;
 public class ReportServiceImpl implements ReportService {
     private final SeatService seatService;
     private final BookingService bookingService;
+    private final CategoryService categoryService;
 
     @Autowired
-    public ReportServiceImpl(SeatService seatService, BookingService bookingService) {
+    public ReportServiceImpl(SeatService seatService, BookingService bookingService, CategoryService categoryService) {
         this.seatService = seatService;
         this.bookingService = bookingService;
+        this.categoryService = categoryService;
     }
 
     @Override
@@ -78,11 +82,78 @@ public class ReportServiceImpl implements ReportService {
         return this.getAdminBookingReportFromSeatList(roomList, date, false);
     }
 
+    @Override
+    public JSONObject getServiceAdminDashboardReport(Date date) throws JSONException, ForbiddenException {
+        User currentUser = SecurityConfig.getCurrentUser();
+        if (currentUser.getShips() == null || !currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()))
+            throw new ForbiddenException("Access denied");
+
+        JSONObject obj = new JSONObject();
+        obj.put("numberOfShips", currentUser.getShips().size());
+        obj.put("ships", this.getUserShipsReportObjects(currentUser, date));
+
+        return obj;
+    }
+
+    List<JSONObject> getUserShipsReportObjects(User user, Date date) throws JSONException {
+        if (user.getShips().size() < 1) return null;
+        List<JSONObject> list = new ArrayList<JSONObject>();
+        for (Ship ship : user.getShips()) {
+            JSONObject obj = new JSONObject();
+            obj.put("id", ship.getId());
+            obj.put("name", ship.getName());
+            obj.put("shipNumber", ship.getShipNumber());
+            obj.put("categories", this.getCategoryReportObjects(ship.getId(), date));
+            obj.put("numberOfSeats", this.seatService.getSeatListByShipId(ship.getId()).size());
+            list.add(obj);
+        }
+        return list;
+    }
+
+    List<JSONObject> getCategoryReportObjects(Long shipId, Date date) throws JSONException {
+        List<Category> categoryList = this.categoryService.getCategoryByShipId(shipId);
+        List<JSONObject> list = new ArrayList<JSONObject>();
+        for (Category category : categoryList) {
+            JSONObject obj = new JSONObject();
+            obj.put("id", category.getId());
+            obj.put("name", category.getName());
+            obj.put("fare", category.getFare());
+            obj.put("numberOfSeats", this.seatService.getSeatListByCategoryId(category.getId()).size());
+            obj.put("sells", this.getReservationReport(category, date));
+            list.add(obj);
+        }
+        return list;
+    }
+
+   JSONObject getReservationReport(Category category, Date date) {
+        int reserved = 0;
+        int blocked = 0;
+        int sold = 0;
+        List<Seat> seatList = this.seatService.getSeatListByCategoryId(category.getId());
+        for (Seat seat : seatList) {
+            Seat.EStatus status = seat.getSeatStatusMap().get(date);
+            if (status == null || status.equals(Seat.EStatus.SEAT_FREE)) {
+
+            } else if (status.equals(Seat.EStatus.SEAT_RESERVED)) {
+                reserved++;
+            } else if (status.equals(Seat.EStatus.SEAT_BLOCKED)) {
+                blocked++;
+            } else if (status.equals(Seat.EStatus.SEAT_SOLD)) {
+                sold++;
+            }
+        }
+        JSONObject obj = new JSONObject();
+        obj.put("reserved", reserved);
+        obj.put("blocked", blocked);
+        obj.put("sold", sold);
+        return obj;
+    }
+
     //Generate booking report from RoomList
-    private List<ServiceAdminSellsReport> getAdminBookingReportFromSeatList(List<Seat> seatList, Date date, boolean isAdmin){
+    private List<ServiceAdminSellsReport> getAdminBookingReportFromSeatList(List<Seat> seatList, Date date, boolean isAdmin) {
         List<ServiceAdminSellsReport> serviceAdminSellsReportList = new ArrayList<>();
 
-        for (Seat seat: seatList) {
+        for (Seat seat : seatList) {
             ServiceAdminSellsReport serviceAdminSellsReport = new ServiceAdminSellsReport();
             String[] seats = {seat.getSeatNumber()};
             serviceAdminSellsReport.setSeatNumbers(seats);
@@ -90,7 +161,7 @@ public class ReportServiceImpl implements ReportService {
             serviceAdminSellsReport.setShipNumber(seat.getShip().getShipNumber());
             serviceAdminSellsReport.setRoutes(seat.getShip().getStartingPoint() + " - " + seat.getShip().getDroppingPoint());
             Long bookingId = seat.getBookingIdMap().get(date);
-            if(bookingId != null){
+            if (bookingId != null) {
                 Booking booking = this.bookingService.getOne(bookingId);
                 if (!booking.isCancelled()) {
                     serviceAdminSellsReport.setJourneyDate(booking.getSubBookingList().get(0).getDate());
@@ -104,7 +175,7 @@ public class ReportServiceImpl implements ReportService {
                     serviceAdminSellsReport.setRole(booking.getCreatedBy().getRoles().get(0).getRole());
                     serviceAdminSellsReport.setPaid(booking.isPaid());
                 }
-            } else if(isAdmin){
+            } else if (isAdmin) {
                 continue;
             }
             serviceAdminSellsReportList.add(serviceAdminSellsReport);
@@ -125,7 +196,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     //Populate ServiceAdminBookingReport from SubBooking and Booking
-    private ServiceAdminSellsReport populateServiceAdminBookingReport( Booking booking) throws ParseException {
+    private ServiceAdminSellsReport populateServiceAdminBookingReport(Booking booking) throws ParseException {
         ServiceAdminSellsReport serviceAdminSellsReport = new ServiceAdminSellsReport();
         serviceAdminSellsReport.setJourneyDate(booking.getSubBookingList().get(0).getDate());
         serviceAdminSellsReport.setBookingId(booking.getId());
@@ -137,7 +208,7 @@ public class ReportServiceImpl implements ReportService {
         serviceAdminSellsReport.setShipNumber(booking.getShip().getShipNumber());
         serviceAdminSellsReport.setRoutes(booking.getShip().getStartingPoint() + " - " + booking.getShip().getDroppingPoint());
         String[] sets = new String[booking.getSubBookingList().size()];
-        for(int i = 0; i<booking.getSubBookingList().size(); i++){
+        for (int i = 0; i < booking.getSubBookingList().size(); i++) {
             sets[i] = booking.getSubBookingList().get(i).getSeat().getSeatNumber();
         }
         serviceAdminSellsReport.setSeatNumbers(sets);
