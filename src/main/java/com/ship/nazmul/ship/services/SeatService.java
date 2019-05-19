@@ -19,7 +19,7 @@ public interface SeatService {
 
     Seat getOne(long seatId) throws NotFoundException;
 
-    List<Seat> getAll();
+    List<Seat> getAll() throws ForbiddenException;
 
     Page<Seat> getAll(int page) throws ForbiddenException;
 

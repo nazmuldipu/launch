@@ -12,7 +12,6 @@ import com.ship.nazmul.ship.repositories.SeatRepository;
 import com.ship.nazmul.ship.services.CategoryService;
 import com.ship.nazmul.ship.services.SeatService;
 import com.ship.nazmul.ship.services.ShipService;
-import netscape.security.ForbiddenTargetException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,9 +55,9 @@ public class SeatServiceImpl implements SeatService {
     }
 
     @Override
-    public List<Seat> getAll() {
+    public List<Seat> getAll() throws ForbiddenException {
         User user = SecurityConfig.getCurrentUser();
-        if (!user.isAdmin()) throw new ForbiddenTargetException("Access denied");
+        if (!user.isAdmin()) throw new ForbiddenException("Access denied");
         return this.seatRepository.findAll();
     }
 
