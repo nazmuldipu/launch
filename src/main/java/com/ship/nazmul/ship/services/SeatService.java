@@ -21,7 +21,7 @@ public interface SeatService {
 
     List<Seat> getAll();
 
-    Page<Seat> getAll(int page);
+    Page<Seat> getAll(int page) throws ForbiddenException;
 
     boolean exists(long id);
 

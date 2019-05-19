@@ -63,9 +63,9 @@ public class SeatServiceImpl implements SeatService {
     }
 
     @Override
-    public Page<Seat> getAll(int page) {
+    public Page<Seat> getAll(int page) throws ForbiddenException {
         User user = SecurityConfig.getCurrentUser();
-        if (!user.isAdmin()) throw new ForbiddenTargetException("Access denied");
+        if (!user.isAdmin()) throw new ForbiddenException("Access denied");
 
         return this.seatRepository.findAll(PageAttr.getPageRequest(page));
     }
