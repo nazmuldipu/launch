@@ -100,7 +100,11 @@ public class AdminAgentLedgerServiceImpl implements AdminAgentLedgerService {
     @Override
     public int getAdminAgentBalance(Long agentId) {
         AdminAgentLedger adminAgentLedger = this.adminAgentLedgerRepository.findFirstByAgentIdOrderByIdDesc(agentId);
-        return adminAgentLedger.getBalance();
+        if(adminAgentLedger != null) {
+            return adminAgentLedger.getBalance();
+        }
+
+        return  0;
     }
 
 

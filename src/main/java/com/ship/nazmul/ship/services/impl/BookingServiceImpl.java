@@ -5,6 +5,7 @@ import com.ship.nazmul.ship.commons.Validator;
 import com.ship.nazmul.ship.commons.utils.DateUtil;
 import com.ship.nazmul.ship.config.security.SecurityConfig;
 import com.ship.nazmul.ship.entities.*;
+import com.ship.nazmul.ship.entities.accountings.AdminAgentLedger;
 import com.ship.nazmul.ship.entities.accountings.AdminCashbook;
 import com.ship.nazmul.ship.entities.accountings.AdminShipLedger;
 import com.ship.nazmul.ship.entities.accountings.ShipCashBook;
@@ -19,6 +20,7 @@ import com.ship.nazmul.ship.services.BookingService;
 import com.ship.nazmul.ship.services.CategoryService;
 import com.ship.nazmul.ship.services.SeatService;
 import com.ship.nazmul.ship.services.UserService;
+import com.ship.nazmul.ship.services.accountings.AdminAgentLedgerService;
 import com.ship.nazmul.ship.services.accountings.AdminCashbookService;
 import com.ship.nazmul.ship.services.accountings.AdminShipLedgerService;
 import com.ship.nazmul.ship.services.accountings.ShipCashBookService;
@@ -42,10 +44,11 @@ public class BookingServiceImpl implements BookingService {
     private final AdminCashbookService adminCashbookService;
     private final AdminShipLedgerService adminShipLedgerService;
     private final ShipCashBookService shipCashBookService;
+    private final AdminAgentLedgerService adminAgentLedgerService;
 
 
     @Autowired
-    public BookingServiceImpl(BookingRepository bookingRepository, UserService userService, CategoryService categoryService, SeatService seatService, AdminCashbookService adminCashbookService, AdminShipLedgerService adminShipLedgerService, ShipCashBookService shipCashBookService) {
+    public BookingServiceImpl(BookingRepository bookingRepository, UserService userService, CategoryService categoryService, SeatService seatService, AdminCashbookService adminCashbookService, AdminShipLedgerService adminShipLedgerService, ShipCashBookService shipCashBookService, AdminAgentLedgerService adminAgentLedgerService) {
         this.bookingRepository = bookingRepository;
         this.userService = userService;
         this.categoryService = categoryService;
@@ -53,6 +56,7 @@ public class BookingServiceImpl implements BookingService {
         this.adminCashbookService = adminCashbookService;
         this.adminShipLedgerService = adminShipLedgerService;
         this.shipCashBookService = shipCashBookService;
+        this.adminAgentLedgerService = adminAgentLedgerService;
     }
 
     @Override
@@ -83,7 +87,7 @@ public class BookingServiceImpl implements BookingService {
     public Booking getServiceAdminBooking(Long id) {
         Booking booking = this.getOne(id);
         User currentUser = SecurityConfig.getCurrentUser();
-        if(currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()) && Validator.containsShip(currentUser.getShips(), booking.getShip()) && !booking.isCancelled())
+        if (currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()) && Validator.containsShip(currentUser.getShips(), booking.getShip()) && !booking.isCancelled())
             return booking;
 
         return null;
@@ -170,9 +174,12 @@ public class BookingServiceImpl implements BookingService {
         booking.setPaid(true);
         booking = this.save(booking);
         if (SecurityConfig.getCurrentUser().hasRole(Role.ERole.ROLE_ADMIN.toString())) {
-            this.adminSellRoomsAccounting(booking, false);
+            booking.setHotelswaveAgentDiscount(booking.getShip().getHotelswavePercentage() * booking.getTotalPayablePrice() / 100);
+            this.adminSellSeatAccounting(booking, false);
         } else if (SecurityConfig.getCurrentUser().hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString())) {
-            this.serviceAdminSellRoomsAccounting(booking, false);
+            this.serviceAdminSellSeatAccounting(booking, false);
+        } else if(SecurityConfig.getCurrentUser().hasRole(Role.ERole.ROLE_AGENT.toString())){
+            this.adminAgentSellsSeatAccount(booking, false);
         }
         return booking;
     }
@@ -193,7 +200,7 @@ public class BookingServiceImpl implements BookingService {
     /*1) Admin_Cashbook debit total booking amount
      * 2) Admin_Ship_Ledger credit ( total amount - hotelswave discount)
      * */
-    private void adminSellRoomsAccounting(Booking booking, boolean cancel) throws NotFoundException {
+    private void adminSellSeatAccounting(Booking booking, boolean cancel) throws NotFoundException {
         //1) Admin_Cashbook debit total booking amount
         Ship ship = booking.getShip();
         String explanation = (cancel ? "Cancel " : "") + "Booking for booking id " + booking.getId();
@@ -222,7 +229,36 @@ public class BookingServiceImpl implements BookingService {
 
     }
 
-    private void serviceAdminSellRoomsAccounting(Booking booking, boolean cancel) {
+    private void adminAgentSellsSeatAccount(Booking booking, boolean cancel){
+        int commission = booking.getShip().getHotelswavePercentage() * booking.getTotalPayablePrice() / (100 * 2);
+        String explanation = (cancel ? "Cancel " : "") + "Booking for booking id " + booking.getId();
+
+        //1) Debit AdminAgentLedger = total_advance - hotelswave_agent_discount
+        AdminAgentLedger adminAgentLedger;
+        if (cancel) {
+            adminAgentLedger = new AdminAgentLedger(booking.getCreatedBy(), new Date(), explanation, 0, booking.getTotalPayablePrice() - commission);
+        } else {
+            adminAgentLedger = new AdminAgentLedger(SecurityConfig.getCurrentUser(), new Date(), explanation, booking.getTotalPayablePrice() -commission, 0);
+        }
+        adminAgentLedger.setRef(booking.getId().toString());
+        adminAgentLedger.setApproved(true);
+        adminAgentLedger = this.adminAgentLedgerService.updateBalanceAndSave(booking.getCreatedBy().getId(), adminAgentLedger);
+
+        //2) Admin_Hotel_Ledger credit ( total amount - hotelswave discount)
+        int hotelswavePercentages = (int) (booking.getTotalPayablePrice() * booking.getShip().getHotelswavePercentage() / 100.00);
+        int amount = booking.getTotalPayablePrice() - hotelswavePercentages; //deduct hotels wave percentages;
+        AdminShipLedger adminShipLedger;
+        if (!cancel) {
+            adminShipLedger = new AdminShipLedger( booking.getShip(), new Date(), explanation, 0, amount);
+        } else {
+            adminShipLedger = new AdminShipLedger( booking.getShip(), new Date(), explanation, amount, 0);
+        }
+        adminShipLedger.setApproved(true);
+        adminShipLedger.setRef(booking.getId().toString());
+        this.adminShipLedgerService.updateAdminShipLedger( booking.getShip().getId(), adminShipLedger);
+    }
+
+    private void serviceAdminSellSeatAccounting(Booking booking, boolean cancel) {
         Ship ship = booking.getShip();
         String explanation = (cancel ? "Cancel" : "") + "Booking for booking id " + booking.getId();
         //1)Add amount to shipCashbook
@@ -279,7 +315,37 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Booking createAdminAgentBooking(Booking booking) {
+    public Booking createAdminAgentBooking(Booking booking) throws ForbiddenException, NotFoundException, ParseException, UserAlreadyExistsException, NullPasswordException, UserInvalidException {
+        //1) Security check if user has sufficient permission for this action
+        User user = SecurityConfig.getCurrentUser();
+        if (!user.hasRole(Role.ERole.ROLE_AGENT.toString())) throw new ForbiddenException("Access denied");
+
+        int agentBalance = this.adminAgentLedgerService.getAdminAgentBalance(user.getId());
+
+        // 2) Add subBookingList to booking and Calculate Booking
+        booking.setSubBookingList(this.calculateSubBookingList(booking.getSubBookingList()));
+        booking = this.calculateBooking(booking);
+        booking.setShip(booking.getSubBookingList().get(0).getSeat().getCategory().getShip());
+        booking.setShipName(booking.getShip().getName());
+        booking.setCategoryName(booking.getSubBookingList().get(0).getSeat().getCategory().getName());
+
+        int agentCommission = (int) (booking.getShip().getHotelswavePercentage() * booking.getTotalPayablePrice() / (200.0 ));
+        System.out.println("HOTELS WAVE PERCENTAGE :" + booking.getShip().getHotelswavePercentage());
+        System.out.println("Commission: " + agentCommission + ", Balance : " + agentBalance + ", Payable : " + (booking.getTotalPayablePrice() - agentCommission));
+
+        if(agentBalance > (booking.getTotalPayablePrice() - agentCommission)){
+            if (user.hasRole(Role.ERole.ROLE_AGENT.toString())) {
+                booking = this.save(booking);
+                if (this.confirmBooking(booking)) {
+                    if (booking.geteStatus() == Seat.EStatus.SEAT_SOLD) {
+                        booking = this.approveBooking(booking);
+                    }
+                    return booking;
+                }
+            }
+        } else {
+            throw new ForbiddenException("In sufficient balace");
+        }
         return null;
     }
 
@@ -335,15 +401,14 @@ public class BookingServiceImpl implements BookingService {
         if (!booking.isCancelled()) {
             if (booking.getCreatedBy().hasRole(Role.ERole.ROLE_ADMIN.toString())) {
                 if (!currentUser.isAdmin()) throw new ForbiddenException("Access denied");
-                this.adminSellRoomsAccounting(booking, true);
+                this.adminSellSeatAccounting(booking, true);
             } else if (booking.getCreatedBy().hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString())) {
                 if (!currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()))
                     throw new ForbiddenException("Access denied");
-                System.out.println("D1 : OK I AM HERE");
-                this.serviceAdminSellRoomsAccounting(booking, true);
-//            } else if (booking.getCreatedBy().hasRole(Role.ERole.ROLE_AGENT.toString())) {
-//                if (!currentUser.isAdmin()) throw new ForbiddenException("Access denied");
-//                this.subtractFromAdminAgentLedger(booking, true);
+                this.serviceAdminSellSeatAccounting(booking, true);
+            } else if (booking.getCreatedBy().hasRole(Role.ERole.ROLE_AGENT.toString())) {
+                if (!currentUser.isAdmin()) throw new ForbiddenException("Access denied");
+                this.adminAgentSellsSeatAccount(booking, true);
 //            } else if (booking.getCreatedBy().hasRole(Role.ERole.ROLE_SERVICE_AGENT.toString())) {
 //                if (!currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()))
 //                    throw new ForbiddenException("Access denied");
@@ -352,12 +417,11 @@ public class BookingServiceImpl implements BookingService {
 //                if (!currentUser.isAdmin()) throw new ForbiddenException("Access denied");
 //                this.userPaymentAccounting(booking, true);
 //            }
-                System.out.println("D2: I AM ALSO HERE");
+            }
                 this.clearBooking(booking);
-                System.out.println("D3: TELL ME WHERE I AM");
                 booking.setCancelled(true);
                 this.bookingRepository.save(booking);
-            }
+
         }
     }
 
