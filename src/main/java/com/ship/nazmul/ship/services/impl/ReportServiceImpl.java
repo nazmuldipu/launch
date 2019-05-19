@@ -125,7 +125,7 @@ public class ReportServiceImpl implements ReportService {
         return list;
     }
 
-   JSONObject getReservationReport(Category category, Date date) {
+   JSONObject getReservationReport(Category category, Date date) throws JSONException{
         int reserved = 0;
         int blocked = 0;
         int sold = 0;
