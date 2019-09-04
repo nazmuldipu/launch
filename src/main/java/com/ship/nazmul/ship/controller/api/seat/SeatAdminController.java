@@ -46,7 +46,7 @@ public class SeatAdminController {
     }
 
     @GetMapping("/available/{shipId}")
-    private ResponseEntity getAllAvailableSeatForUser(@PathVariable("shipId") Long shipId,
+    private ResponseEntity getAllAvailableSeatForAdmin(@PathVariable("shipId") Long shipId,
                                                       @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date date) throws NotFoundException {
         return ResponseEntity.ok(this.seatService.getAvailableSeatByShipId(shipId, date));
     }
