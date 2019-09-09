@@ -150,6 +150,8 @@ public class BookingServiceImpl implements BookingService {
             if (this.confirmBooking(booking)) {
                 if (booking.geteStatus() == Seat.EStatus.SEAT_SOLD) {
                     booking = this.approveBooking(booking);
+                } else if(booking.geteStatus() == Seat.EStatus.SEAT_RESERVED){
+                    booking = this.reserveBooking(booking);
                 }
                 return booking;
             }
@@ -180,6 +182,14 @@ public class BookingServiceImpl implements BookingService {
             this.serviceAdminSellSeatAccounting(booking, false);
         } else if(SecurityConfig.getCurrentUser().hasRole(Role.ERole.ROLE_AGENT.toString())){
             this.adminAgentSellsSeatAccount(booking, false);
+        }
+        return booking;
+    }
+
+    private Booking reserveBooking(Booking booking) throws NotFoundException, ParseException {
+        booking.seteStatus(Seat.EStatus.SEAT_RESERVED);
+        for (SubBooking subBooking : booking.getSubBookingList()) {
+            this.seatService.updateStatusMap(subBooking.getSeat().getId(), subBooking.getDate(), booking.geteStatus());
         }
         return booking;
     }
@@ -339,6 +349,8 @@ public class BookingServiceImpl implements BookingService {
                 if (this.confirmBooking(booking)) {
                     if (booking.geteStatus() == Seat.EStatus.SEAT_SOLD) {
                         booking = this.approveBooking(booking);
+                    } else if(booking.geteStatus() == Seat.EStatus.SEAT_RESERVED){
+                        booking = this.reserveBooking(booking);
                     }
                     return booking;
                 }
@@ -367,6 +379,8 @@ public class BookingServiceImpl implements BookingService {
             if (this.confirmBooking(booking)) {
                 if (booking.geteStatus() == Seat.EStatus.SEAT_SOLD) {
                     booking = this.approveBooking(booking);
+                }else if(booking.geteStatus() == Seat.EStatus.SEAT_RESERVED){
+                    booking = this.reserveBooking(booking);
                 }
                 return booking;
             }
@@ -386,9 +400,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public void cancelReservation(Long bookingId) throws ParseException, NotFoundException, ForbiddenException, UserAlreadyExistsException, NullPasswordException, UserInvalidException {
-        System.out.println("D1 : " + bookingId);
         Booking booking = this.getOne(bookingId);
-        System.out.println("D2 " + booking);
         booking.setCancelled(true);
         this.clearBooking(booking);
         this.save(booking);
