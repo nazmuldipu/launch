@@ -213,7 +213,7 @@ public class SeatServiceImpl implements SeatService {
         System.out.println("D1 : seatID "+ seatId);
         this.removeBookingMap(seatId, date);
         System.out.println("D2 :  status cleared" );
-        this.clearStatusMap(seatId, dategi);
+        this.clearStatusMap(seatId, date);
     }
 
     @Override
