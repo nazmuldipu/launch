@@ -23,13 +23,26 @@ public class BookingAdminAgentController {
         this.bookingService = bookingService;
     }
 
+    @GetMapping("/mySells")
+    private ResponseEntity getAdminAgentMySells( @RequestParam(value = "page", defaultValue = "0") Integer page){
+        return ResponseEntity.ok(this.bookingService.getMySells(page));
+    }
+
     @PostMapping("/sell")
     private ResponseEntity createAdminAgentBooking(@RequestBody Booking booking) throws ParseException, NotFoundException, ForbiddenException, UserAlreadyExistsException, NullPasswordException, UserInvalidException {
         return ResponseEntity.ok(this.bookingService.createAdminAgentBooking(booking));
     }
 
-    @GetMapping("/mySells")
-    private ResponseEntity getAdminAgentMySells( @RequestParam(value = "page", defaultValue = "0") Integer page){
-        return ResponseEntity.ok(this.bookingService.getMySells(page));
+    @PutMapping("/confirmReservation/{bookingId}")
+    private ResponseEntity confirmReservation(@PathVariable("bookingId")Long bookingId) throws NullPasswordException, UserAlreadyExistsException, UserInvalidException, NotFoundException, ParseException {
+
+        return ResponseEntity.ok(this.bookingService.confirmReservation(bookingId));
+    }
+
+    @DeleteMapping("/cancelReservation/{bookingId}")
+    private ResponseEntity cancelReservation(@PathVariable("bookingId")Long bookingId) throws UserInvalidException, ForbiddenException, ParseException, NullPasswordException, NotFoundException, UserAlreadyExistsException {
+
+        this.bookingService.cancelReservation(bookingId);
+        return ResponseEntity.ok().build();
     }
 }

@@ -154,7 +154,7 @@ public class SeatServiceImpl implements SeatService {
     }
 
     @Override
-    public Map<Date, Integer> getFareMap(Long roomId,Date startDate, Date endDate) throws NotFoundException {
+    public Map<Date, Integer> getFareMap(Long roomId, Date startDate, Date endDate) throws NotFoundException {
         Seat seat = this.getOne(roomId);
         List<Date> dates = DateUtil.getDatesBetween(startDate, endDate);
         Map<Date, Integer> fareMap = new HashMap<>();
@@ -202,8 +202,7 @@ public class SeatServiceImpl implements SeatService {
     @Override
     public void clearSeatStatusAndBookingIdMap(Long seatId, Date date, Booking booking) throws ForbiddenException, NotFoundException, ParseException {
         User currentUser = SecurityConfig.getCurrentUser();
-        System.out.println("D4: " + currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()) + currentUser.getRoles() );
-        if (!currentUser.isAdmin() && !(currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()) && Validator.containsShip(currentUser.getShips(), booking.getShip())))
+        if (!currentUser.isAdmin() && !currentUser.hasRole(Role.ERole.ROLE_AGENT.toString()) && !(currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()) && Validator.containsShip(currentUser.getShips(), booking.getShip())))
             throw new ForbiddenException("Access denied");
         this.removeBookingMap(seatId, date);
         this.updateStatusMap(seatId, date, Seat.EStatus.SEAT_FREE);

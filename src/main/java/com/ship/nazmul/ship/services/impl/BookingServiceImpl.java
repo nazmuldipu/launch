@@ -386,7 +386,9 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public void cancelReservation(Long bookingId) throws ParseException, NotFoundException, ForbiddenException, UserAlreadyExistsException, NullPasswordException, UserInvalidException {
+        System.out.println("D1 : " + bookingId);
         Booking booking = this.getOne(bookingId);
+        System.out.println("D2 " + booking);
         booking.setCancelled(true);
         this.clearBooking(booking);
         this.save(booking);
