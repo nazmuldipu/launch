@@ -162,6 +162,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public Booking confirmReservation(Long bookingId) throws NotFoundException, UserAlreadyExistsException, NullPasswordException, UserInvalidException, ParseException {
         Booking booking = this.getOne(bookingId);
+        System.out.println(booking);
         return this.approveBooking(booking);
     }
 
@@ -326,6 +327,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public Booking createAdminAgentBooking(Booking booking) throws ForbiddenException, NotFoundException, ParseException, UserAlreadyExistsException, NullPasswordException, UserInvalidException {
+        System.out.println(booking);
         //1) Security check if user has sufficient permission for this action
         User user = SecurityConfig.getCurrentUser();
         if (!user.hasRole(Role.ERole.ROLE_AGENT.toString())) throw new ForbiddenException("Access denied");
@@ -401,6 +403,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public void cancelReservation(Long bookingId) throws ParseException, NotFoundException, ForbiddenException, UserAlreadyExistsException, NullPasswordException, UserInvalidException {
         Booking booking = this.getOne(bookingId);
+        System.out.println(booking);
         booking.setCancelled(true);
         this.clearBooking(booking);
         this.save(booking);
