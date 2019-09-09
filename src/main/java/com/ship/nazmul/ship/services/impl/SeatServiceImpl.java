@@ -193,10 +193,16 @@ public class SeatServiceImpl implements SeatService {
     @Override
     public Seat updateStatusMap(Long seatId, Date date, Seat.EStatus status) throws NotFoundException, ParseException {
         Seat seat = this.getOne(seatId);
-        date = DateUtil.truncateTimeFromDate(date);
+//        date = DateUtil.truncateTimeFromDate(date);
         seat.getSeatStatusMap().put(date, status);
         seat = this.seatRepository.save(seat);
         return seat;
+    }
+
+    private void clearStatusMap(Long seatId, Date date) throws NotFoundException {
+        Seat seat = this.getOne(seatId);
+        seat.getSeatStatusMap().remove(date);
+        this.seatRepository.save(seat);
     }
 
     @Override
@@ -207,7 +213,7 @@ public class SeatServiceImpl implements SeatService {
         System.out.println("D1 : seatID "+ seatId);
         this.removeBookingMap(seatId, date);
         System.out.println("D2 :  status cleared" );
-        this.updateStatusMap(seatId, date, Seat.EStatus.SEAT_FREE);
+        this.clearStatusMap(seatId, dategi);
     }
 
     @Override
