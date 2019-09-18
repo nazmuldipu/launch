@@ -1,9 +1,11 @@
 package com.ship.nazmul.ship.services;
 
 import com.ship.nazmul.ship.entities.Role;
+import com.ship.nazmul.ship.entities.Ship;
 import com.ship.nazmul.ship.entities.User;
 import com.ship.nazmul.ship.exceptions.exists.UserAlreadyExistsException;
 import com.ship.nazmul.ship.exceptions.forbidden.ForbiddenException;
+import com.ship.nazmul.ship.exceptions.invalid.InvalidException;
 import com.ship.nazmul.ship.exceptions.invalid.UserInvalidException;
 import com.ship.nazmul.ship.exceptions.notfound.NotFoundException;
 import com.ship.nazmul.ship.exceptions.notfound.UserNotFoundException;
@@ -11,6 +13,7 @@ import com.ship.nazmul.ship.exceptions.nullpointer.NullPasswordException;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
+import java.util.Set;
 
 public interface UserService {
     User save(User user) throws UserAlreadyExistsException, UserInvalidException, NullPasswordException;
@@ -35,6 +38,8 @@ public interface UserService {
 
     List<User> getUserListByShipId(Long shipId);
 
+    Set<Ship> getUserShipList(Long userId) throws UserNotFoundException;
+
     boolean exists(User user);
 
     User setRoles(Long id, String[] roles) throws UserNotFoundException, UserAlreadyExistsException, NullPasswordException, UserInvalidException;
@@ -54,6 +59,9 @@ public interface UserService {
 
     User assignShipAndRole(Long userId, Long shipId, Role.ERole role) throws NotFoundException;
 
+    User assignShipAdmin(Long userId, Long shipId) throws NotFoundException, ForbiddenException, InvalidException;
+
+    User assignShipAgent(Long userId, Long shipId) throws NotFoundException;
     // **************************** Service admin modules **********************************
     User addServiceAdminUser(User user) throws UserAlreadyExistsException, NullPasswordException, UserInvalidException;
 

@@ -97,16 +97,16 @@ public class AdminShipLedgerServiceImpl implements AdminShipLedgerService {
      * */
     @Override
     public AdminShipLedger payToShip(Long shipId, int amount) throws NotFoundException, ForbiddenException {
-        Ship Ship = this.ShipService.getOne(shipId);
+        Ship ship = this.ShipService.getOne(shipId);
         // 1) Amount credit from AdminCashbook
-        this.adminCashbookService.addAdminCashbookEntry(0,amount, "Pay to Ship : " + Ship.getName());
+        this.adminCashbookService.addAdminCashbookEntry(0,amount, "Pay to Ship : " + ship.getName());
 
         // 2) Amount debit from AdminShipLedger
-        AdminShipLedger adminShipLedger = new AdminShipLedger(Ship, new Date(), "Got payment from Shipswave ", amount, 0);
+        AdminShipLedger adminShipLedger = new AdminShipLedger(ship, new Date(), "Got payment from Shipswave ", amount, 0);
         adminShipLedger = this.updateAdminShipLedger(shipId, adminShipLedger);
 
         // 3) Amount debit to ShipCashbook
-        ShipCashBook ShipCashBook = new ShipCashBook(Ship, new Date(), "Hotelswave payment ", amount, 0);
+        ShipCashBook ShipCashBook = new ShipCashBook(ship, new Date(), "Hotelswave payment ", amount, 0);
         ShipCashBook = this.ShipCashBookService.debitAmount(ShipCashBook);
 
         return adminShipLedger;

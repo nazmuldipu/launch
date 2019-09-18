@@ -1,9 +1,11 @@
 package com.ship.nazmul.ship.controller.api.users;
 
 import com.ship.nazmul.ship.entities.Role;
+import com.ship.nazmul.ship.entities.Ship;
 import com.ship.nazmul.ship.entities.User;
 import com.ship.nazmul.ship.exceptions.exists.UserAlreadyExistsException;
 import com.ship.nazmul.ship.exceptions.forbidden.ForbiddenException;
+import com.ship.nazmul.ship.exceptions.invalid.InvalidException;
 import com.ship.nazmul.ship.exceptions.invalid.UserInvalidException;
 import com.ship.nazmul.ship.exceptions.notfound.NotFoundException;
 import com.ship.nazmul.ship.exceptions.notfound.UserNotFoundException;
@@ -15,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/v1/admin/users")
@@ -50,7 +53,7 @@ public class UserAdminController {
     }
 
     @GetMapping("/{userId}")
-    private ResponseEntity<User> getAdminUser(@PathVariable("userId")Long userId) throws UserNotFoundException {
+    private ResponseEntity<User> getAdminUser(@PathVariable("userId") Long userId) throws UserNotFoundException {
         return ResponseEntity.ok(this.userService.getOne(userId));
     }
 
@@ -80,10 +83,14 @@ public class UserAdminController {
     }
 
     @GetMapping("/searchByShipId/{shipId}")
-    private ResponseEntity<List<User>> getUserListByShipId(@PathVariable("shipId")Long shipId){
+    private ResponseEntity<List<User>> getUserListByShipId(@PathVariable("shipId") Long shipId) {
         return ResponseEntity.ok(this.userService.getUserListByShipId(shipId));
     }
 
+    @GetMapping("/getUserShipList/{userId}")
+    private ResponseEntity<Set<Ship>> getUserShipList(@PathVariable("userId") Long userId) throws UserNotFoundException {
+        return ResponseEntity.ok(this.userService.getUserShipList(userId));
+    }
 
     //Remove Service admin Agent
     @PutMapping("/removeAgent/{userId}")
@@ -97,11 +104,25 @@ public class UserAdminController {
         return ResponseEntity.ok(this.userService.changeUserPasswordByAdmin(userId, password));
     }
 
-    @PatchMapping("assignShip/{userId}")
+    //    @PatchMapping("/assignShip/{userId}")
+//    public ResponseEntity assignHotel(@PathVariable("userId") Long userId,
+//                                      @RequestParam("shipId")Long shipId,
+//                                      @RequestParam("role") Role.ERole role) throws NotFoundException {
+//        User user = this.userService.assignShipAndRole(userId, shipId, role);
+//        return ResponseEntity.ok(user );
+//    }
+    @PatchMapping("/assignShipAgent/{userId}")
     public ResponseEntity assignHotel(@PathVariable("userId") Long userId,
-                                      @RequestParam("shipId")Long shipId,
-                                      @RequestParam("role") Role.ERole role) throws NotFoundException {
-        User user = this.userService.assignShipAndRole(userId, shipId, role);
-        return ResponseEntity.ok(user );
+                                      @RequestParam("shipId") Long shipId) throws NotFoundException {
+//        User user = this.userService.assignShipAndRole(userId, shipId, role);
+        User user = this.userService.assignShipAgent(userId, shipId);
+        return ResponseEntity.ok(user);
+    }
+
+    @PatchMapping("/assignShipAdmin/{userId}")
+    public ResponseEntity assignShipAdmin(@PathVariable("userId") Long userId,
+                                          @RequestParam("shipId") Long shipId) throws InvalidException, NotFoundException, ForbiddenException {
+        User user = this.userService.assignShipAdmin(userId, shipId);
+        return ResponseEntity.ok(user);
     }
 }

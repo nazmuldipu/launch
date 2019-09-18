@@ -8,6 +8,7 @@ import com.ship.nazmul.ship.entities.Ship;
 import com.ship.nazmul.ship.entities.User;
 import com.ship.nazmul.ship.exceptions.exists.UserAlreadyExistsException;
 import com.ship.nazmul.ship.exceptions.forbidden.ForbiddenException;
+import com.ship.nazmul.ship.exceptions.invalid.InvalidException;
 import com.ship.nazmul.ship.exceptions.invalid.UserInvalidException;
 import com.ship.nazmul.ship.exceptions.notfound.NotFoundException;
 import com.ship.nazmul.ship.exceptions.notfound.UserNotFoundException;
@@ -245,6 +246,53 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User assignShipAdmin(Long userId, Long shipId) throws NotFoundException, ForbiddenException, InvalidException {
+        //Get provided User and Ship object
+        User user = this.getOne(userId);
+        Ship ship = this.shipService.getOne(shipId);
+
+        //Remove all previous Ship admin
+        List<User> currentShipUsers = this.getUserListByShipId(shipId);
+        for(User csu : currentShipUsers){
+            if(csu.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString())){
+                csu.getShips().remove(ship);
+                csu.changeRole(this.roleService.findRole(Role.ERole.ROLE_USER));
+                this.userRepo.save(csu);
+            }
+        }
+
+        //Add ship into user ShipList and save
+        if(!user.getShips().contains(ship)){
+            user.getShips().add(ship);
+            user.changeRole(this.roleService.findRole(Role.ERole.ROLE_SERVICE_ADMIN));
+            user = this.userRepo.save(user);
+        } else if(user.hasRole(Role.ERole.ROLE_SERVICE_AGENT.toString())){
+            user.changeRole(this.roleService.findRole(Role.ERole.ROLE_SERVICE_ADMIN));
+            user = this.userRepo.save(user);
+        }
+
+        //Set ship admin and save
+        ship.setAdmin(user);
+        this.shipService.save(ship);
+        return user;
+    }
+
+    @Override
+    public User assignShipAgent(Long userId, Long shipId) throws NotFoundException{
+        //Get provided User and Ship object
+        User user = this.getOne(userId);
+        Ship ship = this.shipService.getOne(shipId);
+
+        //Add ship into user ShipList and save
+        if(!user.getShips().contains(ship)){
+            user.getShips().add(ship);
+            user.changeRole(this.roleService.findRole(Role.ERole.ROLE_SERVICE_AGENT));
+            user = this.userRepo.save(user);
+        }
+        return user;
+    }
+
+    @Override
     public User addServiceAdminUser(User user) throws UserAlreadyExistsException, NullPasswordException, UserInvalidException {
         User oldUser = this.userRepo.findByPhoneNumber(user.getPhoneNumber());
         if (oldUser != null) return oldUser;
@@ -327,6 +375,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> getUserListByShipId(Long shipId) {
         return this.userRepo.findByShipsId(shipId);
+    }
+
+    @Override
+    public Set<Ship> getUserShipList(Long userId) throws UserNotFoundException {
+        User user = this.getOne(userId);
+        return user.getShips();
     }
 
 

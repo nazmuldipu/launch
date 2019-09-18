@@ -22,6 +22,7 @@ public class Ship extends BaseEntity {
     private String droppingPoint;
     private String startTime;
     private String route;
+    private ShipName shipName;
     private boolean ac;
     private boolean containCabin;
     private boolean online;
@@ -46,6 +47,25 @@ public class Ship extends BaseEntity {
     @OneToMany(mappedBy = "ship", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Category> categoryList;
+
+    @ManyToOne
+    private User admin;
+
+    public enum ShipName{
+        SUKANTO_BABU("Sukanto Babu"),
+        BAY_CRUISE("Bay_Cruise"),
+        OTHER("Other");
+
+        String value;
+
+        ShipName(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+    }
 
 //    @JsonIgnore
 //    @OneToMany(cascade = CascadeType.ALL)
@@ -251,6 +271,13 @@ public class Ship extends BaseEntity {
         this.categoryList = categoryList;
     }
 
+    public ShipName getShipName() {
+        return shipName;
+    }
+
+    public void setShipName(ShipName shipName) {
+        this.shipName = shipName;
+    }
 //    public List<User> getUser() {
 //        return user;
 //    }
@@ -258,6 +285,15 @@ public class Ship extends BaseEntity {
 //    public void setUser(List<User> user) {
 //        this.user = user;
 //    }
+
+
+    public User getAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(User admin) {
+        this.admin = admin;
+    }
 
     @Override
     public String toString() {
