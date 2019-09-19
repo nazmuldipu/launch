@@ -27,16 +27,15 @@ public class AccountingServiceAdminController {
 //        return ResponseEntity.ok(this.shipAgentLedgerService.addBalanceToShipAgent(agentId, shipId, amount));
 //    }
 
-    @GetMapping("/shipAdminCashbook/{adminId}")
-    private ResponseEntity getHotelCashbook(@PathVariable("adminId")Long adminId, @RequestParam(value = "page", defaultValue = "0") Integer page) throws ForbiddenException {
-        //TODO: HIDE Hotel information from response info
-        return ResponseEntity.ok(this.shipAdminCashbookService.getShipAdminCashbookForServiceAdmin(adminId, page));
+    @GetMapping("/shipAdminCashbook")
+    private ResponseEntity getHotelCashbook(@RequestParam(value = "page", defaultValue = "0") Integer page) throws ForbiddenException {
+        User currentUser = SecurityConfig.getCurrentUser();
+        return ResponseEntity.ok(this.shipAdminCashbookService.getShipAdminCashbookForServiceAdmin(currentUser.getId(), page));
     }
 
     @GetMapping("/shipAdminLedger/{adminId}")
     private ResponseEntity getShipAdminLedger(@PathVariable("adminId")Long adminId, @RequestParam(value = "page", defaultValue = "0") Integer page){
-        User user = SecurityConfig.getCurrentUser();
-        return ResponseEntity.ok(this.shipAdminLedgerService.getShipAdminLedgerByAdminId(adminId, page));
+       return ResponseEntity.ok(this.shipAdminLedgerService.getShipAdminLedgerByAdminId(adminId, page));
     }
 
 //    @GetMapping("/shipAgentLedger/{userId}")
@@ -44,13 +43,15 @@ public class AccountingServiceAdminController {
 //        return ResponseEntity.ok(this.shipAgentLedgerService.getShipAgentLedgerByAgentId(userId, page));
 //    }
 
-    @PutMapping("/addIncome/{adminId}")
-    private ResponseEntity addIncome(@PathVariable("adminId")Long adminId, @RequestParam("debit")Integer debit, @RequestParam("explanation")String explanation) throws ForbiddenException, NotFoundException {
-        return ResponseEntity.ok(this.shipAdminCashbookService.addShipAdminCashbookEntry(adminId, debit, 0, explanation));
+    @PutMapping("/addIncome")
+    private ResponseEntity addIncome(@RequestParam("debit")Integer debit, @RequestParam("explanation")String explanation) throws ForbiddenException, NotFoundException {
+        User user = SecurityConfig.getCurrentUser();
+        return ResponseEntity.ok(this.shipAdminCashbookService.addShipAdminCashbookEntry(user.getId(), debit, 0, explanation));
     }
 
-    @PutMapping("/addExpense/{adminId}")
-    private ResponseEntity addExpense(@PathVariable("adminId")Long adminId, @RequestParam("credit")Integer credit, @RequestParam("explanation")String explanation) throws ForbiddenException, NotFoundException {
-        return ResponseEntity.ok(this.shipAdminCashbookService.addShipAdminCashbookEntry(adminId, 0, credit, explanation));
+    @PutMapping("/addExpense")
+    private ResponseEntity addExpense(@RequestParam("credit")Integer credit, @RequestParam("explanation")String explanation) throws ForbiddenException, NotFoundException {
+        User user = SecurityConfig.getCurrentUser();
+        return ResponseEntity.ok(this.shipAdminCashbookService.addShipAdminCashbookEntry(user.getId(), 0, credit, explanation));
     }
 }

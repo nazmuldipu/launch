@@ -60,7 +60,7 @@ public class ShipAdminCashbookServiceImpl implements ShipAdminCashbookService {
 
     @Override
     public Page<ShipAdminCashbook> getShipAdminCashbookForServiceAdmin(Long userId, Integer page) {
-        return this.shipAdminCashbookRepository.findByUserId(userId, PageAttr.getPageRequest(page));
+        return this.shipAdminCashbookRepository.findByUserIdOrderByIdAsc(userId, PageAttr.getPageRequest(page));
     }
 
     @Override

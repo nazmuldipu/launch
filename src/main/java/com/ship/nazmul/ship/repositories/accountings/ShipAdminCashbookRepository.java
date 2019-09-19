@@ -14,7 +14,7 @@ public interface ShipAdminCashbookRepository  extends JpaRepository<ShipAdminCas
 
     List<ShipAdminCashbook> findByUserId(Long userId);
 
-    Page<ShipAdminCashbook> findByUserId(Long userId, Pageable pageable);
+    Page<ShipAdminCashbook> findByUserIdOrderByIdAsc(Long userId, Pageable pageable);
 
     Long countByUserId(Long ShipId);
 
