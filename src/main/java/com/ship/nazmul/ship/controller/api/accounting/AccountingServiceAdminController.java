@@ -33,7 +33,7 @@ public class AccountingServiceAdminController {
         return ResponseEntity.ok(this.shipAdminCashbookService.getShipAdminCashbookForServiceAdmin(currentUser.getId(), page));
     }
 
-    @GetMapping("/shipAdminLedger")
+    @GetMapping("/hotelswaveLedger")
     private ResponseEntity getShipAdminLedger(@RequestParam(value = "page", defaultValue = "0") Integer page){
         User currentUser = SecurityConfig.getCurrentUser();
        return ResponseEntity.ok(this.shipAdminLedgerService.getShipAdminLedgerByAdminId(currentUser.getId(), page));
