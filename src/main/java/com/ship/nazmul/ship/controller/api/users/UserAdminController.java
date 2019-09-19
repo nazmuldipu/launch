@@ -41,6 +41,11 @@ public class UserAdminController {
         return ResponseEntity.ok(userPage);
     }
 
+    @GetMapping("/getShipAdminList")
+    public ResponseEntity getAllShipAdmin(@RequestParam(value = "page", defaultValue = "0") Integer page){
+        return ResponseEntity.ok(this.userService.findByRole(Role.ERole.ROLE_SERVICE_ADMIN.getValue(),page));
+    }
+
     @PostMapping("")
     private ResponseEntity<User> createAdminUser(@RequestBody User user) throws UserAlreadyExistsException, NullPasswordException, UserInvalidException {
         return ResponseEntity.ok(this.userService.save(user));
@@ -104,13 +109,6 @@ public class UserAdminController {
         return ResponseEntity.ok(this.userService.changeUserPasswordByAdmin(userId, password));
     }
 
-    //    @PatchMapping("/assignShip/{userId}")
-//    public ResponseEntity assignHotel(@PathVariable("userId") Long userId,
-//                                      @RequestParam("shipId")Long shipId,
-//                                      @RequestParam("role") Role.ERole role) throws NotFoundException {
-//        User user = this.userService.assignShipAndRole(userId, shipId, role);
-//        return ResponseEntity.ok(user );
-//    }
     @PatchMapping("/assignShipAgent/{userId}")
     public ResponseEntity assignHotel(@PathVariable("userId") Long userId,
                                       @RequestParam("shipId") Long shipId) throws NotFoundException {

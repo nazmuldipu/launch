@@ -5,10 +5,7 @@ import com.ship.nazmul.ship.commons.Validator;
 import com.ship.nazmul.ship.commons.utils.DateUtil;
 import com.ship.nazmul.ship.config.security.SecurityConfig;
 import com.ship.nazmul.ship.entities.*;
-import com.ship.nazmul.ship.entities.accountings.AdminAgentLedger;
-import com.ship.nazmul.ship.entities.accountings.AdminCashbook;
-import com.ship.nazmul.ship.entities.accountings.AdminShipLedger;
-import com.ship.nazmul.ship.entities.accountings.ShipCashBook;
+import com.ship.nazmul.ship.entities.accountings.*;
 import com.ship.nazmul.ship.exceptions.exists.UserAlreadyExistsException;
 import com.ship.nazmul.ship.exceptions.forbidden.ForbiddenException;
 import com.ship.nazmul.ship.exceptions.invalid.UserInvalidException;
@@ -20,10 +17,7 @@ import com.ship.nazmul.ship.services.BookingService;
 import com.ship.nazmul.ship.services.CategoryService;
 import com.ship.nazmul.ship.services.SeatService;
 import com.ship.nazmul.ship.services.UserService;
-import com.ship.nazmul.ship.services.accountings.AdminAgentLedgerService;
-import com.ship.nazmul.ship.services.accountings.AdminCashbookService;
-import com.ship.nazmul.ship.services.accountings.AdminShipLedgerService;
-import com.ship.nazmul.ship.services.accountings.ShipCashBookService;
+import com.ship.nazmul.ship.services.accountings.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -42,20 +36,24 @@ public class BookingServiceImpl implements BookingService {
     private final CategoryService categoryService;
     private final SeatService seatService;
     private final AdminCashbookService adminCashbookService;
-    private final AdminShipLedgerService adminShipLedgerService;
-    private final ShipCashBookService shipCashBookService;
+    private final ShipAdminCashbookService shipAdminCashbookService;
+    private final ShipAdminLedgerService shipAdminLedgerService;
+//    private final AdminShipLedgerService adminShipLedgerService;
+//    private final ShipCashBookService shipCashBookService;
     private final AdminAgentLedgerService adminAgentLedgerService;
 
 
     @Autowired
-    public BookingServiceImpl(BookingRepository bookingRepository, UserService userService, CategoryService categoryService, SeatService seatService, AdminCashbookService adminCashbookService, AdminShipLedgerService adminShipLedgerService, ShipCashBookService shipCashBookService, AdminAgentLedgerService adminAgentLedgerService) {
+    public BookingServiceImpl(BookingRepository bookingRepository, UserService userService, CategoryService categoryService, SeatService seatService, AdminCashbookService adminCashbookService, ShipAdminCashbookService shipAdminCashbookService, ShipAdminLedgerService shipAdminLedgerService, AdminAgentLedgerService adminAgentLedgerService) {
         this.bookingRepository = bookingRepository;
         this.userService = userService;
         this.categoryService = categoryService;
         this.seatService = seatService;
         this.adminCashbookService = adminCashbookService;
-        this.adminShipLedgerService = adminShipLedgerService;
-        this.shipCashBookService = shipCashBookService;
+        this.shipAdminCashbookService = shipAdminCashbookService;
+        this.shipAdminLedgerService = shipAdminLedgerService;
+//        this.adminShipLedgerService = adminShipLedgerService;
+//        this.shipCashBookService = shipCashBookService;
         this.adminAgentLedgerService = adminAgentLedgerService;
     }
 
@@ -134,7 +132,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public Booking createAdminBooking(Booking booking) throws ForbiddenException, NotFoundException, ParseException, UserAlreadyExistsException, NullPasswordException, UserInvalidException {
+    public Booking createAdminBooking(Booking booking) throws ForbiddenException, NotFoundException, ParseException, UserAlreadyExistsException, NullPasswordException, UserInvalidException, javassist.NotFoundException {
         //1) Security check if user has sufficient permission for this action
         User user = SecurityConfig.getCurrentUser();
         if (!user.hasRole(Role.ERole.ROLE_ADMIN.toString())) throw new ForbiddenException("Access denied");
@@ -160,13 +158,13 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Booking confirmReservation(Long bookingId) throws NotFoundException, UserAlreadyExistsException, NullPasswordException, UserInvalidException, ParseException {
+    public Booking confirmReservation(Long bookingId) throws NotFoundException, UserAlreadyExistsException, NullPasswordException, UserInvalidException, ParseException, javassist.NotFoundException {
         Booking booking = this.getOne(bookingId);
         System.out.println(booking);
         return this.approveBooking(booking);
     }
 
-    private Booking approveBooking(Booking booking) throws NotFoundException, UserAlreadyExistsException, NullPasswordException, UserInvalidException, ParseException {
+    private Booking approveBooking(Booking booking) throws NotFoundException, UserAlreadyExistsException, NullPasswordException, UserInvalidException, ParseException, javassist.NotFoundException {
         booking.seteStatus(Seat.EStatus.SEAT_SOLD);
         for (SubBooking subBooking : booking.getSubBookingList()) {
             this.seatService.updateStatusMap(subBooking.getSeat().getId(), subBooking.getDate(), booking.geteStatus());
@@ -211,10 +209,10 @@ public class BookingServiceImpl implements BookingService {
     /*1) Admin_Cashbook debit total booking amount
      * 2) Admin_Ship_Ledger credit ( total amount - hotelswave discount)
      * */
-    private void adminSellSeatAccounting(Booking booking, boolean cancel) throws NotFoundException {
+    private void adminSellSeatAccounting(Booking booking, boolean cancel) throws NotFoundException, javassist.NotFoundException {
         //1) Admin_Cashbook debit total booking amount
         Ship ship = booking.getShip();
-        String explanation = (cancel ? "Cancel " : "") + "Booking for booking id " + booking.getId();
+        String explanation = (cancel ? "Cancel " : "") + ship.getShipNumber() + ":" + ship.getName() + " - Booking for booking id " + booking.getId();
         AdminCashbook adminCashbook;
         if (!cancel) {
             adminCashbook = new AdminCashbook(new Date(), explanation, booking.getTotalPayablePrice(), 0);
@@ -228,19 +226,23 @@ public class BookingServiceImpl implements BookingService {
         //2) Admin_Hotel_Ledger credit ( total amount - hotelswave discount)
         int hotelswavePercentages = (int) (booking.getTotalPayablePrice() * ship.getHotelswavePercentage() / 100.00);
         int amount = booking.getTotalPayablePrice() - hotelswavePercentages; //deduct hotels wave percentages;
-        AdminShipLedger adminShipLedger;
+        ShipAdminLedger shipAdminLedger;
+//        AdminShipLedger adminShipLedger;
         if (!cancel) {
-            adminShipLedger = new AdminShipLedger(ship, new Date(), explanation, 0, amount);
+            shipAdminLedger = new ShipAdminLedger(ship.getAdmin(), new Date(), explanation, 0, amount);
+//            adminShipLedger = new AdminShipLedger(ship, new Date(), explanation, 0, amount);
         } else {
-            adminShipLedger = new AdminShipLedger(ship, new Date(), explanation, amount, 0);
+            shipAdminLedger = new ShipAdminLedger(ship.getAdmin(), new Date(), explanation, amount, 0);
+//            adminShipLedger = new AdminShipLedger(ship, new Date(), explanation, amount, 0);
         }
-        adminShipLedger.setApproved(true);
-        adminShipLedger.setRef(booking.getId().toString());
-        this.adminShipLedgerService.updateAdminShipLedger(ship.getId(), adminShipLedger);
+
+        shipAdminLedger.setApproved(true);
+        shipAdminLedger.setRef(booking.getId().toString());
+        this.shipAdminLedgerService.addShipAdminLedger(ship.getAdmin().getId(), shipAdminLedger);
 
     }
 
-    private void adminAgentSellsSeatAccount(Booking booking, boolean cancel){
+    private void adminAgentSellsSeatAccount(Booking booking, boolean cancel) throws javassist.NotFoundException {
         int commission = booking.getShip().getHotelswavePercentage() * booking.getTotalPayablePrice() / (100 * 2);
         String explanation = (cancel ? "Cancel " : "") + "Booking for booking id " + booking.getId();
 
@@ -258,29 +260,35 @@ public class BookingServiceImpl implements BookingService {
         //2) Admin_Hotel_Ledger credit ( total amount - hotelswave discount)
         int hotelswavePercentages = (int) (booking.getTotalPayablePrice() * booking.getShip().getHotelswavePercentage() / 100.00);
         int amount = booking.getTotalPayablePrice() - hotelswavePercentages; //deduct hotels wave percentages;
-        AdminShipLedger adminShipLedger;
+//        AdminShipLedger adminShipLedger;
+        ShipAdminLedger shipAdminLedger;
         if (!cancel) {
-            adminShipLedger = new AdminShipLedger( booking.getShip(), new Date(), explanation, 0, amount);
+            shipAdminLedger = new ShipAdminLedger(booking.getShip().getAdmin(), new Date(), explanation, 0, amount);
+//            adminShipLedger = new AdminShipLedger( booking.getShip(), new Date(), explanation, 0, amount);
         } else {
-            adminShipLedger = new AdminShipLedger( booking.getShip(), new Date(), explanation, amount, 0);
+            shipAdminLedger = new ShipAdminLedger(booking.getShip().getAdmin(), new Date(), explanation, amount, 0);
+//            adminShipLedger = new AdminShipLedger( booking.getShip(), new Date(), explanation, amount, 0);
         }
-        adminShipLedger.setApproved(true);
-        adminShipLedger.setRef(booking.getId().toString());
-        this.adminShipLedgerService.updateAdminShipLedger( booking.getShip().getId(), adminShipLedger);
+        shipAdminLedger.setApproved(true);
+        shipAdminLedger.setRef(booking.getId().toString());
+        this.shipAdminLedgerService.addShipAdminLedger(booking.getShip().getAdmin().getId(), shipAdminLedger);
     }
 
     private void serviceAdminSellSeatAccounting(Booking booking, boolean cancel) {
         Ship ship = booking.getShip();
         String explanation = (cancel ? "Cancel" : "") + "Booking for booking id " + booking.getId();
         //1)Add amount to shipCashbook
-        ShipCashBook shipCashBook;
+//        ShipCashBook shipCashBook;
+        ShipAdminCashbook shipAdminCashbook;
         if (!cancel) {
-            shipCashBook = new ShipCashBook(ship, new Date(), explanation, booking.getTotalPayablePrice(), 0);
+            shipAdminCashbook = new ShipAdminCashbook(new Date(), ship.getAdmin(), explanation, booking.getTotalPayablePrice(), 0);
+//            shipCashBook = new ShipCashBook(ship, new Date(), explanation, booking.getTotalPayablePrice(), 0);
         } else {
-            shipCashBook = new ShipCashBook(ship, new Date(), explanation, 0, booking.getTotalPayablePrice());
+            shipAdminCashbook = new ShipAdminCashbook(new Date(), ship.getAdmin(), explanation, 0,booking.getTotalPayablePrice());
+//            shipCashBook = new ShipCashBook(ship, new Date(), explanation, 0, booking.getTotalPayablePrice());
         }
-        shipCashBook.setApproved(true);
-        shipCashBook = this.shipCashBookService.debitAmount(shipCashBook);
+        shipAdminCashbook.setApproved(true);
+        shipAdminCashbook = this.shipAdminCashbookService.debitAmount(shipAdminCashbook);
         return;
     }
 
@@ -326,7 +334,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Booking createAdminAgentBooking(Booking booking) throws ForbiddenException, NotFoundException, ParseException, UserAlreadyExistsException, NullPasswordException, UserInvalidException {
+    public Booking createAdminAgentBooking(Booking booking) throws ForbiddenException, NotFoundException, ParseException, UserAlreadyExistsException, NullPasswordException, UserInvalidException, javassist.NotFoundException {
         System.out.println(booking);
         //1) Security check if user has sufficient permission for this action
         User user = SecurityConfig.getCurrentUser();
@@ -364,7 +372,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Booking createServiceAdminBooking(Booking booking) throws ForbiddenException, NotFoundException, ParseException, UserAlreadyExistsException, NullPasswordException, UserInvalidException {
+    public Booking createServiceAdminBooking(Booking booking) throws ForbiddenException, NotFoundException, ParseException, UserAlreadyExistsException, NullPasswordException, UserInvalidException, javassist.NotFoundException {
         //1) Security check if user has sufficient permission for this action
         User user = SecurityConfig.getCurrentUser();
         if (!user.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString())) throw new ForbiddenException("Access denied");
@@ -410,7 +418,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public void cancelBooking(Long bookingId) throws ForbiddenException, NotFoundException, ParseException {
+    public void cancelBooking(Long bookingId) throws ForbiddenException, NotFoundException, ParseException, javassist.NotFoundException {
         User currentUser = SecurityConfig.getCurrentUser();
         Booking booking = this.getOne(bookingId);
         System.out.println(booking.getCreatedBy().getName() + ":" + booking.getCreatedBy().getRoles());

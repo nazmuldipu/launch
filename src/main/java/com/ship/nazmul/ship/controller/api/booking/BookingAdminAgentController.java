@@ -29,12 +29,12 @@ public class BookingAdminAgentController {
     }
 
     @PostMapping("/sell")
-    private ResponseEntity createAdminAgentBooking(@RequestBody Booking booking) throws ParseException, NotFoundException, ForbiddenException, UserAlreadyExistsException, NullPasswordException, UserInvalidException {
+    private ResponseEntity createAdminAgentBooking(@RequestBody Booking booking) throws ParseException, NotFoundException, ForbiddenException, UserAlreadyExistsException, NullPasswordException, UserInvalidException, javassist.NotFoundException {
         return ResponseEntity.ok(this.bookingService.createAdminAgentBooking(booking));
     }
 
     @PutMapping("/confirmReservation/{bookingId}")
-    private ResponseEntity confirmReservation(@PathVariable("bookingId")Long bookingId) throws NullPasswordException, UserAlreadyExistsException, UserInvalidException, NotFoundException, ParseException {
+    private ResponseEntity confirmReservation(@PathVariable("bookingId")Long bookingId) throws NullPasswordException, UserAlreadyExistsException, UserInvalidException, NotFoundException, ParseException, javassist.NotFoundException {
 
         return ResponseEntity.ok(this.bookingService.confirmReservation(bookingId));
     }

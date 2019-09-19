@@ -86,7 +86,7 @@ public class ShipAdminLedgerServiceImpl implements ShipAdminLedgerService {
      * */
     @Override
     public Page<ShipAdminLedger> getShipAdminLedgerByAdminId(Long adminId, Integer page) {
-        return this.shipAdminLedgerRepository.findByUserId(adminId, PageAttr.getPageRequest(page));
+        return this.shipAdminLedgerRepository.findByUserIdOrderByIdAsc(adminId, PageAttr.getPageRequest(page));
     }
 
     /*Delete ShipAdminLedger from database

@@ -37,12 +37,12 @@ public class BookingAdminController {
     }
 
     @PostMapping("/sell")
-    private ResponseEntity createBooking(@RequestBody Booking booking) throws UserInvalidException, ForbiddenException, ParseException, NullPasswordException, NotFoundException, UserAlreadyExistsException {
+    private ResponseEntity createBooking(@RequestBody Booking booking) throws UserInvalidException, ForbiddenException, ParseException, NullPasswordException, NotFoundException, UserAlreadyExistsException, javassist.NotFoundException {
         return ResponseEntity.ok(this.bookingService.createAdminBooking(booking));
     }
 
     @PutMapping("/confirmReservation/{bookingId}")
-    private ResponseEntity confirmReservation(@PathVariable("bookingId")Long bookingId) throws NullPasswordException, UserAlreadyExistsException, UserInvalidException, NotFoundException, ParseException {
+    private ResponseEntity confirmReservation(@PathVariable("bookingId")Long bookingId) throws NullPasswordException, UserAlreadyExistsException, UserInvalidException, NotFoundException, ParseException, javassist.NotFoundException {
 
         return ResponseEntity.ok(this.bookingService.confirmReservation(bookingId));
     }
@@ -63,7 +63,7 @@ public class BookingAdminController {
     }
 
     @DeleteMapping("/cancelBooking/{bookingId}")
-    private ResponseEntity cancelBooking(@PathVariable("bookingId")Long bookingId) throws NotFoundException, ForbiddenException, ParseException {
+    private ResponseEntity cancelBooking(@PathVariable("bookingId")Long bookingId) throws NotFoundException, ForbiddenException, ParseException, javassist.NotFoundException {
         this.bookingService.cancelBooking(bookingId);
         return ResponseEntity.ok().build();
     }

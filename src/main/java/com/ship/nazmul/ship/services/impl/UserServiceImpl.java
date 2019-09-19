@@ -308,9 +308,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public User createServiceAdminAgent(User user) throws ForbiddenException, NullPasswordException {
         //Security check
-        User serviceUser = SecurityConfig.getCurrentUser();
-        Set<Ship> ships = serviceUser.getShips();
-        if (ships == null || !serviceUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()))
+        User currentUser = SecurityConfig.getCurrentUser();
+        Set<Ship> ships = currentUser.getShips();
+        if (ships == null || !currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()))
             throw new ForbiddenException("Access Denied");
 
         //If user exists and user doesn't belongs to my hotel then access denied
@@ -330,17 +330,24 @@ public class UserServiceImpl implements UserService {
             user.setPassword(user.getPhoneNumber().substring(user.getPhoneNumber().length() - 6));
             user.setPassword(PasswordUtil.encryptPassword(user.getPassword(), PasswordUtil.EncType.BCRYPT_ENCODER, null));
             user.changeRole(this.roleService.findRole(Role.ERole.ROLE_SERVICE_AGENT));
+            user.getShips().clear();
+            this.userRepo.save(user);
             user.getShips().addAll(ships);
             return this.userRepo.save(user);
         }
     }
 
     @Override
-    public Page<User> getServiceAdminAgents(Long shipId, int page) throws ForbiddenException {
+    public Page<User> getServiceAdminAgents(int page) throws ForbiddenException {
         Set<Ship> ships = SecurityConfig.getCurrentUser().getShips();
         if (ships == null || !SecurityConfig.getCurrentUser().hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()))
             throw new ForbiddenException("Access denied");
-        return this.userRepo.findByShipsIdAndRolesName(shipId, Role.ERole.ROLE_SERVICE_AGENT.getValue(), PageAttr.getPageRequest(page));
+        List<Long> shipsId = new ArrayList<>();
+        for(Ship ship: ships){
+            shipsId.add(ship.getId());
+        }
+
+        return this.userRepo.findDistinctByShipsIdInAndRolesName(shipsId, Role.ERole.ROLE_SERVICE_AGENT.getValue(), PageAttr.getPageRequest(page));
     }
 
     @Override

@@ -12,17 +12,17 @@ import java.util.List;
 public interface ShipAdminLedgerRepository extends JpaRepository<ShipAdminLedger, Long> {
     List<ShipAdminLedger> findByUserId(Long userId);
 
-    Page<ShipAdminLedger> findByUserId(Long userId, Pageable pageable);
+    Page<ShipAdminLedger> findByUserIdOrderByIdAsc(Long userId, Pageable pageable);
 
-    List<ShipAdminLedger> findByShipId(Long hotelId);
+//    List<ShipAdminLedger> findByShipId(Long hotelId);
 
-    Page<ShipAdminLedger> findByShipId(Long hotelId, Pageable pageable);
+//    Page<ShipAdminLedger> findByShipId(Long hotelId, Pageable pageable);
 
-    Long countByShipId(Long hotelId);
+//    Long countByShipId(Long hotelId);
 
     Long countByUserId(Long userId);
 
-    ShipAdminLedger findFirstByShipIdOrderByIdDesc(Long hotelId);
+//    ShipAdminLedger findFirstByShipIdOrderByIdDesc(Long hotelId);
 
     ShipAdminLedger findFirstByUserIdOrderByIdDesc(Long userId);
 }

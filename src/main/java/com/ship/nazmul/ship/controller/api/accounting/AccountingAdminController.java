@@ -5,7 +5,8 @@ import com.ship.nazmul.ship.exceptions.notfound.NotFoundException;
 import com.ship.nazmul.ship.exceptions.notfound.UserNotFoundException;
 import com.ship.nazmul.ship.services.accountings.AdminAgentLedgerService;
 import com.ship.nazmul.ship.services.accountings.AdminCashbookService;
-import com.ship.nazmul.ship.services.accountings.AdminShipLedgerService;
+//import com.ship.nazmul.ship.services.accountings.AdminShipLedgerService;
+import com.ship.nazmul.ship.services.accountings.ShipAdminLedgerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,13 +15,14 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/admin/accounting")
 public class AccountingAdminController {
     private final AdminCashbookService adminCashbookService;
-    private final AdminShipLedgerService adminShipLedgerService;
+    private final ShipAdminLedgerService shipAdminLedgerService;
+//    private final AdminShipLedgerService adminShipLedgerService;
     private final AdminAgentLedgerService adminAgentLedgerService;
 
     @Autowired
-    public AccountingAdminController(AdminCashbookService adminCashbookService, AdminShipLedgerService adminShipLedgerService, AdminAgentLedgerService adminAgentLedgerService) {
+    public AccountingAdminController(AdminCashbookService adminCashbookService, ShipAdminLedgerService shipAdminLedgerService, AdminAgentLedgerService adminAgentLedgerService) {
         this.adminCashbookService = adminCashbookService;
-        this.adminShipLedgerService = adminShipLedgerService;
+        this.shipAdminLedgerService = shipAdminLedgerService;
         this.adminAgentLedgerService = adminAgentLedgerService;
     }
 
@@ -40,9 +42,9 @@ public class AccountingAdminController {
         return ResponseEntity.ok(this.adminCashbookService.getAllAdminCashbook(page));
     }
 
-    @GetMapping("/shipLedger/{shipId}")
-    private ResponseEntity getShipLedger(@PathVariable("shipId") Long shipId, @RequestParam(value = "page", defaultValue = "0") Integer page) {
-        return ResponseEntity.ok(this.adminShipLedgerService.getAdminShipLedgerByShipId(shipId, page));
+    @GetMapping("/shipAdminLedger/{adminId}")
+    private ResponseEntity getShipLedger(@PathVariable("adminId") Long adminId, @RequestParam(value = "page", defaultValue = "0") Integer page) {
+        return ResponseEntity.ok(this.shipAdminLedgerService.getShipAdminLedgerByAdminId(adminId, page));
     }
 
     @PutMapping("/addIncome")
@@ -55,8 +57,8 @@ public class AccountingAdminController {
         return ResponseEntity.ok(this.adminCashbookService.addAdminCashbookEntry(0, credit, explanation));
     }
 
-    @PutMapping("/payShip/{shipId}")
-    private ResponseEntity payToShip(@PathVariable("shipId") Long shipId, @RequestParam("amount") Integer amount) throws NotFoundException, ForbiddenException {
-        return ResponseEntity.ok(this.adminShipLedgerService.payToShip(shipId, amount));
+    @PutMapping("/payShipAdmin/{adminId}")
+    private ResponseEntity payToShip(@PathVariable("adminId") Long adminId, @RequestParam("amount") Integer amount) throws NotFoundException, ForbiddenException, javassist.NotFoundException {
+        return ResponseEntity.ok(this.shipAdminLedgerService.payToShipAdmin(adminId, amount));
     }
 }
