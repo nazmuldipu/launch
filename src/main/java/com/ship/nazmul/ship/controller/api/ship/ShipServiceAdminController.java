@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -22,8 +23,7 @@ public class ShipServiceAdminController {
 
     @GetMapping("/myShips")
     private ResponseEntity getServiceAdminShips(){
-        Set<Ship> ships = this.shipService.getMyShips();
-//        System.out.println(ships.toString());
+        List<Ship> ships = this.shipService.getMyShips();
         return ResponseEntity.ok(ships);
     }
 }

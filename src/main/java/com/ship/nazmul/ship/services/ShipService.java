@@ -25,5 +25,5 @@ public interface ShipService {
     Page<Ship> searchShip(String query, int page);
 
     // ************************ SERVICE ADMIN MODULES ******************
-    Set<Ship> getMyShips();
+    List<Ship> getMyShips();
 }

@@ -80,9 +80,18 @@ public class ShipServiceImpl implements ShipService {
 
     @Override
     @Transactional
-    public Set<Ship> getMyShips() {
+    public List<Ship> getMyShips() {
         User user = SecurityConfig.getCurrentUser();
-        return user.getShips();
+        List<Ship> shipSet = new ArrayList<>();
+        Iterator<Ship> shipIterator = user.getShips().iterator();
+        while(shipIterator.hasNext()){
+            Ship ship = shipIterator.next();
+            ship.setImagePaths(null);
+            ship.setCategoryList(null);
+            shipSet.add(ship);
+        }
+        return shipSet;
+
 //        if (user.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()) || user.hasRole(Role.ERole.ROLE_SERVICE_AGENT.toString())) {
 //            List<Ship> shipSet = new ArrayList<>();
 //            Iterator<Ship> shipIterator = user.getShips().iterator();
