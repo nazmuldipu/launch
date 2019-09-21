@@ -42,7 +42,7 @@ public interface BookingService {
 
     Booking createServiceAdminBooking(Booking booking) throws ForbiddenException, NotFoundException, ParseException, UserAlreadyExistsException, NullPasswordException, UserInvalidException, javassist.NotFoundException;
 
-    Booking createServiceAgentBooking(Booking booking);
+    Booking createServiceAgentBooking(Booking booking) throws ForbiddenException, NotFoundException, ParseException, UserAlreadyExistsException, NullPasswordException, UserInvalidException, javassist.NotFoundException;
 
     Page<Booking> getMySells(int page);
 
