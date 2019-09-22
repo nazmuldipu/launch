@@ -106,8 +106,22 @@ public class SeatServiceImpl implements SeatService {
 
     @Override
     public List<Seat> getAvailableSeatByShipId(Long shipId, Date date) throws NotFoundException {
-        List<Seat> seatList = this.seatRepository.findByShipIdOrderBySeatNumber(shipId);
-        return this.getSeatAvailabilityFormSeatList(seatList, date);
+//        List<Seat> seatList = this.seatRepository.findByShipIdOrderBySeatNumber(shipId);
+        List<Category> categoryList = this.categoryService.getCategoryByShipId(shipId);
+        List<Seat> seatList = new ArrayList<>();
+        for (Category category : categoryList) {
+            List<Seat> seats = this.getAvailableSeatByCategoryAndShipId(shipId, category.getId(), date);
+            if (seats.size() > 0) {
+                Integer discount = this.categoryService.getDiscount(seats.get(0).getCategory().getId(), date);
+                seats.get(0).getCategory().setShip(null);
+                if (discount != null && discount > 0) {
+                    seats.get(0).getCategory().setFare(seats.get(0).getCategory().getFare() - discount);
+                }
+            }
+            seatList.addAll(seats);
+        }
+        return seatList;
+//        return this.getSeatAvailabilityFormSeatList(seatList, date);
     }
 
     @Override
@@ -123,9 +137,17 @@ public class SeatServiceImpl implements SeatService {
             seatList.get(i).setAvailable(true);
         }
         for (int j = 0; j < seatList.size(); j++) {
+            seatList.get(j).setShip(null);//clear all ship info before sending it to the front end
             if (!this.checkSeatAvailability(seatList.get(j).getId(), date)) {
                 seatList.get(j).setAvailable(false);
             }
+//            Integer discount = this.categoryService.getDiscount(seatList.get(j).getCategory().getId(), date);
+//            System.out.println("D1 : discount :" + discount);
+//            if(discount != null && discount > 0){
+//                int fare = seatList.get(j).getCategory().getFare() - discount;
+//                System.out.println("D2 : Fare : " + fare + " -> Previous fare " + seatList.get(j).getCategory().getFare() );
+//                seatList.get(j).getCategory().setFare(fare);
+//            }
         }
 
         return seatList;
@@ -210,9 +232,9 @@ public class SeatServiceImpl implements SeatService {
         User currentUser = SecurityConfig.getCurrentUser();
         if (!currentUser.isAdmin() && !currentUser.hasRole(Role.ERole.ROLE_AGENT.toString()) && !(currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()) && Validator.containsShip(currentUser.getShips(), booking.getShip())))
             throw new ForbiddenException("Access denied");
-        System.out.println("D1 : seatID "+ seatId);
+        System.out.println("D1 : seatID " + seatId);
         this.removeBookingMap(seatId, date);
-        System.out.println("D2 :  status cleared" );
+        System.out.println("D2 :  status cleared");
         this.clearStatusMap(seatId, date);
     }
 
