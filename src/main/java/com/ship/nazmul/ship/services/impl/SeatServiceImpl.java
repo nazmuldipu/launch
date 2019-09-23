@@ -232,9 +232,7 @@ public class SeatServiceImpl implements SeatService {
         User currentUser = SecurityConfig.getCurrentUser();
         if (!currentUser.isAdmin() && !currentUser.hasRole(Role.ERole.ROLE_AGENT.toString()) && !(currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()) && Validator.containsShip(currentUser.getShips(), booking.getShip())))
             throw new ForbiddenException("Access denied");
-        System.out.println("D1 : seatID " + seatId);
         this.removeBookingMap(seatId, date);
-        System.out.println("D2 :  status cleared");
         this.clearStatusMap(seatId, date);
     }
 

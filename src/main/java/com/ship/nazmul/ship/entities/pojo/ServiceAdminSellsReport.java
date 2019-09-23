@@ -2,6 +2,7 @@ package com.ship.nazmul.ship.entities.pojo;
 
 import com.ship.nazmul.ship.entities.Seat;
 
+import java.util.Arrays;
 import java.util.Date;
 
 public class ServiceAdminSellsReport {
@@ -132,5 +133,25 @@ public class ServiceAdminSellsReport {
 
     public void setPaid(boolean paid) {
         this.paid = paid;
+    }
+
+    @Override
+    public String toString() {
+        return "ServiceAdminSellsReport{" +
+                "journeyDate=" + journeyDate +
+                ", bookingId=" + bookingId +
+                ", bookingStatus=" + bookingStatus +
+                ", bookingDate=" + bookingDate +
+                ", customerName='" + customerName + '\'' +
+                ", customerPhone='" + customerPhone + '\'' +
+                ", shipName='" + shipName + '\'' +
+                ", shipNumber='" + shipNumber + '\'' +
+                ", routes='" + routes + '\'' +
+                ", seatNumbers=" + Arrays.toString(seatNumbers) +
+                ", price=" + price +
+                ", soldBy='" + soldBy + '\'' +
+                ", role='" + role + '\'' +
+                ", paid=" + paid +
+                '}';
     }
 }

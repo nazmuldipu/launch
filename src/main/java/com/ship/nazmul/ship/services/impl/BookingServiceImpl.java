@@ -177,11 +177,13 @@ public class BookingServiceImpl implements BookingService {
         booking.setPaid(true);
         booking = this.save(booking);
         if (SecurityConfig.getCurrentUser().hasRole(Role.ERole.ROLE_ADMIN.toString())) {
-            booking.setHotelswaveAgentDiscount(booking.getShip().getHotelswavePercentage() * booking.getTotalPayablePrice() / 100);
+            booking.setHotelswaveDiscount(booking.getShip().getHotelswavePercentage() * booking.getTotalPayablePrice() / 100);
             this.adminSellSeatAccounting(booking, false);
         } else if (SecurityConfig.getCurrentUser().hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString())) {
             this.serviceAdminSellSeatAccounting(booking, false);
         } else if (SecurityConfig.getCurrentUser().hasRole(Role.ERole.ROLE_AGENT.toString())) {
+            booking.setHotelswaveDiscount(booking.getShip().getHotelswavePercentage() * booking.getTotalPayablePrice() / 200);
+            booking.setHotelswaveAgentDiscount(booking.getShip().getHotelswavePercentage() * booking.getTotalPayablePrice() / 200);
             this.adminAgentSellsSeatAccount(booking, false);
         } else if (SecurityConfig.getCurrentUser().hasRole(Role.ERole.ROLE_SERVICE_AGENT.toString())){
             this.shipAgentSellsSeatAccount(booking, false);
@@ -243,7 +245,6 @@ public class BookingServiceImpl implements BookingService {
         shipAdminLedger.setApproved(true);
         shipAdminLedger.setRef(booking.getId().toString());
         this.shipAdminLedgerService.addShipAdminLedger(ship.getAdmin().getId(), shipAdminLedger);
-
     }
 
     private void shipAgentSellsSeatAccount(Booking booking, boolean cancel){
@@ -319,11 +320,13 @@ public class BookingServiceImpl implements BookingService {
         int totalFare = 0;
         int totalDiscount = 0;
         int totalCommission = 0;
+        int hotelswaveDiscount = 0;
         for (SubBooking subBooking : booking.getSubBookingList()) {
             totalFare += subBooking.getFare();
             totalDiscount += subBooking.getDiscount();
             totalCommission += subBooking.getCommission();
         }
+        totalDiscount += booking.getTotalDiscount();
         booking.setTotalFare(totalFare);
         booking.setTotalDiscount(totalDiscount);
         booking.setTotalCommission(totalCommission);
