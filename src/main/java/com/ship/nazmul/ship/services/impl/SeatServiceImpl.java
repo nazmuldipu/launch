@@ -111,6 +111,7 @@ public class SeatServiceImpl implements SeatService {
         List<Seat> seatList = new ArrayList<>();
         for (Category category : categoryList) {
             List<Seat> seats = this.getAvailableSeatByCategoryAndShipId(shipId, category.getId(), date);
+            System.out.println("D1 : seat found with size :" + seats.size());
             if (seats.size() > 0) {
                 Integer discount = this.categoryService.getDiscount(seats.get(0).getCategory().getId(), date);
                 seats.get(0).getCategory().setShip(null);
@@ -138,6 +139,7 @@ public class SeatServiceImpl implements SeatService {
         }
         for (int j = 0; j < seatList.size(); j++) {
             seatList.get(j).setShip(null);//clear all ship info before sending it to the front end
+            System.out.println("D2 : is availabel " + this.checkSeatAvailability(seatList.get(j).getId(), date) + "; Date was :" + date + " and seat id was " + seatList.get(j).getId());
             if (!this.checkSeatAvailability(seatList.get(j).getId(), date)) {
                 seatList.get(j).setAvailable(false);
             }
@@ -195,6 +197,7 @@ public class SeatServiceImpl implements SeatService {
     public boolean checkSeatAvailability(Long seatId, Date date) throws NotFoundException {
         Seat seat = this.getOne(seatId);
         Seat.EStatus status = seat.getSeatStatusMap().get(date);
+        System.out.println("D3 : Status of seat id " + seatId + " is " + status);
         if (status == null || status == Seat.EStatus.SEAT_FREE)
             return true;
         return false;
