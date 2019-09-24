@@ -10,6 +10,7 @@ import com.ship.nazmul.ship.services.BookingService;
 import com.ship.nazmul.ship.services.CategoryService;
 import com.ship.nazmul.ship.services.ReportService;
 import com.ship.nazmul.ship.services.SeatService;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -189,7 +190,7 @@ public class ReportServiceImpl implements ReportService {
 
         JSONObject obj = new JSONObject();
         obj.put("numberOfShips", currentUser.getShips().size());
-        obj.put("ships", this.getUserShipsReportObjects(currentUser, date));
+        obj.put("ships",  new JSONArray(this.getUserShipsReportObjects(currentUser, date)));
 
         return obj;
     }
@@ -202,11 +203,10 @@ public class ReportServiceImpl implements ReportService {
             obj.put("id", ship.getId());
             obj.put("name", ship.getName());
             obj.put("shipNumber", ship.getShipNumber());
-            obj.put("categories", this.getCategoryReportObjects(ship.getId(), date));
+            obj.put("categories", new JSONArray(this.getCategoryReportObjects(ship.getId(), date)));
             obj.put("numberOfSeats", this.seatService.getSeatListByShipId(ship.getId()).size());
             list.add(obj);
         }
-        System.out.println(list.toString());
         return list;
     }
 
