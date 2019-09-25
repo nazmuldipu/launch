@@ -215,7 +215,7 @@ public class SeatServiceImpl implements SeatService {
 
     private void clearStatusMap(Long seatId, Date date) throws NotFoundException {
         Seat seat = this.getOne(seatId);
-        seat.getSeatStatusMap().remove(date);
+        seat.getSeatStatusMap().remove(DateUtil.removeTimeFromDate(date));
         this.seatRepository.save(seat);
     }
 

@@ -231,7 +231,7 @@ public class ReportServiceImpl implements ReportService {
         int sold = 0;
         List<Seat> seatList = this.seatService.getSeatListByCategoryId(category.getId());
         for (Seat seat : seatList) {
-            Seat.EStatus status = seat.getSeatStatusMap().get(date);
+            Seat.EStatus status = seat.getSeatStatusMap().get(DateUtil.removeTimeFromDate(date));
             if (status == null || status.equals(Seat.EStatus.SEAT_FREE)) {
 
             } else if (status.equals(Seat.EStatus.SEAT_RESERVED)) {
