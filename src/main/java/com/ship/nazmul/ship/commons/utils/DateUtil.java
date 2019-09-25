@@ -127,6 +127,14 @@ public class DateUtil {
         DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
         return formatter.parse(formatter.format(date));
     }
+
+    public static java.sql.Date convertUtilToSql(java.util.Date uDate) {
+        java.sql.Date sDate = new java.sql.Date(uDate.getTime());
+        System.out.println("D6 : " + sDate);
+
+        return sDate;
+    }
+
     public static Date removeTimeFromDate(Date date){
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
