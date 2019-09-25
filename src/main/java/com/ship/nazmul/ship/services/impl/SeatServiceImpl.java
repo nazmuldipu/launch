@@ -109,10 +109,8 @@ public class SeatServiceImpl implements SeatService {
 //        List<Seat> seatList = this.seatRepository.findByShipIdOrderBySeatNumber(shipId);
         List<Category> categoryList = this.categoryService.getCategoryByShipId(shipId);
         List<Seat> seatList = new ArrayList<>();
-        System.out.println(" D1 : " + date);
         for (Category category : categoryList) {
             List<Seat> seats = this.getAvailableSeatByCategoryAndShipId(shipId, category.getId(), date);
-            System.out.println("D1 : seat found with size :" + seats.size());
             if (seats.size() > 0) {
                 Integer discount = this.categoryService.getDiscount(seats.get(0).getCategory().getId(), date);
                 seats.get(0).getCategory().setShip(null);
@@ -130,7 +128,6 @@ public class SeatServiceImpl implements SeatService {
     public List<Seat> getAvailableSeatByCategoryAndShipId(Long shipId, Long categoryId, Date date) throws NotFoundException {
 
         List<Seat> seatList = this.seatRepository.findByShipIdAndCategoryIdOrderBySeatNumber(shipId, categoryId);
-        System.out.println("D2 :" + date);
         return this.getSeatAvailabilityFormSeatList(seatList, date);
     }
 
@@ -138,23 +135,11 @@ public class SeatServiceImpl implements SeatService {
         for (int i = 0; i < seatList.size(); i++) {
             seatList.get(i).setAvailable(true);
         }
-        System.out.println("D3 : " + date);
-//        date = DateUtil.getDateWithoutTimeUsingFormat(date);
-//        date = DateUtil.convertUtilToSql(date);
-//        System.out.println("D5 :" + date);
         for (int j = 0; j < seatList.size(); j++) {
             seatList.get(j).setShip(null);//clear all ship info before sending it to the front end
-            System.out.println("D4 : is availabel " + this.checkSeatAvailability(seatList.get(j).getId(), date) + "; Date was :" + date + " and seat id was " + seatList.get(j).getId());
             if (!this.checkSeatAvailability(seatList.get(j).getId(), date)) {
                 seatList.get(j).setAvailable(false);
             }
-//            Integer discount = this.categoryService.getDiscount(seatList.get(j).getCategory().getId(), date);
-//            System.out.println("D1 : discount :" + discount);
-//            if(discount != null && discount > 0){
-//                int fare = seatList.get(j).getCategory().getFare() - discount;
-//                System.out.println("D2 : Fare : " + fare + " -> Previous fare " + seatList.get(j).getCategory().getFare() );
-//                seatList.get(j).getCategory().setFare(fare);
-//            }
         }
 
         return seatList;
@@ -202,8 +187,6 @@ public class SeatServiceImpl implements SeatService {
     public boolean checkSeatAvailability(Long seatId, Date date) throws NotFoundException {
         Seat seat = this.getOne(seatId);
         Seat.EStatus status = seat.getSeatStatusMap().get(DateUtil.removeTimeFromDate(date));
-        System.out.println("D5 : Status of seat id " + seatId + " is " + status);
-        System.out.println("D6 : total "+ seat.getSeatStatusMap() );
         if (status == null || status == Seat.EStatus.SEAT_FREE)
             return true;
         return false;

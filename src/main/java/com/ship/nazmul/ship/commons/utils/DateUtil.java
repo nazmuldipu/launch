@@ -130,8 +130,6 @@ public class DateUtil {
 
     public static java.sql.Date convertUtilToSql(java.util.Date uDate) {
         java.sql.Date sDate = new java.sql.Date(uDate.getTime());
-        System.out.println("D6 : " + sDate);
-
         return sDate;
     }
 
