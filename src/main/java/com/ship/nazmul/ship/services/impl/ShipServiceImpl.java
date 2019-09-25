@@ -37,8 +37,8 @@ public class ShipServiceImpl implements ShipService {
 
         if (ship.getShipFacilities() == null) ship.setShipFacilities(new ShipFacilities());
         if (ship.getId() != null) {
-            List<String> imagePaths = this.getOne(ship.getId()).getImagePaths();
-            ship.setImagePaths(imagePaths);
+//            List<String> imagePaths = this.getOne(ship.getId()).getImagePaths();
+//            ship.setImagePaths(imagePaths);
             //TODO: setStartsFrom
 //            ship.setStartsFrom();
         }
@@ -86,7 +86,7 @@ public class ShipServiceImpl implements ShipService {
         Iterator<Ship> shipIterator = user.getShips().iterator();
         while(shipIterator.hasNext()){
             Ship ship = shipIterator.next();
-            ship.setImagePaths(null);
+//            ship.setImagePaths(null);
             ship.setCategoryList(null);
             shipSet.add(ship);
         }

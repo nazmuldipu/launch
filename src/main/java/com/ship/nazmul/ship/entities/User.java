@@ -49,7 +49,7 @@ public class User extends BaseEntity implements UserDetails {
     private List<Role> roles;
 
     @JsonIgnore
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToMany(cascade={CascadeType.PERSIST,CascadeType.REMOVE}, fetch = FetchType.EAGER)
 //    @(fetch = FetchType.EAGER)
     private Set<Ship> ships = new HashSet<Ship>();
 
@@ -57,6 +57,7 @@ public class User extends BaseEntity implements UserDetails {
     private boolean accountNonExpired = true;
     private boolean accountNonLocked = true;
     private boolean credentialsNonExpired = true;
+    private int commission;
 
 
 //    public Hotel getHotel() {
@@ -254,6 +255,14 @@ public class User extends BaseEntity implements UserDetails {
         this.ships = ships;
     }
 
+    public int getCommission() {
+        return commission;
+    }
+
+    public void setCommission(int commission) {
+        this.commission = commission;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -268,6 +277,7 @@ public class User extends BaseEntity implements UserDetails {
                 ", accountNonExpired=" + accountNonExpired +
                 ", accountNonLocked=" + accountNonLocked +
                 ", credentialsNonExpired=" + credentialsNonExpired +
+                ", commission=" + commission +
                 '}';
     }
 }

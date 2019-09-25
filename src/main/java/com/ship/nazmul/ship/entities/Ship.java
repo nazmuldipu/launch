@@ -34,12 +34,12 @@ public class Ship extends BaseEntity {
     private float rating;
     private int numberOfReviews;
 
-    private Integer hotelswavePercentage;
+    private Integer hotelswaveCommission;
 
-    @JsonIgnore
-    @ElementCollection(fetch = FetchType.LAZY)
-    @Cascade(org.hibernate.annotations.CascadeType.ALL)
-    private List<String> imagePaths;
+//    @JsonIgnore
+//    @ElementCollection(fetch = FetchType.LAZY)
+//    @Cascade(org.hibernate.annotations.CascadeType.ALL)
+//    private List<String> imagePaths;
 
     @Embedded
     private ShipFacilities shipFacilities;
@@ -239,21 +239,21 @@ public class Ship extends BaseEntity {
         this.numberOfReviews = numberOfReviews;
     }
 
-    public Integer getHotelswavePercentage() {
-        return hotelswavePercentage;
+    public Integer getHotelswaveCommission() {
+        return hotelswaveCommission;
     }
 
-    public void setHotelswavePercentage(Integer hotelswavePercentage) {
-        this.hotelswavePercentage = hotelswavePercentage;
+    public void setHotelswaveCommission(Integer hotelswaveCommission) {
+        this.hotelswaveCommission = hotelswaveCommission;
     }
 
-    public List<String> getImagePaths() {
-        return imagePaths;
-    }
-
-    public void setImagePaths(List<String> imagePaths) {
-        this.imagePaths = imagePaths;
-    }
+    //    public List<String> getImagePaths() {
+//        return imagePaths;
+//    }
+//
+//    public void setImagePaths(List<String> imagePaths) {
+//        this.imagePaths = imagePaths;
+//    }
 
     public ShipFacilities getShipFacilities() {
         return shipFacilities;
@@ -319,8 +319,8 @@ public class Ship extends BaseEntity {
                 ", startsFrom=" + startsFrom +
                 ", rating=" + rating +
                 ", numberOfReviews=" + numberOfReviews +
-                ", hotelswavePercentage=" + hotelswavePercentage +
-                ", imagePaths=" + imagePaths +
+                ", hotelswaveCommission=" + hotelswaveCommission +
+//                ", imagePaths=" + imagePaths +
                 ", shipFacilities=" + shipFacilities +
                 '}';
     }

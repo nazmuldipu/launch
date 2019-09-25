@@ -177,15 +177,28 @@ public class BookingServiceImpl implements BookingService {
         booking.setPaid(true);
         booking = this.save(booking);
         if (SecurityConfig.getCurrentUser().hasRole(Role.ERole.ROLE_ADMIN.toString())) {
-            booking.setHotelswaveDiscount(booking.getShip().getHotelswavePercentage() * booking.getTotalPayablePrice() / 100);
+            int hotelswaveCommission = 0;
+            for(int i = 0; i < booking.getSubBookingList().size(); i++){
+                hotelswaveCommission += booking.getShip().getHotelswaveCommission();
+            }
+            booking.setHotelswaveDiscount(hotelswaveCommission);
             this.adminSellSeatAccounting(booking, false);
         } else if (SecurityConfig.getCurrentUser().hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString())) {
             this.serviceAdminSellSeatAccounting(booking, false);
         } else if (SecurityConfig.getCurrentUser().hasRole(Role.ERole.ROLE_AGENT.toString())) {
-            booking.setHotelswaveDiscount(booking.getShip().getHotelswavePercentage() * booking.getTotalPayablePrice() / 200);
-            booking.setHotelswaveAgentDiscount(booking.getShip().getHotelswavePercentage() * booking.getTotalPayablePrice() / 200);
+            int hotelswaveCommission = 0;
+            for(int i = 0; i < booking.getSubBookingList().size(); i++){
+                hotelswaveCommission += booking.getShip().getHotelswaveCommission();
+            }
+            booking.setHotelswaveDiscount(hotelswaveCommission/2);
+            booking.setHotelswaveAgentDiscount(hotelswaveCommission/2);
             this.adminAgentSellsSeatAccount(booking, false);
         } else if (SecurityConfig.getCurrentUser().hasRole(Role.ERole.ROLE_SERVICE_AGENT.toString())){
+            int agentDiscount = 0;
+            for(int i = 0; i < booking.getSubBookingList().size(); i++){
+                agentDiscount += SecurityConfig.getCurrentUser().getCommission();
+            }
+            booking.setAgentDiscount(agentDiscount);
             this.shipAgentSellsSeatAccount(booking, false);
         }
         return booking;
@@ -230,8 +243,7 @@ public class BookingServiceImpl implements BookingService {
         this.adminCashbookService.updateBalanceAndSave(adminCashbook);
 
         //2) Admin_Hotel_Ledger credit ( total amount - hotelswave discount)
-        int hotelswavePercentages = (int) (booking.getTotalPayablePrice() * ship.getHotelswavePercentage() / 100.00);
-        int amount = booking.getTotalPayablePrice() - hotelswavePercentages; //deduct hotels wave percentages;
+        int amount = booking.getTotalPayablePrice() - booking.getHotelswaveDiscount(); //deduct hotels wave percentages;
         ShipAdminLedger shipAdminLedger;
 //        AdminShipLedger adminShipLedger;
         if (!cancel) {
@@ -248,10 +260,10 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private void shipAgentSellsSeatAccount(Booking booking, boolean cancel){
-        int shipAgentCommission = 0;
-        for (int i = 0; i < booking.getSubBookingList().size(); i++) {
-            shipAgentCommission += booking.getSubBookingList().get(i).getSeat().getCategory().getAgentDiscount();
-        }
+        int shipAgentCommission = booking.getAgentDiscount();
+//        for (int i = 0; i < booking.getSubBookingList().size(); i++) {
+//            shipAgentCommission += booking.getSubBookingList().get(i).getSeat().getCategory().getAgentDiscount();
+//        }
         String explanation = (cancel ? "Cancel " : "") + "Booking for booking id " + booking.getId();
 
         //1) Debit ShipAgentLedger = total_advance - shipAgentCommission
@@ -267,7 +279,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private void adminAgentSellsSeatAccount(Booking booking, boolean cancel) throws javassist.NotFoundException {
-        int commission = booking.getShip().getHotelswavePercentage() * booking.getTotalPayablePrice() / (100 * 2);
+        int commission = booking.getShip().getHotelswaveCommission()/2;
         String explanation = (cancel ? "Cancel " : "") + "Booking for booking id " + booking.getId();
 
         //1) Debit AdminAgentLedger = total_advance - hotelswave_agent_discount
@@ -282,8 +294,8 @@ public class BookingServiceImpl implements BookingService {
         adminAgentLedger = this.adminAgentLedgerService.updateBalanceAndSave(booking.getCreatedBy().getId(), adminAgentLedger);
 
         //2) Admin_Hotel_Ledger credit ( total amount - hotelswave discount)
-        int hotelswavePercentages = (int) (booking.getTotalPayablePrice() * booking.getShip().getHotelswavePercentage() / 100.00);
-        int amount = booking.getTotalPayablePrice() - hotelswavePercentages; //deduct hotels wave percentages;
+        int hotelswaveCommission = booking.getShip().getHotelswaveCommission();
+        int amount = booking.getTotalPayablePrice() - hotelswaveCommission; //deduct hotels wave percentages;
 //        AdminShipLedger adminShipLedger;
         ShipAdminLedger shipAdminLedger;
         if (!cancel) {
@@ -320,7 +332,6 @@ public class BookingServiceImpl implements BookingService {
         int totalFare = 0;
         int totalDiscount = 0;
         int totalCommission = 0;
-        int hotelswaveDiscount = 0;
         for (SubBooking subBooking : booking.getSubBookingList()) {
             totalFare += subBooking.getFare();
             totalDiscount += subBooking.getDiscount();
@@ -374,8 +385,8 @@ public class BookingServiceImpl implements BookingService {
         booking.setShipName(booking.getShip().getName());
         booking.setCategoryName(booking.getSubBookingList().get(0).getSeat().getCategory().getName());
 
-        int agentCommission = (int) (booking.getShip().getHotelswavePercentage() * booking.getTotalPayablePrice() / (200.0));
-        System.out.println("HOTELS WAVE PERCENTAGE :" + booking.getShip().getHotelswavePercentage());
+        int agentCommission = booking.getShip().getHotelswaveCommission()/2;
+        System.out.println("HOTELS WAVE PERCENTAGE :" + booking.getShip().getHotelswaveCommission());
         System.out.println("Commission: " + agentCommission + ", Balance : " + agentBalance + ", Payable : " + (booking.getTotalPayablePrice() - agentCommission));
 
         if (agentBalance > (booking.getTotalPayablePrice() - agentCommission)) {
@@ -439,7 +450,7 @@ public class BookingServiceImpl implements BookingService {
 
         int shipAgentCommission = 0;
         for (int i = 0; i < booking.getSubBookingList().size(); i++) {
-            shipAgentCommission += booking.getSubBookingList().get(i).getSeat().getCategory().getAgentDiscount();
+            shipAgentCommission += user.getCommission();
         }
         System.out.println("Agent Commission: " + shipAgentCommission + ", Balance : " + agentBalance + ", Payable : " + (booking.getTotalPayablePrice() - shipAgentCommission));
         if (agentBalance > (booking.getTotalPayablePrice() - shipAgentCommission)) {

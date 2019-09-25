@@ -315,11 +315,12 @@ public class UserServiceImpl implements UserService {
 
         //If user exists and user doesn't belongs to my hotel then access denied
         User oldUser = this.userRepo.findByPhoneNumber(user.getPhoneNumber());
-        if (oldUser != null && !oldUser.isOnlyUser() && oldUser.getShips() != null)
-            throw new ForbiddenException("Access denied");
+//        if (oldUser != null && !oldUser.isOnlyUser() && oldUser.getShips() != null)
+//            throw new ForbiddenException("Access denied");
 
 
         if (oldUser != null) {
+            oldUser.setCommission(user.getCommission());
             oldUser.setName(user.getName());
             oldUser.setEmail(user.getEmail());
             oldUser.changeRole(this.roleService.findRole(Role.ERole.ROLE_SERVICE_AGENT));
@@ -361,9 +362,10 @@ public class UserServiceImpl implements UserService {
         if (user.isOnlyUser()) {
             return user;
         } else if (user.hasRole(Role.ERole.ROLE_SERVICE_AGENT.toString()) && user.getShips() != null && user.getShips().removeAll(ships)) {
-            user.changeRole(this.roleService.findRole(Role.ERole.ROLE_USER));
-            user.setShips(null);
-            user.getShips().clear();
+//            user.changeRole(this.roleService.findRole(Role.ERole.ROLE_USER));
+//            user.setShips(null);
+//            user.getShips().clear();
+            user.getShips().removeAll(ships);
             return this.userRepo.save(user);
         }
         return null;
