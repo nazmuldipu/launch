@@ -155,16 +155,9 @@ public class SeatServiceImpl implements SeatService {
             obj.put("id", seat.getId());
             obj.put("seatNumber", seat.getSeatNumber());
             obj.put("category", seat.getCategory().getName());
-            System.out.println("D1 : CHECK availability" + this.checkSeatAvailability(seat.getId(), date));
             if (!this.checkSeatAvailability(seat.getId(), date)) {
-                System.out.println("D2 : I AM HERE" );
-                System.out.println("D3 : BOOKING ID : "  + seat.getBookingIdMap().get(date));
-                System.out.println("D4 : status " + seat.getSeatStatusMap().get(date));
-                System.out.println("D5 : bookingId " + seat.getBookingIdMap().get(DateUtil.removeTimeFromDate(date)));
-                System.out.println("D6 : status : " + seat.getSeatStatusMap().get(DateUtil.removeTimeFromDate(date)));
-                //seat.getSeatStatusMap().get(DateUtil.removeTimeFromDate(date));
-                obj.put("bookingId", seat.getBookingIdMap().get(date));
-                obj.put("status", seat.getSeatStatusMap().get(date));
+                obj.put("bookingId", seat.getBookingIdMap().get(DateUtil.removeTimeFromDate(date)));
+                obj.put("status", seat.getSeatStatusMap().get(DateUtil.removeTimeFromDate(date)));
             } else {
                 obj.put("bookingId", 0);
                 obj.put("status", Seat.EStatus.SEAT_FREE.toString());
