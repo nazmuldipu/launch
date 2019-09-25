@@ -203,6 +203,7 @@ public class SeatServiceImpl implements SeatService {
         Seat seat = this.getOne(seatId);
         Seat.EStatus status = seat.getSeatStatusMap().get(DateUtil.convertUtilToSql(date));
         System.out.println("D5 : Status of seat id " + seatId + " is " + status);
+        System.out.println("D6 : total "+ seat.getSeatStatusMap() );
         if (status == null || status == Seat.EStatus.SEAT_FREE)
             return true;
         return false;
