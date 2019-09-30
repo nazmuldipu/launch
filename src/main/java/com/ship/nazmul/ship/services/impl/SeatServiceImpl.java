@@ -186,7 +186,11 @@ public class SeatServiceImpl implements SeatService {
     @Override
     public boolean checkSeatAvailability(Long seatId, Date date) throws NotFoundException {
         Seat seat = this.getOne(seatId);
+        System.out.println("D1 :" + date + " -> " + seat.getSeatStatusMap());
         Seat.EStatus status = seat.getSeatStatusMap().get(DateUtil.removeTimeFromDate(date));
+        System.out.println("D2 : "+ status);
+        System.out.println("D3 : " + seat.getSeatStatusMap().get(date));
+        System.out.println();
         if (status == null || status == Seat.EStatus.SEAT_FREE)
             return true;
         return false;
