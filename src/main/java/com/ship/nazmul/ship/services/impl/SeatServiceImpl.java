@@ -246,6 +246,7 @@ public class SeatServiceImpl implements SeatService {
         seat.getSeatStatusMap().clear();
         this.seatRepository.save(seat);
         System.out.println("CS3 : " + seat.getSeatStatusMap());
+        System.out.println("BB3 : " + seatStatusMap);
         for (Map.Entry<Date, Seat.EStatus> entry : seatStatusMap.entrySet()) {
             seat.getSeatStatusMap().put(entry.getKey(), entry.getValue());
             System.out.println("Key : " + entry.getKey() + " Value : " + entry.getValue());
