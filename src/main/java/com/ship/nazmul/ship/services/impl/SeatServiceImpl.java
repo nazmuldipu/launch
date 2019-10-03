@@ -235,8 +235,11 @@ public class SeatServiceImpl implements SeatService {
     private void clearStatusMap(Long seatId, Date date) throws NotFoundException {
         Seat seat = this.getOne(seatId);
         //TODO: remove following one line after debug period
+        System.out.println("CS1 : " + seat.getSeatStatusMap());
+        System.out.println("CS2 " + date + " -> " + DateUtil.removeTimeFromDate(date));
         seat.getSeatStatusMap().remove(DateUtil.removeTimeFromDate(date));
         seat.getSeatStatusMap().remove(date);
+        System.out.println("CS3 : " + seat.getSeatStatusMap());
         this.seatRepository.save(seat);
     }
 
