@@ -237,27 +237,32 @@ public class SeatServiceImpl implements SeatService {
         //TODO: remove following one line after debug period
         System.out.println("CS1 : " + seatId + "->" + seat.getSeatStatusMap());
         System.out.println("CS2 " + date + " -> " + DateUtil.removeTimeFromDate(date));
-//        final Map<Date, Seat.EStatus> seatStatusMap = seat.getSeatStatusMap();
-//        System.out.println("BB : " + seatStatusMap);
-        seat.getSeatStatusMap().entrySet().removeIf(e-> e.getKey().equals(date));
-        seat.getSeatStatusMap().put(date, Seat.EStatus.SEAT_FREE);
+        final Map<Date, Seat.EStatus> seatStatusMap = new HashMap<>();
+        for (final Map.Entry<Date, Seat.EStatus> entry : seat.getSeatStatusMap().entrySet()) {
+            if(!entry.getKey().equals(date)) {
+                seatStatusMap.put(entry.getKey(), entry.getValue());
+            }
+        }
+        System.out.println("BB : " + seatStatusMap);
+//        seat.getSeatStatusMap().entrySet().removeIf(e-> e.getKey().equals(date));
+//        seat.getSeatStatusMap().put(date, Seat.EStatus.SEAT_FREE);
 //        System.out.println("BB2 : " + seatStatusMap);
 //        seatStatusMap.remove(date);
 //        seat.getSeatStatusMap().keySet().removeIf(key-> key.equals(date));
-//        seat.getSeatStatusMap().clear();
-//        System.out.println("BB3 : " + seatStatusMap);
+        seat.getSeatStatusMap().clear();
+        System.out.println("BB3 : " + seatStatusMap);
         this.seatRepository.save(seat);
         System.out.println("CS3 : " + seat.getSeatStatusMap());
-//        System.out.println("BB4 : " + seatStatusMap);
-//        for (Map.Entry<Date, Seat.EStatus> entry : seatStatusMap.entrySet()) {
-//            seat.getSeatStatusMap().put(entry.getKey(), entry.getValue());
-//            System.out.println("Key : " + entry.getKey() + " Value : " + entry.getValue());
-//            System.out.println("CS4 : " + seat.getSeatStatusMap());
-//            this.seatRepository.save(seat);
-//            System.out.println("CS5 : " + seat.getSeatStatusMap());
-//        }
-//        this.seatRepository.save(seat);
-//        System.out.println("CS6 : " + seat.getSeatStatusMap());
+        System.out.println("BB4 : " + seatStatusMap);
+        for (Map.Entry<Date, Seat.EStatus> entry : seatStatusMap.entrySet()) {
+            seat.getSeatStatusMap().put(entry.getKey(), entry.getValue());
+            System.out.println("Key : " + entry.getKey() + " Value : " + entry.getValue());
+            System.out.println("CS4 : " + seat.getSeatStatusMap());
+            this.seatRepository.save(seat);
+            System.out.println("CS5 : " + seat.getSeatStatusMap());
+        }
+        this.seatRepository.save(seat);
+        System.out.println("CS6 : " + seat.getSeatStatusMap());
 
 
 
