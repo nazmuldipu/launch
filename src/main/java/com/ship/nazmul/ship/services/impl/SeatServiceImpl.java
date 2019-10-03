@@ -240,7 +240,7 @@ public class SeatServiceImpl implements SeatService {
         final Map<Date, Seat.EStatus> seatStatusMap = new HashMap<>();
         for (final Map.Entry<Date, Seat.EStatus> entry : seat.getSeatStatusMap().entrySet()) {
             if(!entry.getKey().equals(date)) {
-                seatStatusMap.put(DateUtil.removeTimeFromDate(date), entry.getValue());
+                seatStatusMap.put(DateUtil.convertUtilToSql(date), entry.getValue());
             }
         }
         System.out.println("BB : " + seatStatusMap);
