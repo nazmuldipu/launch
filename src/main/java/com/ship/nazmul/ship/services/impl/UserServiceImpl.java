@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -355,17 +356,21 @@ public class UserServiceImpl implements UserService {
     public User removeServiceAdminAgent(Long userId) throws ForbiddenException, UserNotFoundException {
         // Security check
         User serviceUser = SecurityConfig.getCurrentUser();
+        if(!serviceUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString())) throw new ForbiddenException("Access denied");
+
         Set<Ship> ships = serviceUser.getShips();
-        if (ships == null) throw new ForbiddenException("Hotel cannot be null");
+        if (ships == null) throw new ForbiddenException("Ships cannot be null");
 
         User user = this.getOne(userId);
         if (user.isOnlyUser()) {
             return user;
-        } else if (user.hasRole(Role.ERole.ROLE_SERVICE_AGENT.toString()) && user.getShips() != null && user.getShips().removeAll(ships)) {
-//            user.changeRole(this.roleService.findRole(Role.ERole.ROLE_USER));
-//            user.setShips(null);
-//            user.getShips().clear();
-            user.getShips().removeAll(ships);
+        } else if (user.hasRole(Role.ERole.ROLE_SERVICE_AGENT.toString()) && user.getShips() != null) {
+            final Set<Ship> newShips = user.getShips();
+            for(Ship ship: ships){
+                newShips.stream().filter(s-> s.getId() == ship.getId()).collect(Collectors.toSet());
+            }
+            user.getShips().clear();
+            user.setShips(newShips);
             return this.userRepo.save(user);
         }
         return null;
