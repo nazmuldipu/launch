@@ -232,25 +232,26 @@ public class SeatServiceImpl implements SeatService {
         return seat;
     }
 
-    private void clearStatusMap(Long seatId, Date date) throws NotFoundException, ParseException {
-        this.updateStatusMap(seatId, date, Seat.EStatus.SEAT_FREE);
-//        Seat seat = this.getOne(seatId);
-//        //TODO: remove following one line after debug period
-//        System.out.println("CS1 : " + seat.getSeatStatusMap());
-//        System.out.println("CS2 " + date + " -> " + DateUtil.removeTimeFromDate(date));
-//        Map<Date, Seat.EStatus> seatStatusMap = seat.getSeatStatusMap();
-//        seatStatusMap.remove(date);
-//        seatStatusMap.remove(DateUtil.removeTimeFromDate(date));
-////        seat.getSeatStatusMap().remove(DateUtil.removeTimeFromDate(date));
-////        seat.getSeatStatusMap().remove(date);
-//        System.out.println("CS3 : " + seat.getSeatStatusMap());
-//        seat.setSeatStatusMap(seatStatusMap);
-//        System.out.println("CS4 : " + seat.getSeatStatusMap());
+    private void clearStatusMap(Long seatId, Date date) throws NotFoundException {
+        Seat seat = this.getOne(seatId);
+        //TODO: remove following one line after debug period
+        System.out.println("CS1 : " + seat.getSeatStatusMap());
+        System.out.println("CS2 " + date + " -> " + DateUtil.removeTimeFromDate(date));
+        Map<Date, Seat.EStatus> seatStatusMap = seat.getSeatStatusMap();
+        seatStatusMap.remove(date);
+        seatStatusMap.remove(DateUtil.removeTimeFromDate(date));
+//        seat.getSeatStatusMap().remove(DateUtil.removeTimeFromDate(date));
+//        seat.getSeatStatusMap().remove(date);
+        System.out.println("CS3 : " + seat.getSeatStatusMap());
+        seat.getSeatStatusMap().clear();
+        this.seatRepository.save(seat);
+        System.out.println("CS4 : " + seat.getSeatStatusMap());
+        seat.setSeatStatusMap(seatStatusMap);
+        this.seatRepository.save(seat);
+//        seat.getSeatStatusMap().put(date, Seat.EStatus.SEAT_FREE);
 //        this.seatRepository.save(seat);
-////        seat.getSeatStatusMap().put(date, Seat.EStatus.SEAT_FREE);
-////        this.seatRepository.save(seat);
-//        System.out.println("CS5 : " + seat.getSeatStatusMap());
-//        System.out.println();
+        System.out.println("CS5 : " + seat.getSeatStatusMap());
+        System.out.println();
     }
 
     @Override
