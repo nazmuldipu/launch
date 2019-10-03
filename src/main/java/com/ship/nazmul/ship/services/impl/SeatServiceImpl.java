@@ -189,8 +189,8 @@ public class SeatServiceImpl implements SeatService {
         System.out.println("D1 :" + date + " -> " + DateUtil.removeTimeFromDate(date));
         System.out.println("D2 : MAP : " + seat.getSeatStatusMap() );
         Seat.EStatus status = seat.getSeatStatusMap().get(DateUtil.removeTimeFromDate(date));
-//        System.out.println("D3 : "+ status);
-//        System.out.println("D4 : " + seat.getSeatStatusMap().get(date));
+        System.out.println("D3 : "+ status);
+        System.out.println("D4 : " + seat.getSeatStatusMap().get(date));
         System.out.println();
         if (status == null || status == Seat.EStatus.SEAT_FREE)
             return true;
