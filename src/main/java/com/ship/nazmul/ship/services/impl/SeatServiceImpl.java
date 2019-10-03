@@ -237,9 +237,16 @@ public class SeatServiceImpl implements SeatService {
         //TODO: remove following one line after debug period
         System.out.println("CS1 : " + seatId + "->" + seat.getSeatStatusMap());
         System.out.println("CS2 " + date + " -> " + DateUtil.removeTimeFromDate(date));
-//        Map<Date, Seat.EStatus> seatStatusMap = seat.getSeatStatusMap();
+        Map<Date, Seat.EStatus> seatStatusMap = seat.getSeatStatusMap();
         seat.getSeatStatusMap().keySet().removeIf(key-> key.equals(date));
         this.seatRepository.save(seat);
+        System.out.println("CS3 : " + seat.getSeatStatusMap());
+        for(Date key : seatStatusMap.keySet()){
+            seat.getSeatStatusMap().put(key, seatStatusMap.get(date));
+        }
+        this.seatRepository.save(seat);
+        System.out.println("CS4 : " + seat.getSeatStatusMap());
+
 //        seatStatusMap.remove(date);
 //        seatStatusMap.remove(DateUtil.removeTimeFromDate(date));
 //        seat.getSeatStatusMap().remove(DateUtil.removeTimeFromDate(date));
@@ -249,7 +256,6 @@ public class SeatServiceImpl implements SeatService {
 //        seat.getSeatStatusMap().entrySet().removeIf(e-> e.getKey().equals(DateUtil.removeTimeFromDate(date)));
 //        seat.getSeatStatusMap().clear();
 
-        System.out.println("CS3 : " + seat.getSeatStatusMap());
 //        seat.setSeatStatusMap(seatStatusMap);
 //        this.seatRepository.save(seat);
 //        seat.getSeatStatusMap().put(date, Seat.EStatus.SEAT_FREE);
