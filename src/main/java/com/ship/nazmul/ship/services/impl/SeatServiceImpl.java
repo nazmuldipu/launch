@@ -241,6 +241,8 @@ public class SeatServiceImpl implements SeatService {
         seat.getSeatStatusMap().remove(date);
         System.out.println("CS3 : " + seat.getSeatStatusMap());
         this.seatRepository.save(seat);
+        System.out.println("CS4 : " + seat.getSeatStatusMap());
+        System.out.println();
     }
 
     @Override
