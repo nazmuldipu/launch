@@ -238,6 +238,7 @@ public class SeatServiceImpl implements SeatService {
         System.out.println("CS1 : " + seatId + "->" + seat.getSeatStatusMap());
         System.out.println("CS2 " + date + " -> " + DateUtil.removeTimeFromDate(date));
         Map<Date, Seat.EStatus> seatStatusMap = seat.getSeatStatusMap();
+        System.out.println("BB : " + seatStatusMap);
         seatStatusMap.remove(date);
 //        seat.getSeatStatusMap().keySet().removeIf(key-> key.equals(date));
         seat.getSeatStatusMap().clear();
