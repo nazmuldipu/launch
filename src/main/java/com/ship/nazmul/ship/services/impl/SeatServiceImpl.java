@@ -232,7 +232,7 @@ public class SeatServiceImpl implements SeatService {
         return seat;
     }
 
-    private void clearStatusMap(Long seatId, Date date) throws NotFoundException {
+    private void clearStatusMap(Long seatId, Date date) throws NotFoundException, ParseException {
         Seat seat = this.getOne(seatId);
         //TODO: remove following one line after debug period
         System.out.println("CS1 : " + seatId + "->" + seat.getSeatStatusMap());
@@ -240,7 +240,8 @@ public class SeatServiceImpl implements SeatService {
         final Map<Date, Seat.EStatus> seatStatusMap = new HashMap<>();
         for (final Map.Entry<Date, Seat.EStatus> entry : seat.getSeatStatusMap().entrySet()) {
             if(!entry.getKey().equals(date)) {
-                seatStatusMap.put(DateUtil.convertUtilToSql(date), entry.getValue());
+                Date dd = DateUtil.removeTimeFromDate(date);
+                seatStatusMap.put(DateUtil.simpleDateFormat(date), entry.getValue());
             }
         }
         System.out.println("BB : " + seatStatusMap);

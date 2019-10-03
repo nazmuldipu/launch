@@ -28,6 +28,12 @@ public class DateUtil {
         return new SimpleDateFormat(DateUtil.DATE_PATTERN_BACKWARDS);
     }
 
+    public static Date simpleDateFormat(Date date) throws ParseException {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        String dateString = format.format(date );
+        return format.parse( dateString);
+    }
+
     public static boolean isSameDay(Date date1, Date date2) {
         Calendar cal1 = Calendar.getInstance();
         Calendar cal2 = Calendar.getInstance();
@@ -142,6 +148,8 @@ public class DateUtil {
         calendar.set(Calendar.ZONE_OFFSET, 0);
         return calendar.getTime();
     }
+
+
 
     public static Date getDayStart(Date date) {
         Calendar calendar = Calendar.getInstance();
