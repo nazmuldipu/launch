@@ -241,7 +241,7 @@ public class SeatServiceImpl implements SeatService {
         for (final Map.Entry<Date, Seat.EStatus> entry : seat.getSeatStatusMap().entrySet()) {
             if(!entry.getKey().equals(date)) {
                 Date dd = DateUtil.removeTimeFromDate(date);
-                seatStatusMap.put(DateUtil.simpleDateFormat(date), entry.getValue());
+                seatStatusMap.put(DateUtil.simpleDateFormat(entry.getKey()), entry.getValue());
             }
         }
         System.out.println("BB : " + seatStatusMap);
