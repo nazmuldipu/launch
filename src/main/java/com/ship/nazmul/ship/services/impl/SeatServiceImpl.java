@@ -156,8 +156,17 @@ public class SeatServiceImpl implements SeatService {
             obj.put("seatNumber", seat.getSeatNumber());
             obj.put("category", seat.getCategory().getName());
             if (!this.checkSeatAvailability(seat.getId(), date)) {
-                obj.put("bookingId", seat.getBookingIdMap().get(DateUtil.removeTimeFromDate(date)));
-                obj.put("status", seat.getSeatStatusMap().get(DateUtil.removeTimeFromDate(date)));
+                //TODO: remove following condition after debug period
+                Long bookingId = seat.getBookingIdMap().get(date);
+                if(bookingId == null){
+                    bookingId = seat.getBookingIdMap().get(DateUtil.removeTimeFromDate(date));
+                }
+                obj.put("bookingId", bookingId);
+                Seat.EStatus status =  seat.getSeatStatusMap().get(date);
+                if(status == null){
+                    status =  seat.getSeatStatusMap().get(DateUtil.removeTimeFromDate(date));
+                }
+                obj.put("status", status);
             } else {
                 obj.put("bookingId", 0);
                 obj.put("status", Seat.EStatus.SEAT_FREE.toString());
@@ -225,7 +234,9 @@ public class SeatServiceImpl implements SeatService {
 
     private void clearStatusMap(Long seatId, Date date) throws NotFoundException {
         Seat seat = this.getOne(seatId);
+        //TODO: remove following one line after debug period
         seat.getSeatStatusMap().remove(DateUtil.removeTimeFromDate(date));
+        seat.getSeatStatusMap().remove(date);
         this.seatRepository.save(seat);
     }
 
