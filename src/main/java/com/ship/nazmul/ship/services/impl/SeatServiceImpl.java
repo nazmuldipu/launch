@@ -255,6 +255,8 @@ public class SeatServiceImpl implements SeatService {
         this.seatRepository.save(seat);
         System.out.println("CS6 : " + seat.getSeatStatusMap());
 
+
+
 //        seatStatusMap.remove(date);
 //        seatStatusMap.remove(DateUtil.removeTimeFromDate(date));
 //        seat.getSeatStatusMap().remove(DateUtil.removeTimeFromDate(date));
