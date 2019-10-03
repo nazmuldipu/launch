@@ -237,7 +237,7 @@ public class SeatServiceImpl implements SeatService {
         //TODO: remove following one line after debug period
         System.out.println("CS1 : " + seatId + "->" + seat.getSeatStatusMap());
         System.out.println("CS2 " + date + " -> " + DateUtil.removeTimeFromDate(date));
-        Map<Date, Seat.EStatus> seatStatusMap = seat.getSeatStatusMap();
+        final Map<Date, Seat.EStatus> seatStatusMap = seat.getSeatStatusMap();
         System.out.println("BB : " + seatStatusMap);
         seatStatusMap.entrySet().removeIf(e-> e.getKey().equals(date));
         System.out.println("BB2 : " + seatStatusMap);
