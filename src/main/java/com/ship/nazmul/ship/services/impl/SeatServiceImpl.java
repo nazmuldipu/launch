@@ -240,9 +240,10 @@ public class SeatServiceImpl implements SeatService {
         seat.getSeatStatusMap().remove(DateUtil.removeTimeFromDate(date));
         seat.getSeatStatusMap().remove(date);
         System.out.println("CS3 : " + seat.getSeatStatusMap());
+        seat.setSeatStatusMap(seat.getSeatStatusMap());
         this.seatRepository.save(seat);
-        seat.getSeatStatusMap().put(date, Seat.EStatus.SEAT_FREE);
-        this.seatRepository.save(seat);
+//        seat.getSeatStatusMap().put(date, Seat.EStatus.SEAT_FREE);
+//        this.seatRepository.save(seat);
         System.out.println("CS4 : " + seat.getSeatStatusMap());
         System.out.println();
     }
