@@ -105,7 +105,7 @@ public class SeatServiceImpl implements SeatService {
     }
 
     @Override
-    public List<Seat> getAvailableSeatByShipId(Long shipId, Date date) throws NotFoundException {
+    public List<Seat> getAvailableSeatByShipId(Long shipId, Date date) throws NotFoundException, ParseException {
 //        List<Seat> seatList = this.seatRepository.findByShipIdOrderBySeatNumber(shipId);
         List<Category> categoryList = this.categoryService.getCategoryByShipId(shipId);
         List<Seat> seatList = new ArrayList<>();
@@ -125,13 +125,13 @@ public class SeatServiceImpl implements SeatService {
     }
 
     @Override
-    public List<Seat> getAvailableSeatByCategoryAndShipId(Long shipId, Long categoryId, Date date) throws NotFoundException {
+    public List<Seat> getAvailableSeatByCategoryAndShipId(Long shipId, Long categoryId, Date date) throws NotFoundException, ParseException {
 
         List<Seat> seatList = this.seatRepository.findByShipIdAndCategoryIdOrderBySeatNumber(shipId, categoryId);
         return this.getSeatAvailabilityFormSeatList(seatList, date);
     }
 
-    private List<Seat> getSeatAvailabilityFormSeatList(List<Seat> seatList, Date date) throws NotFoundException {
+    private List<Seat> getSeatAvailabilityFormSeatList(List<Seat> seatList, Date date) throws NotFoundException, ParseException {
         for (int i = 0; i < seatList.size(); i++) {
             seatList.get(i).setAvailable(true);
         }
@@ -146,7 +146,7 @@ public class SeatServiceImpl implements SeatService {
     }
 
     @Override
-    public List<JSONObject> getSeatListWithBookingIdByShipId(Long shipId, Date date) throws JSONException, NotFoundException {
+    public List<JSONObject> getSeatListWithBookingIdByShipId(Long shipId, Date date) throws JSONException, NotFoundException, ParseException {
         List<Seat> seatList = this.seatRepository.findByShipIdOrderBySeatNumber(shipId);
 
         List<JSONObject> list = new ArrayList<JSONObject>();
@@ -157,14 +157,14 @@ public class SeatServiceImpl implements SeatService {
             obj.put("category", seat.getCategory().getName());
             if (!this.checkSeatAvailability(seat.getId(), date)) {
                 //TODO: remove following condition after debug period
-                Long bookingId = seat.getBookingIdMap().get(date);
+                Long bookingId = seat.getBookingIdMap().get(DateUtil.simpleDateFormat(date));
                 if(bookingId == null){
-                    bookingId = seat.getBookingIdMap().get(DateUtil.removeTimeFromDate(date));
+                    bookingId = seat.getBookingIdMap().get(DateUtil.simpleDateFormat(date));
                 }
                 obj.put("bookingId", bookingId);
                 Seat.EStatus status =  seat.getSeatStatusMap().get(date);
                 if(status == null){
-                    status =  seat.getSeatStatusMap().get(DateUtil.removeTimeFromDate(date));
+                    status =  seat.getSeatStatusMap().get(DateUtil.simpleDateFormat(date));
                 }
                 obj.put("status", status);
             } else {
@@ -193,15 +193,15 @@ public class SeatServiceImpl implements SeatService {
 
 
     @Override
-    public boolean checkSeatAvailability(Long seatId, Date date) throws NotFoundException {
+    public boolean checkSeatAvailability(Long seatId, Date date) throws NotFoundException, ParseException {
         Seat seat = this.getOne(seatId);
         //TODO: remove print command after testing period complete
-        System.out.println("D1 : seatid : " + seatId + "; Date:" + date + " -> " + DateUtil.removeTimeFromDate(date));
+        System.out.println("D1 : seatid : " + seatId + "; Date:" + date + " -> " + DateUtil.simpleDateFormat(date));
         System.out.println("D2 : MAP : " + seat.getSeatStatusMap() );
-        Seat.EStatus status = seat.getSeatStatusMap().get(date);
+        Seat.EStatus status = seat.getSeatStatusMap().get(DateUtil.simpleDateFormat(date));
         if(status == null) {
             System.out.println("D5 : Found null");
-            status = seat.getSeatStatusMap().get(DateUtil.removeTimeFromDate(date));
+            status = seat.getSeatStatusMap().get(date);
         }
         System.out.println("D3 : "+ status);
         System.out.println("D4 : " + seat.getSeatStatusMap().get(date));

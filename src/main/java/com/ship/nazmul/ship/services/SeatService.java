@@ -37,15 +37,15 @@ public interface SeatService {
 
     List<Seat> findByCategoryId(Long categoryId);
 
-    List<Seat> getAvailableSeatByShipId(Long shipId, Date date) throws NotFoundException;
+    List<Seat> getAvailableSeatByShipId(Long shipId, Date date) throws NotFoundException, ParseException;
 
-    List<Seat> getAvailableSeatByCategoryAndShipId(Long shipId, Long categoryId, Date date) throws NotFoundException;
+    List<Seat> getAvailableSeatByCategoryAndShipId(Long shipId, Long categoryId, Date date) throws NotFoundException, ParseException;
 
-    List<JSONObject> getSeatListWithBookingIdByShipId(Long shipId, Date date) throws JSONException, NotFoundException;
+    List<JSONObject> getSeatListWithBookingIdByShipId(Long shipId, Date date) throws JSONException, NotFoundException, ParseException;
 
     Map<Date, Integer> getFareMap(Long roomId, Date startDate, Date endDate) throws NotFoundException;
 
-    boolean checkSeatAvailability(Long seatId, Date date) throws NotFoundException;
+    boolean checkSeatAvailability(Long seatId, Date date) throws NotFoundException, ParseException;
 
     Seat updateSeatStatusAndBookingMap(Long seatId, Date date, Seat.EStatus status, Booking booking) throws NotFoundException, ForbiddenException, ParseException;
 

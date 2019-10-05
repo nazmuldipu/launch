@@ -16,22 +16,22 @@ public interface ReportService {
 
     List<ServiceAdminSellsReportRange> getAdminSellsReportRange(Date startDate, Date endDate) throws ForbiddenException, ParseException;
 
-    List<ServiceAdminSellsReport> getAdminReservationReport(Date date) throws ForbiddenException;
+    List<ServiceAdminSellsReport> getAdminReservationReport(Date date) throws ForbiddenException, ParseException;
 
-    List<ServiceAdminSellsReportRange> getAdminReservationReportRange(Date startDate, Date endDate) throws ForbiddenException;
+    List<ServiceAdminSellsReportRange> getAdminReservationReportRange(Date startDate, Date endDate) throws ForbiddenException, ParseException;
 
     List<ServiceAdminSellsReport> getAdminSellsReportByShipId(Date date, Long shipId) throws ParseException;
 
-    List<ServiceAdminSellsReport> getAdminReservationReportByShipId(Date date, Long shipId) throws ForbiddenException;
+    List<ServiceAdminSellsReport> getAdminReservationReportByShipId(Date date, Long shipId) throws ForbiddenException, ParseException;
 
     /************************************Service Admin modules***************************************/
     List<ServiceAdminSellsReport> getServiceAdminSellsReport(Long shipId, Date date) throws ForbiddenException, ParseException;
 
     List<ServiceAdminSellsReportRange> getServiceAdminSellsReportRange(Long shipId, Date startDate, Date endDate) throws ForbiddenException, ParseException;
 
-    List<ServiceAdminSellsReport> getServiceAdminReservationReport(Long shipId, Date date) throws ForbiddenException;
+    List<ServiceAdminSellsReport> getServiceAdminReservationReport(Long shipId, Date date) throws ForbiddenException, ParseException;
 
-    List<ServiceAdminSellsReportRange> getServiceAdminReservationReportRange(Long shipId, Date startDate, Date endDate) throws ForbiddenException;
+    List<ServiceAdminSellsReportRange> getServiceAdminReservationReportRange(Long shipId, Date startDate, Date endDate) throws ForbiddenException, ParseException;
 
-    JSONObject getServiceAdminDashboardReport(Date date) throws JSONException, ForbiddenException;
+    JSONObject getServiceAdminDashboardReport(Date date) throws JSONException, ForbiddenException, ParseException;
 }

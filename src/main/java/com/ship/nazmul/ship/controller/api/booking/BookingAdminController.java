@@ -58,7 +58,7 @@ public class BookingAdminController {
     }
 
     @GetMapping("/check/{seatId}")
-    private ResponseEntity checkAvailability(@PathVariable("seatId")Long seatId, @RequestParam("date")@DateTimeFormat(pattern = "yyyy-MM-dd")Date date) throws NotFoundException {
+    private ResponseEntity checkAvailability(@PathVariable("seatId")Long seatId, @RequestParam("date")@DateTimeFormat(pattern = "yyyy-MM-dd")Date date) throws NotFoundException, ParseException {
         return ResponseEntity.ok(this.seatService.checkSeatAvailability(seatId, date));
     }
 

@@ -8,6 +8,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
 import java.util.Date;
 
 @RestController
@@ -22,14 +23,14 @@ public class SeatAdminAgentController {
 
     @GetMapping("/available/{shipId}")
     private ResponseEntity getAllAvailableSeatForUser(@PathVariable("shipId") Long shipId,
-                                                      @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date date) throws NotFoundException {
+                                                      @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date date) throws NotFoundException, ParseException {
         return ResponseEntity.ok(this.seatService.getAvailableSeatByShipId(shipId, date));
     }
 
     @GetMapping("/statusList/{shipId}")
     private ResponseEntity getSeatBookingInfoByDate(@PathVariable("shipId") Long shipId,
                                                     @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date date
-    ) throws NotFoundException, JSONException {
+    ) throws NotFoundException, JSONException, ParseException {
         return ResponseEntity.ok(this.seatService.getSeatListWithBookingIdByShipId(shipId, date).toString());
     }
 }

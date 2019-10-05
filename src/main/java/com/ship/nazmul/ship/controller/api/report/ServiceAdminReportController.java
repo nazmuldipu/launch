@@ -23,7 +23,7 @@ public class ServiceAdminReportController {
     }
 
     @GetMapping("")
-    private ResponseEntity getServiceAdminDashboardReport(@RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date date) throws ForbiddenException, JSONException {
+    private ResponseEntity getServiceAdminDashboardReport(@RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date date) throws ForbiddenException, JSONException, ParseException {
         return ResponseEntity.ok(this.reportService.getServiceAdminDashboardReport(date).toString());
     }
 
@@ -38,12 +38,12 @@ public class ServiceAdminReportController {
     }
 
     @GetMapping("/shipReservation/{shipId}")
-    private ResponseEntity getAdminReservationReportByHotelId(@PathVariable("shipId") Long shipId, @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date date) throws JSONException, ForbiddenException{
+    private ResponseEntity getAdminReservationReportByHotelId(@PathVariable("shipId") Long shipId, @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date date) throws JSONException, ForbiddenException, ParseException {
         return ResponseEntity.ok(this.reportService.getServiceAdminReservationReport(shipId, date));
     }
 
     @GetMapping("/shipReservationRange/{shipId}")
-    private ResponseEntity getAdminReservationReportRangeByHotelId(@PathVariable("shipId") Long shipId, @RequestParam("startDate") @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate, @RequestParam("endDate") @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate) throws ForbiddenException {
+    private ResponseEntity getAdminReservationReportRangeByHotelId(@PathVariable("shipId") Long shipId, @RequestParam("startDate") @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate, @RequestParam("endDate") @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate) throws ForbiddenException, ParseException {
         return ResponseEntity.ok(this.reportService.getServiceAdminReservationReportRange(shipId, startDate, endDate));
     }
 
