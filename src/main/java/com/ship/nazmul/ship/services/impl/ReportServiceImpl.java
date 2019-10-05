@@ -274,7 +274,6 @@ public class ReportServiceImpl implements ReportService {
             //TODO: remove following after debug period
             Long bookingId = seat.getBookingIdMap().get(date);
             if(bookingId == null) {
-                System.out.println("getAdminBookingReportFromSeatList date: found null");
                 bookingId = seat.getBookingIdMap().get(DateUtil.removeTimeFromDate(date));
             }
             if (bookingId != null) {
