@@ -271,7 +271,12 @@ public class ReportServiceImpl implements ReportService {
             serviceAdminSellsReport.setShipName(seat.getShip().getName());
             serviceAdminSellsReport.setShipNumber(seat.getShip().getShipNumber());
             serviceAdminSellsReport.setRoutes(seat.getShip().getStartingPoint() + " - " + seat.getShip().getDroppingPoint());
-            Long bookingId = seat.getBookingIdMap().get(DateUtil.simpleDateFormat(date));
+            //TODO: remove following after debug period
+            Long bookingId = seat.getBookingIdMap().get(date);
+            if(bookingId == null) {
+                System.out.println("getAdminBookingReportFromSeatList date: found null");
+                bookingId = seat.getBookingIdMap().get(DateUtil.removeTimeFromDate(date));
+            }
             if (bookingId != null) {
                 Booking booking = this.bookingService.getOne(bookingId);
                 if (!booking.isCancelled()) {
