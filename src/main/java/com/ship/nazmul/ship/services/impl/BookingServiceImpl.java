@@ -162,7 +162,6 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public Booking confirmReservation(Long bookingId) throws NotFoundException, UserAlreadyExistsException, NullPasswordException, UserInvalidException, ParseException, javassist.NotFoundException {
         Booking booking = this.getOne(bookingId);
-        System.out.println(booking);
         return this.approveBooking(booking);
     }
 
@@ -386,8 +385,6 @@ public class BookingServiceImpl implements BookingService {
         booking.setCategoryName(booking.getSubBookingList().get(0).getSeat().getCategory().getName());
 
         int agentCommission = booking.getShip().getHotelswaveCommission()/2;
-        System.out.println("HOTELS WAVE PERCENTAGE :" + booking.getShip().getHotelswaveCommission());
-        System.out.println("Commission: " + agentCommission + ", Balance : " + agentBalance + ", Payable : " + (booking.getTotalPayablePrice() - agentCommission));
 
         if (agentBalance > (booking.getTotalPayablePrice() - agentCommission)) {
             if (user.hasRole(Role.ERole.ROLE_AGENT.toString())) {
@@ -452,7 +449,7 @@ public class BookingServiceImpl implements BookingService {
         for (int i = 0; i < booking.getSubBookingList().size(); i++) {
             shipAgentCommission += user.getCommission();
         }
-        System.out.println("Agent Commission: " + shipAgentCommission + ", Balance : " + agentBalance + ", Payable : " + (booking.getTotalPayablePrice() - shipAgentCommission));
+//        System.out.println("Agent Commission: " + shipAgentCommission + ", Balance : " + agentBalance + ", Payable : " + (booking.getTotalPayablePrice() - shipAgentCommission));
         if (agentBalance > (booking.getTotalPayablePrice() - shipAgentCommission)) {
             booking = this.save(booking);
             if (this.confirmBooking(booking)) {
@@ -474,7 +471,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public void cancelReservation(Long bookingId) throws ParseException, NotFoundException, ForbiddenException, UserAlreadyExistsException, NullPasswordException, UserInvalidException {
         Booking booking = this.getOne(bookingId);
-        System.out.println(booking);
+//        System.out.println(booking);
         booking.setCancelled(true);
         this.clearBooking(booking);
         this.save(booking);
@@ -484,8 +481,7 @@ public class BookingServiceImpl implements BookingService {
     public void cancelBooking(Long bookingId) throws ForbiddenException, NotFoundException, ParseException, javassist.NotFoundException {
         User currentUser = SecurityConfig.getCurrentUser();
         Booking booking = this.getOne(bookingId);
-        System.out.println(booking.getCreatedBy().getName() + ":" + booking.getCreatedBy().getRoles());
-        System.out.println(currentUser.getRoles());
+
         if (!booking.isCancelled()) {
             if (booking.getCreatedBy().hasRole(Role.ERole.ROLE_ADMIN.toString())) {
                 if (!currentUser.isAdmin()) throw new ForbiddenException("Access denied");
