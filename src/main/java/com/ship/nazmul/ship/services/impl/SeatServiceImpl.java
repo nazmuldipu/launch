@@ -157,14 +157,14 @@ public class SeatServiceImpl implements SeatService {
             obj.put("category", seat.getCategory().getName());
             if (!this.checkSeatAvailability(seat.getId(), date)) {
                 //TODO: remove following condition after debug period
-                Long bookingId = seat.getBookingIdMap().get(DateUtil.simpleDateFormat(date));
+                Long bookingId = seat.getBookingIdMap().get(date);
                 if(bookingId == null){
-                    bookingId = seat.getBookingIdMap().get(DateUtil.simpleDateFormat(date));
+                    bookingId = seat.getBookingIdMap().get(DateUtil.removeTimeFromDate(date));
                 }
                 obj.put("bookingId", bookingId);
                 Seat.EStatus status =  seat.getSeatStatusMap().get(date);
                 if(status == null){
-                    status =  seat.getSeatStatusMap().get(DateUtil.simpleDateFormat(date));
+                    status =  seat.getSeatStatusMap().get(DateUtil.removeTimeFromDate(date));
                 }
                 obj.put("status", status);
             } else {
@@ -192,6 +192,12 @@ public class SeatServiceImpl implements SeatService {
     }
 
 
+
+    /*Check if a seat is available on a particular date
+    * @param seatId     id for required seat
+    * @param date       date to be search
+    * @return true      if no data is available of status is free
+    * */
     @Override
     public boolean checkSeatAvailability(Long seatId, Date date) throws NotFoundException, ParseException {
         Seat seat = this.getOne(seatId);
