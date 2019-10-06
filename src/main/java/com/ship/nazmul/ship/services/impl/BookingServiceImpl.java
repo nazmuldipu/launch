@@ -487,10 +487,10 @@ public class BookingServiceImpl implements BookingService {
                 .filter(sb -> Objects.equals(sb.getSeat().getId(), seatId))
                 .findAny()
                 .get();
-        this.seatService.clearSeatStatusAndBookingIdMap(seatId, subBooking.getDate(), booking);
         List<SubBooking> subBookingList = booking.getSubBookingList().stream()
                 .filter(sb -> !Objects.equals(sb.getSeat().getId(), seatId))
                 .collect(Collectors.toList());
+        this.seatService.clearSeatStatusAndBookingIdMap(seatId, subBooking.getDate(), booking);
         booking.setTotalDiscount(booking.getTotalDiscount() - (booking.getTotalDiscount()/booking.getSubBookingList().size()));//must be prior to set new sub booking list
         booking.setSubBookingList(subBookingList);
         booking = this.calculateBooking(booking);
