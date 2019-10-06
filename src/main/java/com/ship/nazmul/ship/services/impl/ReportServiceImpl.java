@@ -285,7 +285,7 @@ public class ReportServiceImpl implements ReportService {
                     serviceAdminSellsReport.setBookingDate(booking.getCreated());
                     serviceAdminSellsReport.setCustomerName(booking.getUser().getName());
                     serviceAdminSellsReport.setCustomerPhone(booking.getUser().getPhoneNumber());
-                    serviceAdminSellsReport.setPrice(booking.getTotalPayablePrice());
+                    serviceAdminSellsReport.setPrice(booking.getTotalPayablePrice()/booking.getSubBookingList().size());
                     serviceAdminSellsReport.setSoldBy(booking.getCreatedBy().getName());
                     serviceAdminSellsReport.setRole(booking.getCreatedBy().getRoles().get(0).getRole());
                     serviceAdminSellsReport.setPaid(booking.isPaid());

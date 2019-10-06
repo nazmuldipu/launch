@@ -27,6 +27,8 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class BookingServiceImpl implements BookingService {
@@ -477,6 +479,24 @@ public class BookingServiceImpl implements BookingService {
         System.out.println(booking);
         booking.setCancelled(true);
         this.clearBooking(booking);
+        this.save(booking);
+    }
+
+    @Override
+    public void cancelReservationSeat(Long seatId, Long bookingId) throws NotFoundException, ForbiddenException, ParseException, UserAlreadyExistsException, NullPasswordException, UserInvalidException {
+        Booking booking = this.getOne(bookingId);
+        SubBooking subBooking = booking.getSubBookingList().stream()
+                .peek(sub -> System.out.println("Stream : " + sub.getSeat().getId() + " : " + seatId + " -> " + Objects.equals(sub.getSeat().getId(), seatId)))
+                .filter(sb -> Objects.equals(sb.getSeat().getId(), seatId))
+                .findAny()
+                .get();
+        this.seatService.clearSeatStatusAndBookingIdMap(seatId, subBooking.getDate(), booking);
+        List<SubBooking> subBookingList = booking.getSubBookingList().stream()
+                .filter(sb -> !Objects.equals(sb.getSeat().getId(), seatId))
+                .collect(Collectors.toList());
+        booking.setTotalDiscount(booking.getTotalDiscount() - (booking.getTotalDiscount()/booking.getSubBookingList().size()));//must be prior to set new sub booking list
+        booking.setSubBookingList(subBookingList);
+        booking = this.calculateBooking(booking);
         this.save(booking);
     }
 

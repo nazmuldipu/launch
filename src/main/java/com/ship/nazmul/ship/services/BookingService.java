@@ -48,6 +48,8 @@ public interface BookingService {
 
     void cancelReservation(Long bookingId) throws ParseException, NotFoundException, ForbiddenException, UserAlreadyExistsException, NullPasswordException, UserInvalidException;
 
+    void cancelReservationSeat(Long seatId, Long bookingId) throws NotFoundException, ForbiddenException, ParseException, UserAlreadyExistsException, NullPasswordException, UserInvalidException;
+
     void cancelBooking(Long bookingId) throws ForbiddenException, NotFoundException, ParseException, javassist.NotFoundException;
 
 

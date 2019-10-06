@@ -52,4 +52,10 @@ public class BookingServiceAdminController {
         this.bookingService.cancelReservation(bookingId);
         return ResponseEntity.ok().build();
     }
+    @DeleteMapping("/cancelReservationSeat/{seatId}")
+    private ResponseEntity cancelReservationSeat(@PathVariable("seatId")Long seatId, @RequestParam("bookingId")Long bookingId) throws NotFoundException, ForbiddenException, ParseException, UserAlreadyExistsException, NullPasswordException, UserInvalidException {
+        System.out.println("Seat id : " + seatId + "; Booking id " + bookingId);
+        this.bookingService.cancelReservationSeat(seatId, bookingId);
+        return ResponseEntity.ok().build();
+    }
 }
