@@ -202,19 +202,11 @@ public class SeatServiceImpl implements SeatService {
     public boolean checkSeatAvailability(Long seatId, Date date) throws NotFoundException, ParseException {
         Seat seat = this.getOne(seatId);
         //TODO: remove print command after testing period complete
-        System.out.println("D1 : seatId : " + seatId + "; Date:" + date + " -> " + DateUtil.simpleDateFormat(date) + " -> " + DateUtil.removeTimeFromDate(date));
-        System.out.println("D2 : MAP : " + seat.getSeatStatusMap() );
         Seat.EStatus status = seat.getSeatStatusMap().get(date);
         if(status == null) {
-            System.out.println("D3 simpleDateFormat: Found null");
+            System.out.println("D3 date: Found null");
             status = seat.getSeatStatusMap().get(DateUtil.removeTimeFromDate(date));
         }
-        if(status == null) {
-            System.out.println("D4 date: Found null");
-            status = seat.getSeatStatusMap().get(DateUtil.simpleDateFormat(date));
-        }
-        System.out.println("D5 finally status : "+ status);
-        System.out.println();
         if (status == null || status == Seat.EStatus.SEAT_FREE)
             return true;
         return false;
