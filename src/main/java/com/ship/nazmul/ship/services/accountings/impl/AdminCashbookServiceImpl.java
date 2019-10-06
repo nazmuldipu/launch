@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -64,7 +65,7 @@ public class AdminCashbookServiceImpl implements AdminCashbookService {
         if (!user.hasRole(Role.ERole.ROLE_ADMIN.toString()))
             throw new ForbiddenException("Access denied");
         AdminCashbook lastCashbook = this.adminCashbookRepository.findFirstByOrderByIdDesc();
-        AdminCashbook adminCashbook = new AdminCashbook(new Date(), explanation, debit, credit);
+        AdminCashbook adminCashbook = new AdminCashbook(LocalDate.now(), explanation, debit, credit);
         int lastBalance = lastCashbook == null ? 0 : lastCashbook.getBalance();
         adminCashbook.setBalance(lastBalance + adminCashbook.getDebit() - adminCashbook.getCredit());
         adminCashbook.setApproved(true);

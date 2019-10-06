@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import org.springframework.data.domain.Page;
 
 import java.text.ParseException;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -37,21 +38,21 @@ public interface SeatService {
 
     List<Seat> findByCategoryId(Long categoryId);
 
-    List<Seat> getAvailableSeatByShipId(Long shipId, Date date) throws NotFoundException, ParseException;
+    List<Seat> getAvailableSeatByShipId(Long shipId, LocalDate date) throws NotFoundException, ParseException;
 
-    List<Seat> getAvailableSeatByCategoryAndShipId(Long shipId, Long categoryId, Date date) throws NotFoundException, ParseException;
+    List<Seat> getAvailableSeatByCategoryAndShipId(Long shipId, Long categoryId, LocalDate date) throws NotFoundException, ParseException;
 
-    List<JSONObject> getSeatListWithBookingIdByShipId(Long shipId, Date date) throws JSONException, NotFoundException, ParseException;
+    List<JSONObject> getSeatListWithBookingIdByShipId(Long shipId, LocalDate date) throws JSONException, NotFoundException, ParseException;
 
-    Map<Date, Integer> getFareMap(Long roomId, Date startDate, Date endDate) throws NotFoundException;
+    Map<LocalDate, Integer> getFareMap(Long roomId, LocalDate startDate, LocalDate endDate) throws NotFoundException;
 
-    boolean checkSeatAvailability(Long seatId, Date date) throws NotFoundException, ParseException;
+    boolean checkSeatAvailability(Long seatId, LocalDate date) throws NotFoundException, ParseException;
 
-    Seat updateSeatStatusAndBookingMap(Long seatId, Date date, Seat.EStatus status, Booking booking) throws NotFoundException, ForbiddenException, ParseException;
+    Seat updateSeatStatusAndBookingMap(Long seatId, LocalDate date, Seat.EStatus status, Booking booking) throws NotFoundException, ForbiddenException, ParseException;
 
-    Seat updateStatusMap(Long seatId, Date date, Seat.EStatus status) throws NotFoundException, ParseException;
+    Seat updateStatusMap(Long seatId, LocalDate date, Seat.EStatus status) throws NotFoundException, ParseException;
 
-    void clearSeatStatusAndBookingIdMap(Long seatId, Date date, Booking booking) throws ForbiddenException, NotFoundException, ParseException;
+    void clearSeatStatusAndBookingIdMap(Long seatId, LocalDate date, Booking booking) throws ForbiddenException, NotFoundException, ParseException;
 
-    public void removeBookingMap(Long seatId, Date date) throws NotFoundException;
+    public void removeBookingMap(Long seatId, LocalDate date) throws NotFoundException;
 }

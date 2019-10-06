@@ -1,12 +1,19 @@
 package com.ship.nazmul.ship.entities.pojo;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.ship.nazmul.ship.commons.utils.LocalDateDeserializer;
+import com.ship.nazmul.ship.commons.utils.LocalDateSerializer;
 import com.ship.nazmul.ship.entities.Seat;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Date;
 
 public class ServiceAdminSellsReport {
-    private Date journeyDate;
+    @JsonSerialize(using = LocalDateSerializer.class)
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    private LocalDate journeyDate;
     private Long bookingId;
     private Seat.EStatus bookingStatus;
     private Date bookingDate;
@@ -23,11 +30,11 @@ public class ServiceAdminSellsReport {
 
 
 
-    public Date getJourneyDate() {
+    public LocalDate getJourneyDate() {
         return journeyDate;
     }
 
-    public void setJourneyDate(Date journeyDate) {
+    public void setJourneyDate(LocalDate journeyDate) {
         this.journeyDate = journeyDate;
     }
 

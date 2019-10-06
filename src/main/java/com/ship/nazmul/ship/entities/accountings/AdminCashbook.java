@@ -1,13 +1,20 @@
 package com.ship.nazmul.ship.entities.accountings;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.ship.nazmul.ship.commons.utils.LocalDateDeserializer;
+import com.ship.nazmul.ship.commons.utils.LocalDateSerializer;
 import com.ship.nazmul.ship.entities.base.BaseEntity;
 
 import javax.persistence.Entity;
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
 public class AdminCashbook extends BaseEntity {
-    private Date date;
+    @JsonSerialize(using = LocalDateSerializer.class)
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    private LocalDate date;
     private String explanation;
     private String ref;
     private int debit;
@@ -18,18 +25,18 @@ public class AdminCashbook extends BaseEntity {
     public AdminCashbook() {
     }
 
-    public AdminCashbook(Date date, String explanation, int debit, int credit) {
+    public AdminCashbook(LocalDate date, String explanation, int debit, int credit) {
         this.date = date;
         this.explanation = explanation;
         this.debit = debit;
         this.credit = credit;
     }
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 

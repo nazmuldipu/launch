@@ -2,12 +2,11 @@ package com.ship.nazmul.ship.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.ship.nazmul.ship.commons.utils.DateUtil;
+import com.ship.nazmul.ship.commons.utils.LocalDateAttributeConverter;
 import com.ship.nazmul.ship.entities.base.BaseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import javax.persistence.*;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.Map;
 
 @Entity
@@ -31,13 +30,15 @@ public class Seat extends BaseEntity{
     @JsonIgnore
     @ElementCollection(fetch = FetchType.EAGER)
     @MapKeyColumn(name = "date")
-    private Map<Date, EStatus> seatStatusMap;
+    @Convert(converter = LocalDateAttributeConverter.class, attributeName = "key")
+    private Map<LocalDate, EStatus> seatStatusMap;
 
 
     @JsonIgnore
     @ElementCollection(fetch = FetchType.EAGER)
     @MapKeyColumn(name = "date")
-    private Map<Date, Long> bookingIdMap;
+    @Convert(converter = LocalDateAttributeConverter.class, attributeName = "key")
+    private Map<LocalDate, Long> bookingIdMap;
 
     public enum EStatus {
         SEAT_BLOCKED("Blocked"),
@@ -148,19 +149,19 @@ public class Seat extends BaseEntity{
         this.ship = ship;
     }
 
-    public Map<Date, EStatus> getSeatStatusMap() {
+    public Map<LocalDate, EStatus> getSeatStatusMap() {
         return seatStatusMap;
     }
 
-    public void setSeatStatusMap(Map<Date, EStatus> seatStatusMap) {
+    public void setSeatStatusMap(Map<LocalDate, EStatus> seatStatusMap) {
         this.seatStatusMap = seatStatusMap;
     }
 
-    public Map<Date, Long> getBookingIdMap() {
+    public Map<LocalDate, Long> getBookingIdMap() {
         return bookingIdMap;
     }
 
-    public void setBookingIdMap(Map<Date, Long> bookingIdMap) {
+    public void setBookingIdMap(Map<LocalDate, Long> bookingIdMap) {
         this.bookingIdMap = bookingIdMap;
     }
 

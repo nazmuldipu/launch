@@ -19,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
+import java.time.LocalDate;
 import java.util.*;
 
 
@@ -105,7 +106,7 @@ public class SeatServiceImpl implements SeatService {
     }
 
     @Override
-    public List<Seat> getAvailableSeatByShipId(Long shipId, Date date) throws NotFoundException, ParseException {
+    public List<Seat> getAvailableSeatByShipId(Long shipId, LocalDate date) throws NotFoundException, ParseException {
 //        List<Seat> seatList = this.seatRepository.findByShipIdOrderBySeatNumber(shipId);
         List<Category> categoryList = this.categoryService.getCategoryByShipId(shipId);
         List<Seat> seatList = new ArrayList<>();
@@ -125,13 +126,13 @@ public class SeatServiceImpl implements SeatService {
     }
 
     @Override
-    public List<Seat> getAvailableSeatByCategoryAndShipId(Long shipId, Long categoryId, Date date) throws NotFoundException, ParseException {
+    public List<Seat> getAvailableSeatByCategoryAndShipId(Long shipId, Long categoryId, LocalDate date) throws NotFoundException, ParseException {
 
         List<Seat> seatList = this.seatRepository.findByShipIdAndCategoryIdOrderBySeatNumber(shipId, categoryId);
         return this.getSeatAvailabilityFormSeatList(seatList, date);
     }
 
-    private List<Seat> getSeatAvailabilityFormSeatList(List<Seat> seatList, Date date) throws NotFoundException, ParseException {
+    private List<Seat> getSeatAvailabilityFormSeatList(List<Seat> seatList, LocalDate date) throws NotFoundException, ParseException {
         for (int i = 0; i < seatList.size(); i++) {
             seatList.get(i).setAvailable(true);
         }
@@ -146,7 +147,7 @@ public class SeatServiceImpl implements SeatService {
     }
 
     @Override
-    public List<JSONObject> getSeatListWithBookingIdByShipId(Long shipId, Date date) throws JSONException, NotFoundException, ParseException {
+    public List<JSONObject> getSeatListWithBookingIdByShipId(Long shipId, LocalDate date) throws JSONException, NotFoundException, ParseException {
         List<Seat> seatList = this.seatRepository.findByShipIdOrderBySeatNumber(shipId);
 
         List<JSONObject> list = new ArrayList<JSONObject>();
@@ -159,12 +160,12 @@ public class SeatServiceImpl implements SeatService {
                 //TODO: remove following condition after debug period
                 Long bookingId = seat.getBookingIdMap().get(date);
                 if(bookingId == null){
-                    bookingId = seat.getBookingIdMap().get(DateUtil.removeTimeFromDate(date));
+                    bookingId = seat.getBookingIdMap().get(date);
                 }
                 obj.put("bookingId", bookingId);
                 Seat.EStatus status =  seat.getSeatStatusMap().get(date);
                 if(status == null){
-                    status =  seat.getSeatStatusMap().get(DateUtil.removeTimeFromDate(date));
+                    status =  seat.getSeatStatusMap().get(date);
                 }
                 obj.put("status", status);
             } else {
@@ -177,10 +178,10 @@ public class SeatServiceImpl implements SeatService {
     }
 
     @Override
-    public Map<Date, Integer> getFareMap(Long roomId, Date startDate, Date endDate) throws NotFoundException {
+    public Map<LocalDate, Integer> getFareMap(Long roomId, LocalDate startDate, LocalDate endDate) throws NotFoundException {
         Seat seat = this.getOne(roomId);
-        List<Date> dates = DateUtil.getDatesBetween(startDate, endDate);
-        Map<Date, Integer> fareMap = new HashMap<>();
+        List<LocalDate> dates = DateUtil.getLocalDatesBetween(startDate, endDate);
+        Map<LocalDate, Integer> fareMap = new HashMap<>();
 //        for (int i = 0; i < dates.size(); i++) {
 //            Integer discount = seat.getDiscountMap().get(dates.get(i));
 //            if (discount == null) {
@@ -199,13 +200,13 @@ public class SeatServiceImpl implements SeatService {
     * @return true      if no data is available of status is free
     * */
     @Override
-    public boolean checkSeatAvailability(Long seatId, Date date) throws NotFoundException, ParseException {
+    public boolean checkSeatAvailability(Long seatId, LocalDate date) throws NotFoundException, ParseException {
         Seat seat = this.getOne(seatId);
         //TODO: remove print command after testing period complete
         Seat.EStatus status = seat.getSeatStatusMap().get(date);
         if(status == null) {
             System.out.println("D3 date: Found null");
-            status = seat.getSeatStatusMap().get(DateUtil.removeTimeFromDate(date));
+            status = seat.getSeatStatusMap().get(date);
         }
         if (status == null || status == Seat.EStatus.SEAT_FREE)
             return true;
@@ -213,19 +214,19 @@ public class SeatServiceImpl implements SeatService {
     }
 
     @Override
-    public Seat updateSeatStatusAndBookingMap(Long roomId, Date date, Seat.EStatus status, Booking booking) throws NotFoundException, ForbiddenException, ParseException {
+    public Seat updateSeatStatusAndBookingMap(Long roomId, LocalDate date, Seat.EStatus status, Booking booking) throws NotFoundException, ForbiddenException, ParseException {
         User user = SecurityConfig.getCurrentUser();
         Seat seat = this.getOne(roomId);
         if (user.isOnlyUser() && booking.getUser().getId() != user.getId())
             throw new ForbiddenException("Access denied");
-        date = DateUtil.truncateTimeFromDate(date);
+//        date = DateUtil.truncateTimeFromDate(date);
         seat.getSeatStatusMap().put(date, status);
         seat.getBookingIdMap().put(date, booking.getId());
         return this.seatRepository.save(seat);
     }
 
     @Override
-    public Seat updateStatusMap(Long seatId, Date date, Seat.EStatus status) throws NotFoundException, ParseException {
+    public Seat updateStatusMap(Long seatId, LocalDate date, Seat.EStatus status) throws NotFoundException, ParseException {
         Seat seat = this.getOne(seatId);
 //        date = DateUtil.truncateTimeFromDate(date);
         seat.getSeatStatusMap().put(date, status);
@@ -233,18 +234,18 @@ public class SeatServiceImpl implements SeatService {
         return seat;
     }
 
-    private void clearStatusMap(Long seatId, Date date) throws NotFoundException, ParseException {
+    private void clearStatusMap(Long seatId, LocalDate date) throws NotFoundException, ParseException {
         Seat seat = this.getOne(seatId);
         //TODO: remove following one line after debug period
-        final Map<Date, Seat.EStatus> seatStatusMap = new HashMap<>();
-        for (final Map.Entry<Date, Seat.EStatus> entry : seat.getSeatStatusMap().entrySet()) {
+        final Map<LocalDate, Seat.EStatus> seatStatusMap = new HashMap<>();
+        for (final Map.Entry<LocalDate, Seat.EStatus> entry : seat.getSeatStatusMap().entrySet()) {
             if(!entry.getKey().equals(date)) {
-                seatStatusMap.put(DateUtil.simpleDateFormat(entry.getKey()), entry.getValue());
+                seatStatusMap.put(entry.getKey(), entry.getValue());
             }
         }
         seat.getSeatStatusMap().clear();
         this.seatRepository.save(seat);
-        for (Map.Entry<Date, Seat.EStatus> entry : seatStatusMap.entrySet()) {
+        for (Map.Entry<LocalDate, Seat.EStatus> entry : seatStatusMap.entrySet()) {
             seat.getSeatStatusMap().put(entry.getKey(), entry.getValue());
             this.seatRepository.save(seat);
         }
@@ -252,7 +253,7 @@ public class SeatServiceImpl implements SeatService {
     }
 
     @Override
-    public void clearSeatStatusAndBookingIdMap(Long seatId, Date date, Booking booking) throws ForbiddenException, NotFoundException, ParseException {
+    public void clearSeatStatusAndBookingIdMap(Long seatId, LocalDate date, Booking booking) throws ForbiddenException, NotFoundException, ParseException {
         User currentUser = SecurityConfig.getCurrentUser();
         if (!currentUser.isAdmin() && !currentUser.hasRole(Role.ERole.ROLE_AGENT.toString()) && !(currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()) && Validator.containsShip(currentUser.getShips(), booking.getShip())))
             throw new ForbiddenException("Access denied");
@@ -261,7 +262,7 @@ public class SeatServiceImpl implements SeatService {
     }
 
     @Override
-    public void removeBookingMap(Long seatId, Date date) throws NotFoundException {
+    public void removeBookingMap(Long seatId, LocalDate date) throws NotFoundException {
         Seat seat = this.getOne(seatId);
         seat.getBookingIdMap().remove(date);
         this.seatRepository.save(seat);

@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -235,9 +236,9 @@ public class BookingServiceImpl implements BookingService {
         String explanation = (cancel ? "Cancel " : "") + ship.getShipNumber() + ":" + ship.getName() + " - Booking for booking id " + booking.getId();
         AdminCashbook adminCashbook;
         if (!cancel) {
-            adminCashbook = new AdminCashbook(new Date(), explanation, booking.getTotalPayablePrice(), 0);
+            adminCashbook = new AdminCashbook(LocalDate.now(), explanation, booking.getTotalPayablePrice(), 0);
         } else {
-            adminCashbook = new AdminCashbook(new Date(), explanation, 0, booking.getTotalPayablePrice());
+            adminCashbook = new AdminCashbook(LocalDate.now(), explanation, 0, booking.getTotalPayablePrice());
         }
         adminCashbook.setApproved(true);
         adminCashbook.setRef(booking.getId().toString());
@@ -248,10 +249,10 @@ public class BookingServiceImpl implements BookingService {
         ShipAdminLedger shipAdminLedger;
 //        AdminShipLedger adminShipLedger;
         if (!cancel) {
-            shipAdminLedger = new ShipAdminLedger(ship.getAdmin(), new Date(), explanation, 0, amount);
+            shipAdminLedger = new ShipAdminLedger(ship.getAdmin(), LocalDate.now(), explanation, 0, amount);
 //            adminShipLedger = new AdminShipLedger(ship, new Date(), explanation, 0, amount);
         } else {
-            shipAdminLedger = new ShipAdminLedger(ship.getAdmin(), new Date(), explanation, amount, 0);
+            shipAdminLedger = new ShipAdminLedger(ship.getAdmin(), LocalDate.now(), explanation, amount, 0);
 //            adminShipLedger = new AdminShipLedger(ship, new Date(), explanation, amount, 0);
         }
 
@@ -270,9 +271,9 @@ public class BookingServiceImpl implements BookingService {
         //1) Debit ShipAgentLedger = total_advance - shipAgentCommission
         ShipAgentLedger shipAgentLedger;
         if(cancel){
-            shipAgentLedger = new ShipAgentLedger(SecurityConfig.getCurrentUser(), new Date(), explanation, 0, booking.getTotalPayablePrice() - shipAgentCommission);
+            shipAgentLedger = new ShipAgentLedger(SecurityConfig.getCurrentUser(),LocalDate.now(), explanation, 0, booking.getTotalPayablePrice() - shipAgentCommission);
         } else {
-            shipAgentLedger = new ShipAgentLedger(SecurityConfig.getCurrentUser(), new Date(), explanation, booking.getTotalPayablePrice() - shipAgentCommission, 0);
+            shipAgentLedger = new ShipAgentLedger(SecurityConfig.getCurrentUser(), LocalDate.now(), explanation, booking.getTotalPayablePrice() - shipAgentCommission, 0);
         }
         shipAgentLedger.setRef(booking.getId().toString());
         shipAgentLedger.setApproved(true);
@@ -286,9 +287,9 @@ public class BookingServiceImpl implements BookingService {
         //1) Debit AdminAgentLedger = total_advance - hotelswave_agent_discount
         AdminAgentLedger adminAgentLedger;
         if (cancel) {
-            adminAgentLedger = new AdminAgentLedger(booking.getCreatedBy(), new Date(), explanation, 0, booking.getTotalPayablePrice() - commission);
+            adminAgentLedger = new AdminAgentLedger(booking.getCreatedBy(), LocalDate.now(), explanation, 0, booking.getTotalPayablePrice() - commission);
         } else {
-            adminAgentLedger = new AdminAgentLedger(SecurityConfig.getCurrentUser(), new Date(), explanation, booking.getTotalPayablePrice() - commission, 0);
+            adminAgentLedger = new AdminAgentLedger(SecurityConfig.getCurrentUser(), LocalDate.now(), explanation, booking.getTotalPayablePrice() - commission, 0);
         }
         adminAgentLedger.setRef(booking.getId().toString());
         adminAgentLedger.setApproved(true);
@@ -300,10 +301,10 @@ public class BookingServiceImpl implements BookingService {
 //        AdminShipLedger adminShipLedger;
         ShipAdminLedger shipAdminLedger;
         if (!cancel) {
-            shipAdminLedger = new ShipAdminLedger(booking.getShip().getAdmin(), new Date(), explanation, 0, amount);
+            shipAdminLedger = new ShipAdminLedger(booking.getShip().getAdmin(), LocalDate.now(), explanation, 0, amount);
 //            adminShipLedger = new AdminShipLedger( booking.getShip(), new Date(), explanation, 0, amount);
         } else {
-            shipAdminLedger = new ShipAdminLedger(booking.getShip().getAdmin(), new Date(), explanation, amount, 0);
+            shipAdminLedger = new ShipAdminLedger(booking.getShip().getAdmin(), LocalDate.now(), explanation, amount, 0);
 //            adminShipLedger = new AdminShipLedger( booking.getShip(), new Date(), explanation, amount, 0);
         }
         shipAdminLedger.setApproved(true);
@@ -318,10 +319,10 @@ public class BookingServiceImpl implements BookingService {
 //        ShipCashBook shipCashBook;
         ShipAdminCashbook shipAdminCashbook;
         if (!cancel) {
-            shipAdminCashbook = new ShipAdminCashbook(new Date(), ship.getAdmin(), explanation, booking.getTotalPayablePrice(), 0);
+            shipAdminCashbook = new ShipAdminCashbook(LocalDate.now(), ship.getAdmin(), explanation, booking.getTotalPayablePrice(), 0);
 //            shipCashBook = new ShipCashBook(ship, new Date(), explanation, booking.getTotalPayablePrice(), 0);
         } else {
-            shipAdminCashbook = new ShipAdminCashbook(new Date(), ship.getAdmin(), explanation, 0, booking.getTotalPayablePrice());
+            shipAdminCashbook = new ShipAdminCashbook(LocalDate.now(), ship.getAdmin(), explanation, 0, booking.getTotalPayablePrice());
 //            shipCashBook = new ShipCashBook(ship, new Date(), explanation, 0, booking.getTotalPayablePrice());
         }
         shipAdminCashbook.setApproved(true);
@@ -352,7 +353,7 @@ public class BookingServiceImpl implements BookingService {
         for (SubBooking subBooking : subBookingList) {
             Seat seat = this.seatService.getOne(subBooking.getSeat().getId());
             // 3) Create SubBooking for each room and each date
-            SubBooking newSubBooking = new SubBooking(DateUtil.truncateTimeFromDate(subBooking.getDate()), subBooking.getDiscount(), subBooking.getCommission(), seat);
+            SubBooking newSubBooking = new SubBooking(subBooking.getDate(), subBooking.getDiscount(), subBooking.getCommission(), seat);
             // 4) Calculate each subBooking and add to subBookingList
             newSubBooking = this.calculateSubBooking(newSubBooking);
             newSubBookingList.add(newSubBooking);

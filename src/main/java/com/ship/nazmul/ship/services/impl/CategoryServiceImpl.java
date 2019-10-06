@@ -24,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.naming.LimitExceededException;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -90,23 +91,23 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Integer getFare(Long categoryId, Date date) {
+    public Integer getFare(Long categoryId, LocalDate date) {
         Category category = this.getOne(categoryId);
         Integer discount = category.getDiscountMap().get(date);
         return category.getFare() - discount;
     }
 
     @Override
-    public Integer getDiscount(Long categoryId, Date date) {
+    public Integer getDiscount(Long categoryId, LocalDate date) {
         Category category = this.getOne(categoryId);
         return category.getDiscountMap().get(date);
     }
 
     @Override
-    public Map<Date, Integer> getFareMap(Long categoryId, Date startDate, Date endDate) throws NotFoundException {
+    public Map<LocalDate, Integer> getFareMap(Long categoryId, LocalDate startDate, LocalDate endDate) throws NotFoundException {
         Category category = this.getOne(categoryId);
-        List<Date> dates = DateUtil.getDatesBetween(startDate, endDate);
-        Map<Date, Integer> fareMap = new HashMap<>();
+        List<LocalDate> dates = DateUtil.getLocalDatesBetween(startDate, endDate);
+        Map<LocalDate, Integer> fareMap = new HashMap<>();
         for (int i = 0; i < dates.size(); i++) {
             Integer discount = category.getDiscountMap().get(dates.get(i));
             if (discount == null) discount = 0;
@@ -116,10 +117,10 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Map<Date, Integer> getDiscountMap(Long categoryId, Date startDate, Date endDate) throws NotFoundException {
+    public Map<LocalDate, Integer> getDiscountMap(Long categoryId, LocalDate startDate, LocalDate endDate) throws NotFoundException {
         Category category = this.getOne(categoryId);
-        List<Date> dates = DateUtil.getDatesBetween(startDate, endDate);
-        Map<Date, Integer> discountMap = new HashMap<>();
+        List<LocalDate> dates = DateUtil.getLocalDatesBetween(startDate, endDate);
+        Map<LocalDate, Integer> discountMap = new HashMap<>();
         for (int i = 0; i < dates.size(); i++) {
             Integer discount = category.getDiscountMap().get(dates.get(i));
             if (discount == null) discount = 0;
@@ -129,13 +130,13 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Map<String, String> updateCategoryDiscount(Long categoryId, Date startDate, Date endDate, int discountAmount) throws ForbiddenException {
+    public Map<String, String> updateCategoryDiscount(Long categoryId, LocalDate startDate, LocalDate endDate, int discountAmount) throws ForbiddenException {
         User user = SecurityConfig.getCurrentUser();
         Category category = this.getOne(categoryId);
         if (user.isOnlyUser() || (!user.isAdmin() && !user.getShips().contains(category.getShip())))
             throw new ForbiddenException("Access denied");
 
-        List<Date> dates = DateUtil.getDatesBetween(startDate, endDate);
+        List<LocalDate> dates = DateUtil.getLocalDatesBetween(startDate, endDate);
         for (int i = 0; i < dates.size(); i++) {
             category.getDiscountMap().put(dates.get(i), discountAmount);
         }

@@ -10,6 +10,7 @@ import com.ship.nazmul.ship.services.BookingService;
 import com.ship.nazmul.ship.services.CategoryService;
 import com.ship.nazmul.ship.services.ReportService;
 import com.ship.nazmul.ship.services.SeatService;
+import org.apache.tomcat.jni.Local;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -35,11 +37,11 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public List<ServiceAdminSellsReport> getAdminSellsReport(Date date) throws ForbiddenException, ParseException {
+    public List<ServiceAdminSellsReport> getAdminSellsReport(LocalDate date) throws ForbiddenException, ParseException {
         User user = SecurityConfig.getCurrentUser();
         if (!user.isAdmin()) throw new ForbiddenException("Access denied");
 
-        List<Booking> bookingList = this.bookingService.getByCreateDateWithoutCanceled(date);
+        List<Booking> bookingList = this.bookingService.getByCreateDateWithoutCanceled(DateUtil.convertToDateViaSqlDate(date));
         return this.getAdminBookingReportFromBookingList(bookingList);
     }
 
@@ -49,10 +51,10 @@ public class ReportServiceImpl implements ReportService {
     * @return List<ServiceAdminSellsReportRange>    list of Service admin sells report
     * */
     @Override
-    public List<ServiceAdminSellsReportRange> getAdminSellsReportRange(Date startDate, Date endDate) throws ForbiddenException, ParseException {
-        List<Date> dateList = DateUtil.getDatesBetween(startDate, endDate);
+    public List<ServiceAdminSellsReportRange> getAdminSellsReportRange(LocalDate startDate, LocalDate endDate) throws ForbiddenException, ParseException {
+        List<LocalDate> dateList = DateUtil.getLocalDatesBetween(startDate, endDate);
         List<ServiceAdminSellsReportRange> serviceAdminSellsReportRanges = new ArrayList<>();
-        for (Date date : dateList) {
+        for (LocalDate date : dateList) {
             List<ServiceAdminSellsReport> sasrList = this.getAdminSellsReport(date);
             serviceAdminSellsReportRanges = this.populateServiceAdminSellsReportRangeList(sasrList, date, serviceAdminSellsReportRanges);
         }
@@ -66,7 +68,7 @@ public class ReportServiceImpl implements ReportService {
     * @param date                                   provided information date
     * @param List<ServiceAdminSellsReportRange>     existed ServiceAdminSellsReportRange list
     * @return List<ServiceAdminSellsReportRange>    populated ServiceAdminSellsReportRange list*/
-    private List<ServiceAdminSellsReportRange> populateServiceAdminSellsReportRangeList(List<ServiceAdminSellsReport> sasrList, Date date, List<ServiceAdminSellsReportRange> sasrrList) {
+    private List<ServiceAdminSellsReportRange> populateServiceAdminSellsReportRangeList(List<ServiceAdminSellsReport> sasrList, LocalDate date, List<ServiceAdminSellsReportRange> sasrrList) {
         for(ServiceAdminSellsReport sasr: sasrList){
             if(sasr.getBookingStatus()!= null && !sasr.getBookingStatus().toString().equals(Seat.EStatus.SEAT_SOLD.toString())) //if booking status is not sold then skip
                 continue;
@@ -89,7 +91,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public List<ServiceAdminSellsReport> getAdminReservationReport(Date date) throws ForbiddenException, ParseException {
+    public List<ServiceAdminSellsReport> getAdminReservationReport(LocalDate date) throws ForbiddenException, ParseException {
         User user = SecurityConfig.getCurrentUser();
         if (!user.isAdmin()) throw new ForbiddenException("Access denied");
         List<Seat> seats = this.seatService.getAll();
@@ -102,11 +104,11 @@ public class ReportServiceImpl implements ReportService {
      * @return List<ServiceAdminSellsReportRange>    list of Service admin sells report
      * */
     @Override
-    public List<ServiceAdminSellsReportRange> getAdminReservationReportRange(Date startDate, Date endDate) throws ForbiddenException, ParseException {
-        List<Date> dateList = DateUtil.getDatesBetween(startDate, endDate);
+    public List<ServiceAdminSellsReportRange> getAdminReservationReportRange(LocalDate startDate, LocalDate endDate) throws ForbiddenException, ParseException {
+        List<LocalDate> dateList = DateUtil.getLocalDatesBetween(startDate, endDate);
         List<ServiceAdminSellsReportRange> serviceAdminSellsReportRanges = new ArrayList<>();
 
-        for (Date date : dateList) {
+        for (LocalDate date : dateList) {
             List<ServiceAdminSellsReport> sasrList = this.getAdminReservationReport(date);
             serviceAdminSellsReportRanges = this.populateServiceAdminSellsReportRangeList(sasrList, date, serviceAdminSellsReportRanges);
         }
@@ -115,13 +117,13 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public List<ServiceAdminSellsReport> getAdminSellsReportByShipId(Date date, Long shipId) throws ParseException {
-        List<Booking> bookingList = this.bookingService.getBookingsByShipIdAndCreateDate(shipId, date);
+    public List<ServiceAdminSellsReport> getAdminSellsReportByShipId(LocalDate date, Long shipId) throws ParseException {
+        List<Booking> bookingList = this.bookingService.getBookingsByShipIdAndCreateDate(shipId, DateUtil.convertToDateViaSqlDate(date));
         return this.getAdminBookingReportFromBookingList(bookingList);
     }
 
     @Override
-    public List<ServiceAdminSellsReport> getAdminReservationReportByShipId(Date date, Long shipId) throws ForbiddenException, ParseException {
+    public List<ServiceAdminSellsReport> getAdminReservationReportByShipId(LocalDate date, Long shipId) throws ForbiddenException, ParseException {
         User user = SecurityConfig.getCurrentUser();
         if (!user.isAdmin()) throw new ForbiddenException("Access denied");
         List<Seat> seats = this.seatService.getSeatListByShipId(shipId);
@@ -129,12 +131,12 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public List<ServiceAdminSellsReport> getServiceAdminSellsReport(Long shipId, Date date) throws ForbiddenException, ParseException {
+    public List<ServiceAdminSellsReport> getServiceAdminSellsReport(Long shipId, LocalDate date) throws ForbiddenException, ParseException {
         User user = SecurityConfig.getCurrentUser();
         if (user.getShips() == null || !user.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()))
             throw new ForbiddenException("Access denied");
 
-        List<Booking> bookingList = this.bookingService.getBookingsByShipIdAndCreateDate(shipId, date);
+        List<Booking> bookingList = this.bookingService.getBookingsByShipIdAndCreateDate(shipId, DateUtil.convertToDateViaSqlDate(date));
         return this.getAdminBookingReportFromBookingList(bookingList);
     }
 
@@ -144,11 +146,11 @@ public class ReportServiceImpl implements ReportService {
     * @param endDate                            report ending date
     * @return ServiceAdminSellsReportRange      for the ship using provided id*/
     @Override
-    public List<ServiceAdminSellsReportRange> getServiceAdminSellsReportRange(Long shipId, Date startDate, Date endDate) throws ForbiddenException, ParseException {
-        List<Date> dateList = DateUtil.getDatesBetween(startDate, endDate);
+    public List<ServiceAdminSellsReportRange> getServiceAdminSellsReportRange(Long shipId, LocalDate startDate, LocalDate endDate) throws ForbiddenException, ParseException {
+        List<LocalDate> dateList = DateUtil.getLocalDatesBetween(startDate, endDate);
         List<ServiceAdminSellsReportRange> serviceAdminSellsReportRanges = new ArrayList<>();
 
-        for (Date date : dateList) {
+        for (LocalDate date : dateList) {
             List<ServiceAdminSellsReport> sasrList = this.getServiceAdminSellsReport(shipId, date);
             serviceAdminSellsReportRanges = this.populateServiceAdminSellsReportRangeList(sasrList, date, serviceAdminSellsReportRanges);
         }
@@ -160,7 +162,7 @@ public class ReportServiceImpl implements ReportService {
     * @param date                           report date
     * @return ServiceAdminSellsReport       final reservation report*/
     @Override
-    public List<ServiceAdminSellsReport> getServiceAdminReservationReport(Long shipId, Date date) throws ForbiddenException, ParseException {
+    public List<ServiceAdminSellsReport> getServiceAdminReservationReport(Long shipId, LocalDate date) throws ForbiddenException, ParseException {
         User user = SecurityConfig.getCurrentUser();
         if (user.getShips() == null || !user.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()))
             throw new ForbiddenException("Access denied");
@@ -175,11 +177,11 @@ public class ReportServiceImpl implements ReportService {
      * @param endDate                            report ending date
      * @return ServiceAdminSellsReportRange      for the ship using provided id*/
     @Override
-    public List<ServiceAdminSellsReportRange> getServiceAdminReservationReportRange(Long shipId, Date startDate, Date endDate) throws ForbiddenException, ParseException {
-        List<Date> dateList = DateUtil.getDatesBetween(startDate, endDate);
+    public List<ServiceAdminSellsReportRange> getServiceAdminReservationReportRange(Long shipId, LocalDate startDate, LocalDate endDate) throws ForbiddenException, ParseException {
+        List<LocalDate> dateList = DateUtil.getLocalDatesBetween(startDate, endDate);
         List<ServiceAdminSellsReportRange> serviceAdminSellsReportRanges = new ArrayList<>();
 
-        for (Date date : dateList) {
+        for (LocalDate date : dateList) {
             List<ServiceAdminSellsReport> sasrList = this.getServiceAdminReservationReport(shipId, date);
             serviceAdminSellsReportRanges = this.populateServiceAdminSellsReportRangeList(sasrList, date, serviceAdminSellsReportRanges);
         }
@@ -187,7 +189,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public JSONObject getServiceAdminDashboardReport(Date date) throws JSONException, ForbiddenException, ParseException {
+    public JSONObject getServiceAdminDashboardReport(LocalDate date) throws JSONException, ForbiddenException, ParseException {
         User currentUser = SecurityConfig.getCurrentUser();
         if (currentUser.getShips() == null || !currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()))
             throw new ForbiddenException("Access denied");
@@ -199,7 +201,7 @@ public class ReportServiceImpl implements ReportService {
         return obj;
     }
 
-    List<JSONObject> getUserShipsReportObjects(User user, Date date) throws JSONException, ParseException {
+    List<JSONObject> getUserShipsReportObjects(User user, LocalDate date) throws JSONException, ParseException {
         if (user.getShips().size() < 1) return null;
         List<JSONObject> list = new ArrayList<JSONObject>();
         for (Ship ship : user.getShips()) {
@@ -214,7 +216,7 @@ public class ReportServiceImpl implements ReportService {
         return list;
     }
 
-    List<JSONObject> getCategoryReportObjects(Long shipId, Date date) throws JSONException, ParseException {
+    List<JSONObject> getCategoryReportObjects(Long shipId, LocalDate date) throws JSONException, ParseException {
         List<Category> categoryList = this.categoryService.getCategoryByShipId(shipId);
         List<JSONObject> list = new ArrayList<JSONObject>();
         for (Category category : categoryList) {
@@ -229,13 +231,13 @@ public class ReportServiceImpl implements ReportService {
         return list;
     }
 
-   JSONObject getReservationReport(Category category, Date date) throws JSONException, ParseException {
+   JSONObject getReservationReport(Category category, LocalDate date) throws JSONException, ParseException {
         int reserved = 0;
         int blocked = 0;
         int sold = 0;
         List<Seat> seatList = this.seatService.getSeatListByCategoryId(category.getId());
         for (Seat seat : seatList) {
-            Seat.EStatus status = seat.getSeatStatusMap().get(DateUtil.removeTimeFromDate(date));
+            Seat.EStatus status = seat.getSeatStatusMap().get(date);
             if(status == null) {
                 status = seat.getSeatStatusMap().get(date);
             }
@@ -263,7 +265,7 @@ public class ReportServiceImpl implements ReportService {
     * @param isAdmin                    if this report generating for admin then skip unsold seat
     * @report ServiceAdminSellsReport   report for provided seat list
     * */
-    private List<ServiceAdminSellsReport> getAdminBookingReportFromSeatList(List<Seat> seatList, Date date, boolean isAdmin) throws ParseException {
+    private List<ServiceAdminSellsReport> getAdminBookingReportFromSeatList(List<Seat> seatList, LocalDate date, boolean isAdmin) throws ParseException {
         List<ServiceAdminSellsReport> serviceAdminSellsReportList = new ArrayList<>();
 
         for (Seat seat : seatList) {
@@ -276,9 +278,9 @@ public class ReportServiceImpl implements ReportService {
             serviceAdminSellsReport.setRoutes(seat.getShip().getStartingPoint() + " - " + seat.getShip().getDroppingPoint());
             //TODO: remove following after debug period
             Long bookingId = seat.getBookingIdMap().get(date);
-            if(bookingId == null) {
-                bookingId = seat.getBookingIdMap().get(DateUtil.removeTimeFromDate(date));
-            }
+//            if(bookingId == null) {
+//                bookingId = seat.getBookingIdMap().get(DateUtil.removeTimeFromDate(date));
+//            }
             if (bookingId != null) {
                 Booking booking = this.bookingService.getOne(bookingId);
                 if (!booking.isCancelled()) {

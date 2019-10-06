@@ -1,11 +1,16 @@
 package com.ship.nazmul.ship.entities.accountings;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.ship.nazmul.ship.commons.utils.LocalDateDeserializer;
+import com.ship.nazmul.ship.commons.utils.LocalDateSerializer;
 import com.ship.nazmul.ship.entities.Ship;
 import com.ship.nazmul.ship.entities.User;
 import com.ship.nazmul.ship.entities.base.BaseEntity;
 
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -14,7 +19,9 @@ public class ShipAdminLedger extends BaseEntity {
 //    private Ship ship;
     @ManyToOne
     private User user;
-    private Date date;
+    @JsonSerialize(using = LocalDateSerializer.class)
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    private LocalDate date;
     private String explanation;
     private String ref;
     private int debit;
@@ -25,7 +32,7 @@ public class ShipAdminLedger extends BaseEntity {
     public ShipAdminLedger() {
     }
 
-    public ShipAdminLedger(User user, Date date, String explanation, int debit, int credit) {
+    public ShipAdminLedger(User user, LocalDate date, String explanation, int debit, int credit) {
 //        this.ship = ship;
         this.user = user;
         this.date = date;
@@ -50,11 +57,11 @@ public class ShipAdminLedger extends BaseEntity {
         this.user = user;
     }
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 

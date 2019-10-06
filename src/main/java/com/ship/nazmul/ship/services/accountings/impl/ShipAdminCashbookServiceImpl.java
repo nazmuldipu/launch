@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -98,7 +99,7 @@ public class ShipAdminCashbookServiceImpl implements ShipAdminCashbookService {
         if (!currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()) || currentUser.getShips() == null)
             throw new ForbiddenException("Access denied");
 
-        ShipAdminCashbook shipAdminCashbook = new ShipAdminCashbook(new Date(), user, explanation, debit, credit);
+        ShipAdminCashbook shipAdminCashbook = new ShipAdminCashbook(LocalDate.now(), user, explanation, debit, credit);
         int lastBalance = this.getLastShipAdminLastEntryBalance(userId);
         shipAdminCashbook.setBalance(lastBalance+shipAdminCashbook.getDebit()-shipAdminCashbook.getCredit());
         shipAdminCashbook.setApproved(true);

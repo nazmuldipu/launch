@@ -17,7 +17,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
-import java.util.Date;
+import java.time.LocalDate;
+//import java.util.Date;
 
 @RestController
 @RequestMapping("/api/v1/admin/booking")
@@ -38,7 +39,8 @@ public class BookingAdminController {
 
     @PostMapping("/sell")
     private ResponseEntity createBooking(@RequestBody Booking booking) throws UserInvalidException, ForbiddenException, ParseException, NullPasswordException, NotFoundException, UserAlreadyExistsException, javassist.NotFoundException {
-        return ResponseEntity.ok(this.bookingService.createAdminBooking(booking));
+        booking = this.bookingService.createAdminBooking(booking);
+        return ResponseEntity.ok(booking);
     }
 
     @PutMapping("/confirmReservation/{bookingId}")
@@ -58,7 +60,7 @@ public class BookingAdminController {
     }
 
     @GetMapping("/check/{seatId}")
-    private ResponseEntity checkAvailability(@PathVariable("seatId")Long seatId, @RequestParam("date")@DateTimeFormat(pattern = "yyyy-MM-dd")Date date) throws NotFoundException, ParseException {
+    private ResponseEntity checkAvailability(@PathVariable("seatId")Long seatId, @RequestParam("date")@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) throws NotFoundException, ParseException {
         return ResponseEntity.ok(this.seatService.checkSeatAvailability(seatId, date));
     }
 

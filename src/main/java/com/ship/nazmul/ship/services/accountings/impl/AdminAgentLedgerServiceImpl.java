@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -86,7 +87,7 @@ public class AdminAgentLedgerServiceImpl implements AdminAgentLedgerService {
         this.adminCashbookService.addAdminCashbookEntry(amount, 0, "Add balance for agent : " + user.getName());
 
         // 2) Add amount credit to Admin_Agent ledger
-        AdminAgentLedger adminAgentLedger = new AdminAgentLedger(user, new Date(), "Add balance : ", 0, amount);
+        AdminAgentLedger adminAgentLedger = new AdminAgentLedger(user, LocalDate.now(), "Add balance : ", 0, amount);
         adminAgentLedger = this.updateBalanceAndSave(agentId, adminAgentLedger);
 
         return adminAgentLedger;

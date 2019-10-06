@@ -7,7 +7,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 
 @Component
@@ -99,6 +102,24 @@ public class DateUtil {
         LocalDate birthday = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 
         return java.time.Period.between(birthday, today);
+    }
+
+    public static Date convertToDateViaSqlDate(LocalDate dateToConvert) {
+        return java.sql.Date.valueOf(dateToConvert);
+    }
+    public static LocalDate convertToLocalDateViaInstant(Date dateToConvert) {
+        return dateToConvert.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
+    }
+    public static List<LocalDate> getLocalDatesBetween(
+            LocalDate startDate, LocalDate endDate) {
+
+        long numOfDaysBetween = ChronoUnit.DAYS.between(startDate, endDate);
+        return IntStream.iterate(0, i -> i + 1)
+                .limit(numOfDaysBetween)
+                .mapToObj(i -> startDate.plusDays(i))
+                .collect(Collectors.toList());
     }
 
     public static List<Date> getDatesBetween(Date startDate, Date endDate) {

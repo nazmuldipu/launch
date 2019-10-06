@@ -1,12 +1,13 @@
 package com.ship.nazmul.ship.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.ship.nazmul.ship.commons.utils.LocalDateAttributeConverter;
 import com.ship.nazmul.ship.entities.base.BaseEntity;
 import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -34,7 +35,9 @@ public class Category extends BaseEntity {
     @JsonIgnore
     @ElementCollection(fetch = FetchType.EAGER)
     @MapKeyColumn(name = "date")
-    private Map<Date, Integer> discountMap;
+    @Convert(converter = LocalDateAttributeConverter.class, attributeName = "key")
+    private Map<LocalDate, Integer> discountMap;
+//    private Map<LocalDate, Integer> discountMap;
 
 
     public String getName() {
@@ -91,11 +94,11 @@ public class Category extends BaseEntity {
     }
 
 
-    public Map<Date, Integer> getDiscountMap() {
+    public Map<LocalDate, Integer> getDiscountMap() {
         return discountMap;
     }
 
-    public void setDiscountMap(Map<Date, Integer> discountMap) {
+    public void setDiscountMap(Map<LocalDate, Integer> discountMap) {
         this.discountMap = discountMap;
     }
 

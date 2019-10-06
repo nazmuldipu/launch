@@ -1,9 +1,17 @@
 package com.ship.nazmul.ship.entities.pojo;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.ship.nazmul.ship.commons.utils.LocalDateDeserializer;
+import com.ship.nazmul.ship.commons.utils.LocalDateSerializer;
+
+import java.time.LocalDate;
 import java.util.Date;
 
 public class ServiceAdminSellsReportRange {
-    private Date date;
+    @JsonSerialize(using = LocalDateSerializer.class)
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    private LocalDate date;
     private String shipNumber;
     private String shipName;
     private int totalNumberOfSeat;
@@ -16,7 +24,7 @@ public class ServiceAdminSellsReportRange {
     public ServiceAdminSellsReportRange() {
     }
 
-    public ServiceAdminSellsReportRange(Date date, String shipNumber, String shipName, int totalNumberOfSeat, int totalFare) {
+    public ServiceAdminSellsReportRange(LocalDate date, String shipNumber, String shipName, int totalNumberOfSeat, int totalFare) {
         this.date = date;
         this.shipNumber = shipNumber;
         this.shipName = shipName;
@@ -24,11 +32,11 @@ public class ServiceAdminSellsReportRange {
         this.totalFare = totalFare;
     }
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 

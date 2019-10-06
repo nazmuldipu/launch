@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.naming.LimitExceededException;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -27,15 +28,15 @@ public interface CategoryService {
 
     List<Category> getCategoryByShipId(Long id);
 
-    Integer getFare(Long categoryId, Date date);
+    Integer getFare(Long categoryId, LocalDate date);
 
-    Integer getDiscount(Long categoryId, Date date);
+    Integer getDiscount(Long categoryId, LocalDate date);
 
-    Map<Date, Integer> getFareMap(Long categoryId, Date startDate, Date endDate) throws NotFoundException;
+    Map<LocalDate, Integer> getFareMap(Long categoryId, LocalDate startDate, LocalDate endDate) throws NotFoundException;
 
-    Map<Date, Integer> getDiscountMap(Long categoryId, Date startDate, Date endDate) throws NotFoundException;
+    Map<LocalDate, Integer> getDiscountMap(Long categoryId, LocalDate startDate, LocalDate endDate) throws NotFoundException;
 
-    Map<String, String> updateCategoryDiscount(Long categoryId, Date startDate, Date endDate, int discountAmount) throws ForbiddenException;
+    Map<String, String> updateCategoryDiscount(Long categoryId, LocalDate startDate, LocalDate endDate, int discountAmount) throws ForbiddenException;
 
     boolean exists(Long id);
 

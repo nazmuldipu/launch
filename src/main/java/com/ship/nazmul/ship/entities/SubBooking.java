@@ -1,19 +1,22 @@
 package com.ship.nazmul.ship.entities;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 
-import javax.persistence.CascadeType;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.ship.nazmul.ship.commons.utils.LocalDateDeserializer;
+import com.ship.nazmul.ship.commons.utils.LocalDateSerializer;
+
 import javax.persistence.Embeddable;
-import javax.persistence.FetchType;
 import javax.persistence.OneToOne;
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDate;
 
 @Embeddable
 public class SubBooking implements Serializable {
-    private Date date;
+    @JsonSerialize(using = LocalDateSerializer.class)
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    private LocalDate date;
     private String seatNumber;
     private int fare;
     private int discount;
@@ -30,12 +33,12 @@ public class SubBooking implements Serializable {
     public SubBooking() {
     }
 
-    public SubBooking(Date date, Seat seat) {
+    public SubBooking(LocalDate date, Seat seat) {
         this.date = date;
         this.seat = seat;
     }
 
-    public SubBooking(Date date, int discount, int commission, Seat seat) {
+    public SubBooking(LocalDate date, int discount, int commission, Seat seat) {
         this.date = date;
         this.discount = discount;
         this.commission = commission;
@@ -44,11 +47,11 @@ public class SubBooking implements Serializable {
 
     }
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 

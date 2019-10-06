@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.naming.LimitExceededException;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -59,16 +60,16 @@ public class CategoryAdminController {
 
     @GetMapping("/discountMap/{categoryId}")
     private ResponseEntity seatPriceMap(@PathVariable("categoryId") Long categoryId,
-                                        @RequestParam("startDate")@DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
-                                        @RequestParam("endDate")@DateTimeFormat(pattern = "yyyy-MM-dd")  Date endDate) throws NotFoundException {
+                                        @RequestParam("startDate")@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+                                        @RequestParam("endDate")@DateTimeFormat(pattern = "yyyy-MM-dd")  LocalDate endDate) throws NotFoundException {
         return ResponseEntity.ok(this.categoryService.getDiscountMap(categoryId, startDate, endDate));
     }
 
     //Set discount map using room id
     @PatchMapping("/discountMap/{categoryId}")
     private ResponseEntity roomDiscountMapping(@PathVariable("categoryId") Long categoryId,
-                                               @RequestParam("startDate") @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
-                                               @RequestParam("endDate") @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate,
+                                               @RequestParam("startDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+                                               @RequestParam("endDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate,
                                                @RequestParam("amount") int amount) throws ForbiddenException {
         return ResponseEntity.ok(this.categoryService.updateCategoryDiscount(categoryId, startDate, endDate, amount));
     }

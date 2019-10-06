@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
+import java.time.LocalDate;
 import java.util.Date;
 
 @RestController
@@ -23,13 +24,13 @@ public class SeatAdminAgentController {
 
     @GetMapping("/available/{shipId}")
     private ResponseEntity getAllAvailableSeatForUser(@PathVariable("shipId") Long shipId,
-                                                      @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date date) throws NotFoundException, ParseException {
+                                                      @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) throws NotFoundException, ParseException {
         return ResponseEntity.ok(this.seatService.getAvailableSeatByShipId(shipId, date));
     }
 
     @GetMapping("/statusList/{shipId}")
     private ResponseEntity getSeatBookingInfoByDate(@PathVariable("shipId") Long shipId,
-                                                    @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date date
+                                                    @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date
     ) throws NotFoundException, JSONException, ParseException {
         return ResponseEntity.ok(this.seatService.getSeatListWithBookingIdByShipId(shipId, date).toString());
     }

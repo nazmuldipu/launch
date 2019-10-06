@@ -7,31 +7,32 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.ParseException;
-import java.util.Date;
+//import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 public interface ReportService {
     /************************************Admin modules***************************************/
-    List<ServiceAdminSellsReport> getAdminSellsReport(Date date) throws ForbiddenException, ParseException;
+    List<ServiceAdminSellsReport> getAdminSellsReport(LocalDate date) throws ForbiddenException, ParseException;
 
-    List<ServiceAdminSellsReportRange> getAdminSellsReportRange(Date startDate, Date endDate) throws ForbiddenException, ParseException;
+    List<ServiceAdminSellsReportRange> getAdminSellsReportRange(LocalDate startDate, LocalDate endDate) throws ForbiddenException, ParseException;
 
-    List<ServiceAdminSellsReport> getAdminReservationReport(Date date) throws ForbiddenException, ParseException;
+    List<ServiceAdminSellsReport> getAdminReservationReport(LocalDate date) throws ForbiddenException, ParseException;
 
-    List<ServiceAdminSellsReportRange> getAdminReservationReportRange(Date startDate, Date endDate) throws ForbiddenException, ParseException;
+    List<ServiceAdminSellsReportRange> getAdminReservationReportRange(LocalDate startDate, LocalDate endDate) throws ForbiddenException, ParseException;
 
-    List<ServiceAdminSellsReport> getAdminSellsReportByShipId(Date date, Long shipId) throws ParseException;
+    List<ServiceAdminSellsReport> getAdminSellsReportByShipId(LocalDate date, Long shipId) throws ParseException;
 
-    List<ServiceAdminSellsReport> getAdminReservationReportByShipId(Date date, Long shipId) throws ForbiddenException, ParseException;
+    List<ServiceAdminSellsReport> getAdminReservationReportByShipId(LocalDate date, Long shipId) throws ForbiddenException, ParseException;
 
     /************************************Service Admin modules***************************************/
-    List<ServiceAdminSellsReport> getServiceAdminSellsReport(Long shipId, Date date) throws ForbiddenException, ParseException;
+    List<ServiceAdminSellsReport> getServiceAdminSellsReport(Long shipId, LocalDate date) throws ForbiddenException, ParseException;
 
-    List<ServiceAdminSellsReportRange> getServiceAdminSellsReportRange(Long shipId, Date startDate, Date endDate) throws ForbiddenException, ParseException;
+    List<ServiceAdminSellsReportRange> getServiceAdminSellsReportRange(Long shipId, LocalDate startDate, LocalDate endDate) throws ForbiddenException, ParseException;
 
-    List<ServiceAdminSellsReport> getServiceAdminReservationReport(Long shipId, Date date) throws ForbiddenException, ParseException;
+    List<ServiceAdminSellsReport> getServiceAdminReservationReport(Long shipId, LocalDate date) throws ForbiddenException, ParseException;
 
-    List<ServiceAdminSellsReportRange> getServiceAdminReservationReportRange(Long shipId, Date startDate, Date endDate) throws ForbiddenException, ParseException;
+    List<ServiceAdminSellsReportRange> getServiceAdminReservationReportRange(Long shipId, LocalDate startDate, LocalDate endDate) throws ForbiddenException, ParseException;
 
-    JSONObject getServiceAdminDashboardReport(Date date) throws JSONException, ForbiddenException, ParseException;
+    JSONObject getServiceAdminDashboardReport(LocalDate date) throws JSONException, ForbiddenException, ParseException;
 }
