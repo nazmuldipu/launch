@@ -21,6 +21,8 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
 
     List<Seat> findByShipIdAndCategoryIdOrderBySeatNumber(Long shipId, Long categoryId);
 
+    List<Seat> findByShipIdAndCategoryIdOrderById(Long shipId, Long categoryId);
+
     List<Seat> findByShipIdOrderBySeatNumberAsc(Long shipId);
 
     Page<Seat> findByShipId(Long shipId, Pageable pageable);

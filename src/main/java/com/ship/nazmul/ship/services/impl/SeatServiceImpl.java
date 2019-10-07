@@ -128,7 +128,7 @@ public class SeatServiceImpl implements SeatService {
     @Override
     public List<Seat> getAvailableSeatByCategoryAndShipId(Long shipId, Long categoryId, LocalDate date) throws NotFoundException, ParseException {
 
-        List<Seat> seatList = this.seatRepository.findByShipIdAndCategoryIdOrderBySeatNumber(shipId, categoryId);
+        List<Seat> seatList = this.seatRepository.findByShipIdAndCategoryIdOrderById(shipId, categoryId);
         return this.getSeatAvailabilityFormSeatList(seatList, date);
     }
 

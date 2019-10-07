@@ -17,21 +17,23 @@ import com.ship.nazmul.ship.repositories.UserRepository;
 import com.ship.nazmul.ship.services.RoleService;
 import com.ship.nazmul.ship.services.ShipService;
 import com.ship.nazmul.ship.services.UserService;
+import com.ship.nazmul.ship.services.accountings.ShipAgentLedgerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepo;
     private final RoleService roleService;
     private final ShipService shipService;
+    private final ShipAgentLedgerService shipAgentLedgerService;
 
     @Value("${baseUrlApi}")
     private String baseUrlApi;
@@ -41,10 +43,11 @@ public class UserServiceImpl implements UserService {
     private String adminPhone2;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepo, RoleService roleService, ShipService shipService) {
+    public UserServiceImpl(UserRepository userRepo, RoleService roleService, ShipService shipService, @Lazy ShipAgentLedgerService shipAgentLedgerService) {
         this.userRepo = userRepo;
         this.roleService = roleService;
         this.shipService = shipService;
+        this.shipAgentLedgerService = shipAgentLedgerService;
     }
 
     @Override
@@ -316,6 +319,9 @@ public class UserServiceImpl implements UserService {
 
         //If user exists and user doesn't belongs to my hotel then access denied
         User oldUser = this.userRepo.findByPhoneNumber(user.getPhoneNumber());
+        if(oldUser != null && !oldUser.isOnlyUser() && oldUser.getShips().size() > 0){
+            throw new ForbiddenException("Access denied, this user already agent for another account.");
+        }
 //        if (oldUser != null && !oldUser.isOnlyUser() && oldUser.getShips() != null)
 //            throw new ForbiddenException("Access denied");
 
@@ -365,12 +371,16 @@ public class UserServiceImpl implements UserService {
         if (user.isOnlyUser()) {
             return user;
         } else if (user.hasRole(Role.ERole.ROLE_SERVICE_AGENT.toString()) && user.getShips() != null) {
-            final Set<Ship> newShips = user.getShips();
-            for(Ship ship: ships){
-                newShips.stream().filter(s-> s.getId() == ship.getId()).collect(Collectors.toSet());
+            int agentBalance = this.shipAgentLedgerService.getServiceAgentBalance(userId);
+            if(agentBalance > 0){
+                this.shipAgentLedgerService.addBalanceToShipAgent(userId, (-1 * agentBalance));
             }
+//            final Set<Ship> newShips = user.getShips();
+//            for(Ship ship: ships){
+//                newShips.stream().filter(s-> s.getId() == ship.getId()).collect(Collectors.toSet());
+//            }
             user.getShips().clear();
-            user.setShips(newShips);
+//            user.setShips(newShips);
             return this.userRepo.save(user);
         }
         return null;
