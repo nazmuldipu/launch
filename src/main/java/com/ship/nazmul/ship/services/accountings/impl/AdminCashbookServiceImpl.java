@@ -52,6 +52,8 @@ public class AdminCashbookServiceImpl implements AdminCashbookService {
 
     @Override
     public AdminCashbook updateBalanceAndSave(AdminCashbook adminCashbook) {
+        System.out.println("D1 : " + adminCashbook.toString());
+        System.out.println("D2 : " +  this.adminCashbookRepository.findFirstByOrderByIdDesc().toString());
         AdminCashbook lastAdminCashbook = this.adminCashbookRepository.findFirstByOrderByIdDesc();
         int lastBalance = lastAdminCashbook == null ? 0 : lastAdminCashbook.getBalance();
         adminCashbook.setBalance(lastBalance + adminCashbook.getDebit() - adminCashbook.getCredit());
