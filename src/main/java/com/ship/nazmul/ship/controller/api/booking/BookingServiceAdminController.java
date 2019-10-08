@@ -43,7 +43,7 @@ public class BookingServiceAdminController {
     }
 
     @DeleteMapping("/cancelBooking/{bookingId}")
-    private ResponseEntity cancelBooking(@PathVariable("bookingId")Long bookingId) throws NotFoundException, ForbiddenException, ParseException, javassist.NotFoundException {
+    private ResponseEntity cancelBooking(@PathVariable("bookingId")Long bookingId) throws NotFoundException, ForbiddenException, ParseException, javassist.NotFoundException, UserAlreadyExistsException, NullPasswordException, UserInvalidException {
         this.bookingService.cancelBooking(bookingId);
         return ResponseEntity.ok().build();
     }

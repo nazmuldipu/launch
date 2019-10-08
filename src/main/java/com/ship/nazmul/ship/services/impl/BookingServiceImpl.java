@@ -514,7 +514,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public void cancelBooking(Long bookingId) throws ForbiddenException, NotFoundException, ParseException, javassist.NotFoundException {
+    public void cancelBooking(Long bookingId) throws ForbiddenException, NotFoundException, ParseException, javassist.NotFoundException, UserAlreadyExistsException, NullPasswordException, UserInvalidException {
         User currentUser = SecurityConfig.getCurrentUser();
         Booking booking = this.getOne(bookingId);
         System.out.println(booking.getCreatedBy().getName() + ":" + booking.getCreatedBy().getRoles());
@@ -546,11 +546,12 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    private void clearBooking(Booking booking) throws ParseException, NotFoundException, ForbiddenException {
+    private void clearBooking(Booking booking) throws ParseException, NotFoundException, ForbiddenException, UserAlreadyExistsException, NullPasswordException, UserInvalidException {
         for (SubBooking subBooking : booking.getSubBookingList()) {
             //Clear Booking and Status map
             System.out.println("clear status and booking id for " + subBooking.getSeat().getSeatNumber() + "; id ="+subBooking.getSeat().getId());
-            this.seatService.clearSeatStatusAndBookingIdMap(subBooking.getSeat().getId(), subBooking.getDate(), booking);
+            this.cancelReservationSeat(subBooking.getSeat().getId(), booking.getId());
+//            this.seatService.clearSeatStatusAndBookingIdMap(subBooking.getSeat().getId(), subBooking.getDate(), booking);
         }
     }
 }
