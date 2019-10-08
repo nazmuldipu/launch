@@ -491,6 +491,8 @@ public class BookingServiceImpl implements BookingService {
         for(SubBooking sb : booking.getSubBookingList()){
             if( !Objects.equals(sb.getSeat().getId(), seatId)){
                 subBookingList.add(sb);
+            } else {
+                this.seatService.clearSeatStatusAndBookingIdMap(seatId, sb.getDate(), booking);
             }
         }
 
