@@ -268,6 +268,7 @@ public class SeatServiceImpl implements SeatService {
             seat.getSeatStatusMap().put(entry.getKey(), entry.getValue());
             this.seatRepository.save(seat);
         }
+        System.out.println("clearStatusMap");
         this.seatRepository.save(seat);
     }
 
@@ -284,6 +285,7 @@ public class SeatServiceImpl implements SeatService {
     public void removeBookingMap(Long seatId, Date date) throws NotFoundException {
         Seat seat = this.getOne(seatId);
         seat.getBookingIdMap().remove(date);
+        System.out.println("removeBookingMap");
         this.seatRepository.save(seat);
     }
 }

@@ -477,6 +477,7 @@ public class BookingServiceImpl implements BookingService {
     public void cancelReservation(Long bookingId) throws ParseException, NotFoundException, ForbiddenException, UserAlreadyExistsException, NullPasswordException, UserInvalidException {
         Booking booking = this.getOne(bookingId);
         System.out.println(booking);
+        System.out.println("Subbooking size " + booking.getSubBookingList());
         booking.setCancelled(true);
         this.clearBooking(booking);
         this.save(booking);
@@ -548,6 +549,7 @@ public class BookingServiceImpl implements BookingService {
     private void clearBooking(Booking booking) throws ParseException, NotFoundException, ForbiddenException {
         for (SubBooking subBooking : booking.getSubBookingList()) {
             //Clear Booking and Status map
+            System.out.println("clear status and booking id for " + subBooking.getSeat().getSeatNumber() + "; id ="+subBooking.getSeat().getId());
             this.seatService.clearSeatStatusAndBookingIdMap(subBooking.getSeat().getId(), subBooking.getDate(), booking);
         }
     }
