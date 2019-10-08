@@ -2,10 +2,12 @@ package com.ship.nazmul.ship.entities.accountings;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.ship.nazmul.ship.commons.utils.LocalDateTimeAttributeConverter;
 import com.ship.nazmul.ship.commons.utils.LocalDateTimeDeserializer;
 import com.ship.nazmul.ship.commons.utils.LocalDateTimeSerializer;
 import com.ship.nazmul.ship.entities.base.BaseEntity;
 
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import java.time.LocalDateTime;
 
@@ -13,6 +15,7 @@ import java.time.LocalDateTime;
 public class AdminCashbook extends BaseEntity {
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @Convert(converter = LocalDateTimeAttributeConverter.class)
     private LocalDateTime date;
     private String explanation;
     private String ref;

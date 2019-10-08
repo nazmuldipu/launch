@@ -2,11 +2,13 @@ package com.ship.nazmul.ship.entities.accountings;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.ship.nazmul.ship.commons.utils.LocalDateTimeAttributeConverter;
 import com.ship.nazmul.ship.commons.utils.LocalDateTimeDeserializer;
 import com.ship.nazmul.ship.commons.utils.LocalDateTimeSerializer;
 import com.ship.nazmul.ship.entities.User;
 import com.ship.nazmul.ship.entities.base.BaseEntity;
 
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import java.time.LocalDateTime;
@@ -19,6 +21,7 @@ public class ShipAdminLedger extends BaseEntity {
     private User user;
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @Convert(converter = LocalDateTimeAttributeConverter.class)
     private LocalDateTime date;
     private String explanation;
     private String ref;
