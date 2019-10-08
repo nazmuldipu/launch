@@ -316,6 +316,9 @@ public class UserServiceImpl implements UserService {
 
         //If user exists and user doesn't belongs to my hotel then access denied
         User oldUser = this.userRepo.findByPhoneNumber(user.getPhoneNumber());
+        if(oldUser != null && !oldUser.isOnlyUser() && oldUser.getShips().size() > 0){
+            throw new ForbiddenException("Access denied, this user already agent for another account.");
+        }
 //        if (oldUser != null && !oldUser.isOnlyUser() && oldUser.getShips() != null)
 //            throw new ForbiddenException("Access denied");
 
@@ -365,12 +368,16 @@ public class UserServiceImpl implements UserService {
         if (user.isOnlyUser()) {
             return user;
         } else if (user.hasRole(Role.ERole.ROLE_SERVICE_AGENT.toString()) && user.getShips() != null) {
-            final Set<Ship> newShips = user.getShips();
-            for(Ship ship: ships){
-                newShips.stream().filter(s-> s.getId() == ship.getId()).collect(Collectors.toSet());
+            int agentBalance = this.shipAgentLedgerService.getServiceAgentBalance(userId);
+            if(agentBalance > 0){
+                this.shipAgentLedgerService.addBalanceToShipAgent(userId, (-1 * agentBalance));
             }
+//            final Set<Ship> newShips = user.getShips();
+//            for(Ship ship: ships){
+//                newShips.stream().filter(s-> s.getId() == ship.getId()).collect(Collectors.toSet());
+//            }
             user.getShips().clear();
-            user.setShips(newShips);
+//            user.setShips(newShips);
             return this.userRepo.save(user);
         }
         return null;
