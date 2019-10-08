@@ -235,10 +235,22 @@ public class SeatServiceImpl implements SeatService {
     @Override
     public Seat updateStatusMap(Long seatId, Date date, Seat.EStatus status) throws NotFoundException, ParseException {
         Seat seat = this.getOne(seatId);
-//        date = DateUtil.truncateTimeFromDate(date);
-        seat.getSeatStatusMap().put(date, status);
-        seat = this.seatRepository.save(seat);
-        return seat;
+        //TODO: remove following one line after debug period
+        final Map<Date, Seat.EStatus> seatStatusMap = new HashMap<>();
+        for (final Map.Entry<Date, Seat.EStatus> entry : seat.getSeatStatusMap().entrySet()) {
+            if(!entry.getKey().equals(date)) {
+                seatStatusMap.put(DateUtil.simpleDateFormat(entry.getKey()), entry.getValue());
+            } else{
+                seatStatusMap.put(DateUtil.simpleDateFormat(entry.getKey()), status);
+            }
+        }
+        seat.getSeatStatusMap().clear();
+        this.seatRepository.save(seat);
+        for (Map.Entry<Date, Seat.EStatus> entry : seatStatusMap.entrySet()) {
+            seat.getSeatStatusMap().put(entry.getKey(), entry.getValue());
+            this.seatRepository.save(seat);
+        }
+        return this.seatRepository.save(seat);
     }
 
     private void clearStatusMap(Long seatId, Date date) throws NotFoundException, ParseException {
