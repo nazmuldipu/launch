@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -100,7 +101,7 @@ public class ShipAgentLedgerServiceImpl implements ShipAgentLedgerService {
         this.shipAdminCashbookService.addShipAdminCashbookEntry(currentUser.getId(), amount, 0, "Agent balance from : "+ user.getName() + " ["+user.getPhoneNumber()+"]");
 
         // 2) Credit amount to ShipAgent cashbook
-        ShipAgentLedger shipAgentLedger = new ShipAgentLedger(user, LocalDate.now(), "Add balance", 0, amount);
+        ShipAgentLedger shipAgentLedger = new ShipAgentLedger(user, LocalDateTime.now(), "Add balance", 0, amount);
         shipAgentLedger = this.updateBalanceAndSave(agentId, shipAgentLedger);
 
         return shipAgentLedger;

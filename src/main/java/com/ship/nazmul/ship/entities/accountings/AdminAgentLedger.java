@@ -4,21 +4,24 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.ship.nazmul.ship.commons.utils.LocalDateDeserializer;
 import com.ship.nazmul.ship.commons.utils.LocalDateSerializer;
+import com.ship.nazmul.ship.commons.utils.LocalDateTimeDeserializer;
+import com.ship.nazmul.ship.commons.utils.LocalDateTimeSerializer;
 import com.ship.nazmul.ship.entities.User;
 import com.ship.nazmul.ship.entities.base.BaseEntity;
 
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
 public class AdminAgentLedger extends BaseEntity {
     @ManyToOne
     private User agent;
-    @JsonSerialize(using = LocalDateSerializer.class)
-    @JsonDeserialize(using = LocalDateDeserializer.class)
-    private LocalDate date;
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    private LocalDateTime date;
     private String explanation;
     private String ref;
     private int debit;
@@ -29,7 +32,7 @@ public class AdminAgentLedger extends BaseEntity {
     public AdminAgentLedger() {
     }
 
-    public AdminAgentLedger(User agent, LocalDate date, String explanation, int debit, int credit) {
+    public AdminAgentLedger(User agent, LocalDateTime date, String explanation, int debit, int credit) {
         this.agent = agent;
         this.date = date;
         this.explanation = explanation;
@@ -45,11 +48,11 @@ public class AdminAgentLedger extends BaseEntity {
         this.agent = agent;
     }
 
-    public LocalDate getDate() {
+    public LocalDateTime getDate() {
         return date;
     }
 
-    public void setDate(LocalDate date) {
+    public void setDate(LocalDateTime date) {
         this.date = date;
     }
 
