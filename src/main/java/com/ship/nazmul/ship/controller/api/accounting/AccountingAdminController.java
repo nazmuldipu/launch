@@ -39,6 +39,7 @@ public class AccountingAdminController {
     @GetMapping("/cashbook")
     private ResponseEntity getAdminCashbook(@RequestParam(value = "page", defaultValue = "0") Integer page) {
         //TODO: HIDE Ship information from response info
+//        this.adminCashbookService.updateFormat();
         return ResponseEntity.ok(this.adminCashbookService.getAllAdminCashbook(page));
     }
 

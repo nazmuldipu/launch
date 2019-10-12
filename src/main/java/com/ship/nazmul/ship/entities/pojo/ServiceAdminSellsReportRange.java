@@ -2,15 +2,17 @@ package com.ship.nazmul.ship.entities.pojo;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.ship.nazmul.ship.commons.utils.LocalDateAttributeConverter;
 import com.ship.nazmul.ship.commons.utils.LocalDateDeserializer;
 import com.ship.nazmul.ship.commons.utils.LocalDateSerializer;
 
+import javax.persistence.Convert;
 import java.time.LocalDate;
-import java.util.Date;
 
 public class ServiceAdminSellsReportRange {
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonDeserialize(using = LocalDateDeserializer.class)
+    @Convert(converter = LocalDateAttributeConverter.class)
     private LocalDate date;
     private String shipNumber;
     private String shipName;

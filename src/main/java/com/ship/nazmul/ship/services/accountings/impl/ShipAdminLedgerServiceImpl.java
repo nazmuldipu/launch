@@ -17,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -136,11 +137,11 @@ public class ShipAdminLedgerServiceImpl implements ShipAdminLedgerService {
         this.adminCashbookService.addAdminCashbookEntry(0,amount, "Pay to ShipAdmin : " + user.getName() + " : " + user.getPhoneNumber());
 
         //2) Debit Amount to ShipAdminLedger
-        ShipAdminLedger shipAdminLedger = new ShipAdminLedger(user, LocalDate.now(), "Got payment from Hotelswave ", amount, 0);
+        ShipAdminLedger shipAdminLedger = new ShipAdminLedger(user, LocalDateTime.now(), "Got payment from Hotelswave ", amount, 0);
         shipAdminLedger = this.addShipAdminLedger(adminId, shipAdminLedger);
 
         //3) Debit amount to ShipAdminCashbook
-        ShipAdminCashbook shipAdminCashbook = new ShipAdminCashbook(LocalDate.now(), user, "Hotelswave payment ", amount, 0);
+        ShipAdminCashbook shipAdminCashbook = new ShipAdminCashbook(LocalDateTime.now(), user, "Hotelswave payment ", amount, 0);
         this.shipAdminCashbookService.debitAmount(shipAdminCashbook);
 
         return shipAdminLedger;

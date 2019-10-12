@@ -4,9 +4,12 @@ package com.ship.nazmul.ship.entities;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.ship.nazmul.ship.commons.utils.LocalDateAttributeConverter;
 import com.ship.nazmul.ship.commons.utils.LocalDateDeserializer;
 import com.ship.nazmul.ship.commons.utils.LocalDateSerializer;
+import com.ship.nazmul.ship.commons.utils.LocalDateTimeAttributeConverter;
 
+import javax.persistence.Convert;
 import javax.persistence.Embeddable;
 import javax.persistence.OneToOne;
 import java.io.Serializable;
@@ -16,6 +19,7 @@ import java.time.LocalDate;
 public class SubBooking implements Serializable {
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonDeserialize(using = LocalDateDeserializer.class)
+    @Convert(converter = LocalDateAttributeConverter.class)
     private LocalDate date;
     private String seatNumber;
     private int fare;

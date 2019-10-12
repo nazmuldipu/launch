@@ -2,16 +2,16 @@ package com.ship.nazmul.ship.entities.accountings;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.ship.nazmul.ship.commons.utils.LocalDateDeserializer;
-import com.ship.nazmul.ship.commons.utils.LocalDateSerializer;
-import com.ship.nazmul.ship.entities.Ship;
+import com.ship.nazmul.ship.commons.utils.LocalDateTimeAttributeConverter;
+import com.ship.nazmul.ship.commons.utils.LocalDateTimeDeserializer;
+import com.ship.nazmul.ship.commons.utils.LocalDateTimeSerializer;
 import com.ship.nazmul.ship.entities.User;
 import com.ship.nazmul.ship.entities.base.BaseEntity;
 
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
-import java.time.LocalDate;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 public class ShipAdminLedger extends BaseEntity {
@@ -19,9 +19,10 @@ public class ShipAdminLedger extends BaseEntity {
 //    private Ship ship;
     @ManyToOne
     private User user;
-    @JsonSerialize(using = LocalDateSerializer.class)
-    @JsonDeserialize(using = LocalDateDeserializer.class)
-    private LocalDate date;
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @Convert(converter = LocalDateTimeAttributeConverter.class)
+    private LocalDateTime date;
     private String explanation;
     private String ref;
     private int debit;
@@ -32,7 +33,7 @@ public class ShipAdminLedger extends BaseEntity {
     public ShipAdminLedger() {
     }
 
-    public ShipAdminLedger(User user, LocalDate date, String explanation, int debit, int credit) {
+    public ShipAdminLedger(User user, LocalDateTime date, String explanation, int debit, int credit) {
 //        this.ship = ship;
         this.user = user;
         this.date = date;
@@ -57,11 +58,11 @@ public class ShipAdminLedger extends BaseEntity {
         this.user = user;
     }
 
-    public LocalDate getDate() {
+    public LocalDateTime getDate() {
         return date;
     }
 
-    public void setDate(LocalDate date) {
+    public void setDate(LocalDateTime date) {
         this.date = date;
     }
 

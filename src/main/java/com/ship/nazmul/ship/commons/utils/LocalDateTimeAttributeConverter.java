@@ -4,17 +4,22 @@ import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 
 @Converter
-public class LocalDateTimeAttributeConverter implements AttributeConverter<LocalDateTime, Timestamp> {
+public class LocalDateTimeAttributeConverter implements AttributeConverter<LocalDateTime, Date> {
 
     @Override
-    public Timestamp convertToDatabaseColumn(LocalDateTime locDateTime) {
-        return (locDateTime == null ? null : Timestamp.valueOf(locDateTime));
+    public Date convertToDatabaseColumn(LocalDateTime dateToConvert) {
+        return java.util.Date
+                .from(dateToConvert.atZone(ZoneId.systemDefault())
+                        .toInstant());
     }
 
     @Override
-    public LocalDateTime convertToEntityAttribute(Timestamp sqlTimestamp) {
-        return (sqlTimestamp == null ? null : sqlTimestamp.toLocalDateTime());
+    public LocalDateTime convertToEntityAttribute(Date dateToConvert) {
+        return new java.sql.Timestamp(
+                dateToConvert.getTime()).toLocalDateTime();
     }
 }
