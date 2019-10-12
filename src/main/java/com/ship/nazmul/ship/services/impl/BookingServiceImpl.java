@@ -139,7 +139,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public Booking createAdminBooking(Booking booking) throws ForbiddenException, NotFoundException, ParseException, UserAlreadyExistsException, NullPasswordException, UserInvalidException, javassist.NotFoundException {
+    public Booking createAdminBooking(Booking booking) throws ForbiddenException, NotFoundException, ParseException, UserAlreadyExistsException, NullPasswordException, UserInvalidException{
         //1) Security check if user has sufficient permission for this action
         User user = SecurityConfig.getCurrentUser();
         if (!user.hasRole(Role.ERole.ROLE_ADMIN.toString())) throw new ForbiddenException("Access denied");
@@ -165,12 +165,12 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Booking confirmReservation(Long bookingId) throws NotFoundException, UserAlreadyExistsException, NullPasswordException, UserInvalidException, ParseException, javassist.NotFoundException {
+    public Booking confirmReservation(Long bookingId) throws NotFoundException, UserAlreadyExistsException, NullPasswordException, UserInvalidException, ParseException{
         Booking booking = this.getOne(bookingId);
         return this.approveBooking(booking);
     }
 
-    private Booking approveBooking(Booking booking) throws NotFoundException, UserAlreadyExistsException, NullPasswordException, UserInvalidException, ParseException, javassist.NotFoundException {
+    private Booking approveBooking(Booking booking) throws NotFoundException, UserAlreadyExistsException, NullPasswordException, UserInvalidException, ParseException{
         booking.seteStatus(Seat.EStatus.SEAT_SOLD);
         for (SubBooking subBooking : booking.getSubBookingList()) {
             this.seatService.updateStatusMap(subBooking.getSeat().getId(), subBooking.getDate(), booking.geteStatus());
@@ -232,7 +232,7 @@ public class BookingServiceImpl implements BookingService {
     /*1) Admin_Cashbook debit total booking amount
      * 2) Admin_Ship_Ledger credit ( total amount - hotelswave discount)
      * */
-    private void adminSellSeatAccounting(Booking booking, boolean cancel) throws NotFoundException, javassist.NotFoundException {
+    private void adminSellSeatAccounting(Booking booking, boolean cancel) throws NotFoundException{
         //1) Admin_Cashbook debit total booking amount
         Ship ship = booking.getShip();
         String explanation = (cancel ? "Cancel " : "") + ship.getShipNumber() + ":" + ship.getName() + " - Booking for booking id " + booking.getId();
@@ -282,7 +282,7 @@ public class BookingServiceImpl implements BookingService {
         shipAgentLedger = this.shipAgentLedgerService.updateBalanceAndSave(SecurityConfig.getCurrentUser().getId(), shipAgentLedger);
     }
 
-    private void adminAgentSellsSeatAccount(Booking booking, boolean cancel) throws javassist.NotFoundException {
+    private void adminAgentSellsSeatAccount(Booking booking, boolean cancel) throws NotFoundException {
         int commission = booking.getShip().getHotelswaveCommission()/2;
         String explanation = (cancel ? "Cancel " : "") + "Booking for booking id " + booking.getId();
 
@@ -332,7 +332,11 @@ public class BookingServiceImpl implements BookingService {
         return;
     }
 
-    /*Remove sold booking seats and recalculate booking*/
+    /*Remove sold booking seats from booking for service admin
+    * @param booking    booking object that from remove
+    * @param setIds     list of seat id's that to be remove
+    *
+    * step: 1) Credit amount from ShipAdminCashbook*/
     private void removeServiceAdminBookingSeats(Booking booking, List<Long> seatIds) throws NotFoundException, ForbiddenException, ParseException, NullPasswordException, UserInvalidException, UserAlreadyExistsException {
         //Accounting parts : remove seats price from Service admin cash book
         String seatList = "";
@@ -346,13 +350,44 @@ public class BookingServiceImpl implements BookingService {
         amount -= (seatIds.size() * (booking.getBookingDiscount() / booking.getSubBookingList().size()));
         String explanation = "Cancel Partial booking seats " + seatList + " for booking id " + booking.getId();
         ShipAdminCashbook shipAdminCashbook;
-        shipAdminCashbook = new ShipAdminCashbook(LocalDate.now(), booking.getShip().getAdmin(), explanation, 0, amount);
+        shipAdminCashbook = new ShipAdminCashbook(LocalDateTime.now(), booking.getShip().getAdmin(), explanation, 0, amount);
         shipAdminCashbook.setApproved(true);
         shipAdminCashbook = this.shipAdminCashbookService.debitAmount(shipAdminCashbook);
 
-
-        this.cancelReservationSeats(booking.getId(), seatIds);
         return;
+    }
+
+
+    /*Remove sold booking seats from booking for ADMIN
+     * @param booking    booking object that from remove
+     * @param setIds     list of seat id's that to be remove
+     *
+     * step: 1) Credit amount from AdminCashbook
+     *       2) Debit amount from ShipAdminLedger after deducting hotelswave ledger*/
+    private void removeAdminBookingSeats(Booking booking, List<Long> seatIds) throws NotFoundException {
+        String seatList = "";
+        int amount = 0;
+        for(SubBooking sb: booking.getSubBookingList()){
+            if(seatIds.contains(sb.getSeat().getId())){
+                seatList += sb.getSeat().getSeatNumber() + ", ";
+                amount += sb.getPayablePrice();
+            }
+        }
+        amount -= (seatIds.size() * (booking.getBookingDiscount() / booking.getSubBookingList().size()));
+
+        //1) Credit amount from AdminCashbook
+        String explanation = "Cancel Partial booking seats " + seatList + " for booking id " + booking.getId();
+        AdminCashbook adminCashbook= new AdminCashbook(LocalDateTime.now(), explanation, 0, amount);
+        adminCashbook.setApproved(true);
+        adminCashbook.setRef(booking.getId().toString());
+        this.adminCashbookService.updateBalanceAndSave(adminCashbook);
+
+        //2) Debit amount from ShipAdminLedger after deducting hotelswave ledger
+        amount -= (seatIds.size() * (booking.getHotelswaveDiscount() / booking.getSubBookingList().size()));
+        ShipAdminLedger shipAdminLedger = new ShipAdminLedger(booking.getShip().getAdmin(), LocalDateTime.now(), explanation, amount, 0);
+        shipAdminLedger.setApproved(true);
+        shipAdminLedger.setRef(booking.getId().toString());
+        this.shipAdminLedgerService.addShipAdminLedger(booking.getShip().getAdmin().getId(), shipAdminLedger);
     }
 
     private Booking calculateBooking(Booking booking) {
@@ -398,7 +433,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Booking createAdminAgentBooking(Booking booking) throws ForbiddenException, NotFoundException, ParseException, UserAlreadyExistsException, NullPasswordException, UserInvalidException, javassist.NotFoundException {
+    public Booking createAdminAgentBooking(Booking booking) throws ForbiddenException, NotFoundException, ParseException, UserAlreadyExistsException, NullPasswordException, UserInvalidException{
         //1) Security check if user has sufficient permission for this action
         User user = SecurityConfig.getCurrentUser();
         if (!user.hasRole(Role.ERole.ROLE_AGENT.toString())) throw new ForbiddenException("Access denied");
@@ -433,7 +468,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Booking createServiceAdminBooking(Booking booking) throws ForbiddenException, NotFoundException, ParseException, UserAlreadyExistsException, NullPasswordException, UserInvalidException, javassist.NotFoundException {
+    public Booking createServiceAdminBooking(Booking booking) throws ForbiddenException, NotFoundException, ParseException, UserAlreadyExistsException, NullPasswordException, UserInvalidException {
         //1) Security check if user has sufficient permission for this action
         User user = SecurityConfig.getCurrentUser();
         if (!user.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString())) throw new ForbiddenException("Access denied");
@@ -460,7 +495,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Booking createServiceAgentBooking(Booking booking) throws ForbiddenException, NotFoundException, ParseException, UserAlreadyExistsException, NullPasswordException, UserInvalidException, javassist.NotFoundException {
+    public Booking createServiceAgentBooking(Booking booking) throws ForbiddenException, NotFoundException, ParseException, UserAlreadyExistsException, NullPasswordException, UserInvalidException{
         //1) Security check if user has sufficient permission for this action
         User user = SecurityConfig.getCurrentUser();
         if (!user.hasRole(Role.ERole.ROLE_SERVICE_AGENT.toString())) throw new ForbiddenException("Access denied");
@@ -532,7 +567,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public void cancelBooking(Long bookingId) throws ForbiddenException, NotFoundException, ParseException, javassist.NotFoundException {
+    public void cancelBooking(Long bookingId) throws ForbiddenException, NotFoundException, ParseException{
         User currentUser = SecurityConfig.getCurrentUser();
         Booking booking = this.getOne(bookingId);
 
@@ -569,13 +604,16 @@ public class BookingServiceImpl implements BookingService {
         if(!currentUser.isAdmin() && !currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()))
             throw new ForbiddenException("Access denied");
         Booking booking = this.getOne(bookingId);
-        System.out.println("D2");
         if (!booking.isCancelled()) {
-            System.out.println("D3");
             if (booking.getCreatedBy().hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString())) {
-                System.out.println("D1 : Booking removing");
+                System.out.println("D1 : Service admin Booking removing");
                 this.removeServiceAdminBookingSeats(booking, seatIds);
+            } else if(booking.getCreatedBy().isAdmin()){
+                System.out.println("D2 : Admin Booking removing");
+                this.removeAdminBookingSeats(booking, seatIds);
             }
+            System.out.println("D3");
+            this.cancelReservationSeats(booking.getId(), seatIds);
         }
     }
 

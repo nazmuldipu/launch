@@ -2,8 +2,8 @@ package com.ship.nazmul.ship.services.accountings;
 
 import com.ship.nazmul.ship.entities.accountings.ShipAdminLedger;
 import com.ship.nazmul.ship.exceptions.forbidden.ForbiddenException;
+import com.ship.nazmul.ship.exceptions.notfound.NotFoundException;
 import com.ship.nazmul.ship.exceptions.notfound.UserNotFoundException;
-import javassist.NotFoundException;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
