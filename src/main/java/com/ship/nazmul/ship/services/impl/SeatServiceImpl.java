@@ -159,9 +159,9 @@ public class SeatServiceImpl implements SeatService {
             if (!this.checkSeatAvailability(seat.getId(), date)) {
                 //TODO: remove following condition after debug period
                 Long bookingId = seat.getBookingIdMap().get(date);
-                if(bookingId == null){
-                    bookingId = seat.getBookingIdMap().get(date);
-                }
+//                if(bookingId == null){
+//                    bookingId = seat.getBookingIdMap().get(date);
+//                }
                 obj.put("bookingId", bookingId);
                 Seat.EStatus status =  seat.getSeatStatusMap().get(date);
                 if(status == null){
@@ -204,10 +204,10 @@ public class SeatServiceImpl implements SeatService {
         Seat seat = this.getOne(seatId);
         //TODO: remove print command after testing period complete
         Seat.EStatus status = seat.getSeatStatusMap().get(date);
-        if(status == null) {
-            System.out.println("D3 date: Found null");
-            status = seat.getSeatStatusMap().get(date);
-        }
+//        if(status == null) {
+//            System.out.println("D3 date: Found null");
+//            status = seat.getSeatStatusMap().get(date);
+//        }
         if (status == null || status == Seat.EStatus.SEAT_FREE)
             return true;
         return false;

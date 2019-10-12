@@ -23,6 +23,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.awt.print.Book;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -330,6 +331,29 @@ public class BookingServiceImpl implements BookingService {
         return;
     }
 
+    /*Remove sold booking seats and recalculate booking*/
+    private void removeServiceAdminBookingSeats(Booking booking, List<Long> seatIds) throws NotFoundException, ForbiddenException, ParseException, NullPasswordException, UserInvalidException, UserAlreadyExistsException {
+        //Accounting parts : remove seats price from Service admin cash book
+        String seatList = "";
+        int amount = 0;
+        for(SubBooking sb: booking.getSubBookingList()){
+            if(seatIds.contains(sb.getSeat().getId())){
+                seatList += sb.getSeat().getSeatNumber() + ", ";
+                amount += sb.getPayablePrice();
+            }
+        }
+        amount -= (seatIds.size() * (booking.getBookingDiscount() / booking.getSubBookingList().size()));
+        String explanation = "Cancel Partial booking seats " + seatList + " for booking id " + booking.getId();
+        ShipAdminCashbook shipAdminCashbook;
+        shipAdminCashbook = new ShipAdminCashbook(LocalDate.now(), booking.getShip().getAdmin(), explanation, 0, amount);
+        shipAdminCashbook.setApproved(true);
+        shipAdminCashbook = this.shipAdminCashbookService.debitAmount(shipAdminCashbook);
+
+
+        this.cancelReservationSeats(booking.getId(), seatIds);
+        return;
+    }
+
     private Booking calculateBooking(Booking booking) {
         int totalFare = 0;
         int totalDiscount = 0;
@@ -339,7 +363,7 @@ public class BookingServiceImpl implements BookingService {
             totalDiscount += subBooking.getDiscount();
             totalCommission += subBooking.getCommission();
         }
-        totalDiscount += booking.getTotalDiscount();
+        totalDiscount += booking.getBookingDiscount();
         booking.setTotalFare(totalFare);
         booking.setTotalDiscount(totalDiscount);
         booking.setTotalCommission(totalCommission);
@@ -492,10 +516,18 @@ public class BookingServiceImpl implements BookingService {
                 .filter(sb -> !Objects.equals(sb.getSeat().getId(), seatId))
                 .collect(Collectors.toList());
         this.seatService.clearSeatStatusAndBookingIdMap(seatId, subBooking.getDate(), booking);
-        booking.setTotalDiscount(booking.getTotalDiscount() - (booking.getTotalDiscount()/booking.getSubBookingList().size()));//must be prior to set new sub booking list
-        booking.setSubBookingList(subBookingList);
+        booking.setBookingDiscount(booking.getBookingDiscount() - (booking.getBookingDiscount()/booking.getSubBookingList().size()));
+//        booking.setTotalDiscount(booking.getTotalDiscount() - (booking.getTotalDiscount()/booking.getSubBookingList().size()));//must be prior to set new sub booking list
+        booking.setSubBookingList(this.calculateSubBookingList(subBookingList));
         booking = this.calculateBooking(booking);
         this.save(booking);
+    }
+
+    @Override
+    public void cancelReservationSeats(Long bookingId, List<Long> seatIds) throws UserInvalidException, ForbiddenException, ParseException, NullPasswordException, NotFoundException, UserAlreadyExistsException {
+        for(Long seatId: seatIds){
+            this.cancelReservationSeat(seatId, bookingId);
+        }
     }
 
     @Override
@@ -527,6 +559,22 @@ public class BookingServiceImpl implements BookingService {
             booking.setCancelled(true);
             this.bookingRepository.save(booking);
 
+        }
+    }
+
+    @Override
+    public void cancelBookingSeats(Long bookingId, List<Long> seatIds) throws ForbiddenException, UserInvalidException, NullPasswordException, ParseException, UserAlreadyExistsException, NotFoundException {
+        User currentUser = SecurityConfig.getCurrentUser();
+        if(!currentUser.isAdmin() && !currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()))
+            throw new ForbiddenException("Access denied");
+        Booking booking = this.getOne(bookingId);
+        System.out.println("D2");
+        if (!booking.isCancelled()) {
+            System.out.println("D3");
+            if (booking.getCreatedBy().hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString())) {
+                System.out.println("D1 : Booking removing");
+                this.removeServiceAdminBookingSeats(booking, seatIds);
+            }
         }
     }
 
