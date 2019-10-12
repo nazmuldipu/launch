@@ -18,15 +18,16 @@ import com.ship.nazmul.ship.services.RoleService;
 import com.ship.nazmul.ship.services.ShipService;
 import com.ship.nazmul.ship.services.UserService;
 import com.ship.nazmul.ship.services.accountings.ShipAgentLedgerService;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -192,8 +193,10 @@ public class UserServiceImpl implements UserService {
 
         //If user exists and user doesn't belongs to my hotel then access denied
         User oldUser = this.userRepo.findByPhoneNumber(user.getPhoneNumber());
-        if (oldUser != null && !oldUser.isOnlyUser() && !oldUser.hasRole(Role.ERole.ROLE_AGENT.toString()))
-            throw new ForbiddenException("Access denied");
+        if (oldUser != null && !oldUser.isOnlyUser() && oldUser.getShips().size() > 0) {
+            throw new ForbiddenException("Access denied, this user already agent for another account.");
+        }
+
 
         if (oldUser != null) {
             oldUser.setName(user.getName());
@@ -257,8 +260,8 @@ public class UserServiceImpl implements UserService {
 
         //Remove all previous Ship admin
         List<User> currentShipUsers = this.getUserListByShipId(shipId);
-        for(User csu : currentShipUsers){
-            if(csu.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString())){
+        for (User csu : currentShipUsers) {
+            if (csu.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString())) {
                 csu.getShips().remove(ship);
                 csu.changeRole(this.roleService.findRole(Role.ERole.ROLE_USER));
                 this.userRepo.save(csu);
@@ -266,11 +269,11 @@ public class UserServiceImpl implements UserService {
         }
 
         //Add ship into user ShipList and save
-        if(!user.getShips().contains(ship)){
+        if (!user.getShips().contains(ship)) {
             user.getShips().add(ship);
             user.changeRole(this.roleService.findRole(Role.ERole.ROLE_SERVICE_ADMIN));
             user = this.userRepo.save(user);
-        } else if(user.hasRole(Role.ERole.ROLE_SERVICE_AGENT.toString())){
+        } else if (user.hasRole(Role.ERole.ROLE_SERVICE_AGENT.toString())) {
             user.changeRole(this.roleService.findRole(Role.ERole.ROLE_SERVICE_ADMIN));
             user = this.userRepo.save(user);
         }
@@ -282,13 +285,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User assignShipAgent(Long userId, Long shipId) throws NotFoundException{
+    public User assignShipAgent(Long userId, Long shipId) throws NotFoundException {
         //Get provided User and Ship object
         User user = this.getOne(userId);
         Ship ship = this.shipService.getOne(shipId);
 
         //Add ship into user ShipList and save
-        if(!user.getShips().contains(ship)){
+        if (!user.getShips().contains(ship)) {
             user.getShips().add(ship);
             user.changeRole(this.roleService.findRole(Role.ERole.ROLE_SERVICE_AGENT));
             user = this.userRepo.save(user);
@@ -309,6 +312,13 @@ public class UserServiceImpl implements UserService {
         return this.save(user);
     }
 
+    /*Create Service admin agent
+    * @param user   user object to be add
+    * @return user  agent object after creating agent
+    * Setps: 1) Check if user with phone number exists
+    *       2) if exist and has ship list then Access denied
+    *       3) if exist but ship list size is zero then add as current user agent
+    *       4) if not exits then create user as agent*/
     @Override
     public User createServiceAdminAgent(User user) throws ForbiddenException, NullPasswordException {
         //Security check
@@ -319,11 +329,8 @@ public class UserServiceImpl implements UserService {
 
         //If user exists and user doesn't belongs to my hotel then access denied
         User oldUser = this.userRepo.findByPhoneNumber(user.getPhoneNumber());
-        if(oldUser != null && !oldUser.isOnlyUser() && oldUser.getShips().size() > 0){
-            throw new ForbiddenException("Access denied, this user already agent for another account.");
-        }
-//        if (oldUser != null && !oldUser.isOnlyUser() && oldUser.getShips() != null)
-//            throw new ForbiddenException("Access denied");
+        if (oldUser != null && !oldUser.isOnlyUser() && oldUser.getShips().size() != 0)
+            throw new ForbiddenException("Access denied");
 
 
         if (oldUser != null) {
@@ -351,18 +358,24 @@ public class UserServiceImpl implements UserService {
         if (ships == null || !SecurityConfig.getCurrentUser().hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()))
             throw new ForbiddenException("Access denied");
         List<Long> shipsId = new ArrayList<>();
-        for(Ship ship: ships){
+        for (Ship ship : ships) {
             shipsId.add(ship.getId());
         }
 
         return this.userRepo.findDistinctByShipsIdInAndRolesName(shipsId, Role.ERole.ROLE_SERVICE_AGENT.getValue(), PageAttr.getPageRequest(page));
     }
 
+    /*Remove Service Admin Agent from ship
+    * @param userId     id of user to be remove
+    *
+    * Steps: 1) Remove balance from serviceAgent account
+    *       2)Remove all ship from service agent account*/
     @Override
     public User removeServiceAdminAgent(Long userId) throws ForbiddenException, UserNotFoundException {
         // Security check
         User serviceUser = SecurityConfig.getCurrentUser();
-        if(!serviceUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString())) throw new ForbiddenException("Access denied");
+        if (!serviceUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()))
+            throw new ForbiddenException("Access denied");
 
         Set<Ship> ships = serviceUser.getShips();
         if (ships == null) throw new ForbiddenException("Ships cannot be null");
@@ -372,13 +385,13 @@ public class UserServiceImpl implements UserService {
             return user;
         } else if (user.hasRole(Role.ERole.ROLE_SERVICE_AGENT.toString()) && user.getShips() != null) {
             int agentBalance = this.shipAgentLedgerService.getServiceAgentBalance(userId);
-            if(agentBalance > 0){
+            if (agentBalance > 0) {
                 this.shipAgentLedgerService.addBalanceToShipAgent(userId, (-1 * agentBalance));
             }
-//            final Set<Ship> newShips = user.getShips();
-//            for(Ship ship: ships){
-//                newShips.stream().filter(s-> s.getId() == ship.getId()).collect(Collectors.toSet());
-//            }
+            final Set<Ship> newShips = user.getShips();
+            for (Ship ship : ships) {
+                newShips.stream().filter(s -> s.getId() == ship.getId()).collect(Collectors.toSet());
+            }
             user.getShips().clear();
 //            user.setShips(newShips);
             return this.userRepo.save(user);
