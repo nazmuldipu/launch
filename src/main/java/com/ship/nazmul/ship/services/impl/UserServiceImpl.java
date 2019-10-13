@@ -165,7 +165,6 @@ public class UserServiceImpl implements UserService {
             if (role != null)
                 user.grantRole(role);
         }
-        System.out.println(user.getRoles());
         return this.save(user);
     }
 

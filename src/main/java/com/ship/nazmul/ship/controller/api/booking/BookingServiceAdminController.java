@@ -55,14 +55,12 @@ public class BookingServiceAdminController {
     }
     @DeleteMapping("/cancelReservationSeats/{bookingId}")
     private ResponseEntity cancelReservationSeat(@PathVariable("bookingId")Long bookingId, @RequestParam("seatIds") List<Long> seatIds) throws NotFoundException, ForbiddenException, ParseException, UserAlreadyExistsException, NullPasswordException, UserInvalidException {
-        System.out.println("Seat id : " + seatIds + "; Booking id " + bookingId);
         this.bookingService.cancelReservationSeats(bookingId, seatIds);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/cancelBookingSeats/{bookingId}")
     private ResponseEntity cancelBookingSeat(@PathVariable("bookingId")Long bookingId, @RequestParam("seatIds") List<Long> seatIds) throws NotFoundException, ForbiddenException, ParseException, UserAlreadyExistsException, NullPasswordException, UserInvalidException {
-        System.out.println("Seat id : " + seatIds + "; Booking id " + bookingId);
         this.bookingService.cancelBookingSeats(bookingId, seatIds);
         return ResponseEntity.ok().build();
     }
