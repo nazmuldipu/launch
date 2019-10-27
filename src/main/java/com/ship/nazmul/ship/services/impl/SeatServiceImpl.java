@@ -44,6 +44,10 @@ public class SeatServiceImpl implements SeatService {
         Category category = this.categoryService.getOne(seat.getCategory().getId());
         if (ship.getId() != category.getShip().getId()) throw new ForbiddenException("Access denied");
 
+        if(seat.getId() != null){
+            seat.setBookingIdMap(seat.getBookingIdMap());
+            seat.setSeatStatusMap(seat.getSeatStatusMap());
+        }
         seat.setShip(ship);
         return this.seatRepository.save(seat);
     }

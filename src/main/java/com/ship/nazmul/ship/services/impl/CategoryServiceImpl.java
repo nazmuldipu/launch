@@ -42,7 +42,7 @@ public class CategoryServiceImpl implements CategoryService {
         this.shipService = shipService;
         this.fileUploadService = fileUploadService;
     }
-
+    //
     @Override
     public Category save(Long shipId, Category category) throws NotFoundException, ForbiddenException, InvalidException {
         Ship ship = this.shipService.getOne(shipId);
@@ -51,6 +51,7 @@ public class CategoryServiceImpl implements CategoryService {
         category.setShip(ship);
         if(category.getId() != null){
             category.setImagePaths(this.getOne(category.getId()).getImagePaths());
+            category.setDiscountMap(this.getOne(category.getId()).getDiscountMap());
         }
         ship = this.updateStartsFrom(ship,category);
 

@@ -2,7 +2,6 @@ package com.ship.nazmul.ship.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ship.nazmul.ship.entities.base.BaseEntity;
-import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
 import java.util.List;

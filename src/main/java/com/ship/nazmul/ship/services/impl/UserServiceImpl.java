@@ -25,6 +25,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -328,7 +329,7 @@ public class UserServiceImpl implements UserService {
 
         //If user exists and user doesn't belongs to my hotel then access denied
         User oldUser = this.userRepo.findByPhoneNumber(user.getPhoneNumber());
-        if (oldUser != null && !oldUser.isOnlyUser() && oldUser.getShips().size() != 0)
+        if (oldUser != null && !oldUser.isOnlyUser() && oldUser.getShips().size() != 0 && !this.containsShipListFromAnotherList(ships, oldUser.getShips()))
             throw new ForbiddenException("Access denied");
 
 
@@ -337,6 +338,7 @@ public class UserServiceImpl implements UserService {
             oldUser.setName(user.getName());
             oldUser.setEmail(user.getEmail());
             oldUser.changeRole(this.roleService.findRole(Role.ERole.ROLE_SERVICE_AGENT));
+            oldUser.getShips().clear();
             oldUser.getShips().addAll(ships);
             return this.userRepo.save(oldUser);
         } else {
@@ -349,6 +351,22 @@ public class UserServiceImpl implements UserService {
             user.getShips().addAll(ships);
             return this.userRepo.save(user);
         }
+    }
+
+    /*Find if any ship from a set of ship matches with another set of ship
+    * @param adminShips     Set of ship admin ships
+    * @param userShips      set of user ships
+    * @return true  if any ship of user ship set contains in admin ship set
+    * */
+    private boolean containsShipListFromAnotherList(Set<Ship> adminShips, Set<Ship> userShips){
+        Iterator<Ship> itr = adminShips.iterator();
+        while(itr.hasNext()){
+            boolean shipContain = adminShips.stream().anyMatch(c -> c.getId().equals(itr.next().getId()));
+            if(shipContain){
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

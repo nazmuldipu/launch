@@ -26,6 +26,7 @@ public class ShipAgentLedgerServiceImpl implements ShipAgentLedgerService {
     private final ShipAgentLedgerRepository shipAgentLedgerRepository;
     private final UserService userService;
     private final ShipAdminCashbookService shipAdminCashbookService;
+
     //    private final ShipCashBookService shipCashBookService;
 //
     @Autowired
@@ -80,7 +81,7 @@ public class ShipAgentLedgerServiceImpl implements ShipAgentLedgerService {
         ShipAgentLedger lastShipAgentLedger = this.shipAgentLedgerRepository.findFirstByAgentIdOrderByIdDesc(agentId);
         int lastBalance = lastShipAgentLedger == null ? 0 : lastShipAgentLedger.getBalance();
         shipAgentLedger.setBalance(lastBalance - shipAgentLedger.getDebit() + shipAgentLedger.getCredit());
-        return  this.save(shipAgentLedger);
+        return this.save(shipAgentLedger);
     }
 
 
@@ -94,11 +95,11 @@ public class ShipAgentLedgerServiceImpl implements ShipAgentLedgerService {
     public ShipAgentLedger addBalanceToShipAgent(Long agentId, int amount) throws UserNotFoundException, ForbiddenException {
         User currentUser = SecurityConfig.getCurrentUser();
         User user = this.userService.getOne(agentId);
-        if(!currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()) || !user.hasRole(Role.ERole.ROLE_SERVICE_AGENT.toString()))
+        if (!currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()) || !user.hasRole(Role.ERole.ROLE_SERVICE_AGENT.toString()))
             throw new ForbiddenException("Only Ship admin can add balance to ship agent");
 
         // 1) Debit amount to ShipAdmin Cashbook
-        this.shipAdminCashbookService.addShipAdminCashbookEntry(currentUser.getId(), amount, 0, "Agent balance from : "+ user.getName() + " ["+user.getPhoneNumber()+"]");
+        this.shipAdminCashbookService.addShipAdminCashbookEntry(currentUser.getId(), amount, 0, "Agent balance from : " + user.getName() + " [" + user.getPhoneNumber() + "]");
 
         // 2) Credit amount to ShipAgent cashbook
         ShipAgentLedger shipAgentLedger = new ShipAgentLedger(user, LocalDateTime.now(), "Add balance", 0, amount);
@@ -114,6 +115,9 @@ public class ShipAgentLedgerServiceImpl implements ShipAgentLedgerService {
 
     @Override
     public int getServiceAgentBalance(Long agentId) {
-        return this.shipAgentLedgerRepository.findFirstByAgentIdOrderByIdDesc(agentId).getBalance();
+        ShipAgentLedger shipAgentLedger = this.shipAgentLedgerRepository.findFirstByAgentIdOrderByIdDesc(agentId);
+        if (shipAgentLedger != null)
+            return shipAgentLedger.getBalance();
+        return 0;
     }
 }
