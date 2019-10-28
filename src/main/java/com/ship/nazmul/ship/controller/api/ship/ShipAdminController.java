@@ -8,8 +8,11 @@ import com.ship.nazmul.ship.exceptions.notfound.NotFoundException;
 import com.ship.nazmul.ship.services.ShipService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/v1/admin/ships")
@@ -47,5 +50,23 @@ public class ShipAdminController {
     private ResponseEntity<?> deleteHotel(@PathVariable("id") Long id) throws ForbiddenException, NotFoundException, InvalidException {
         this.shipService.delete(id);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/shipMap/{shipId}")
+    private ResponseEntity getShipMap(@PathVariable("shipId") Long shipId,
+                                        @RequestParam("startDate")@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+                                        @RequestParam("endDate")@DateTimeFormat(pattern = "yyyy-MM-dd")  LocalDate endDate) throws NotFoundException {
+        return ResponseEntity.ok(this.shipService.getShipMap(shipId, startDate, endDate));
+    }
+    @GetMapping("/checkShip/{shipId}")
+    private ResponseEntity isShipActive(@PathVariable("shipId") Long shipId,
+                                      @RequestParam("date")@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) throws NotFoundException {
+        return ResponseEntity.ok(this.shipService.isShipActive(shipId, date));
+    }
+    @PutMapping("/updateMap/{shipId}")
+    private ResponseEntity updateShipMap(@PathVariable("shipId") Long shipId,
+                                         @RequestParam("date")@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date,
+                                         @RequestParam("value")Boolean value) throws InvalidException, NotFoundException, ForbiddenException {
+        return ResponseEntity.ok(this.shipService.updateShipMap(shipId, date, value));
     }
 }

@@ -1,6 +1,7 @@
 package com.ship.nazmul.ship.services.impl;
 
 import com.ship.nazmul.ship.commons.PageAttr;
+import com.ship.nazmul.ship.commons.utils.DateUtil;
 import com.ship.nazmul.ship.config.security.SecurityConfig;
 import com.ship.nazmul.ship.entities.Role;
 import com.ship.nazmul.ship.entities.Ship;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -76,6 +78,43 @@ public class ShipServiceImpl implements ShipService {
     @Override
     public Page<Ship> searchShip(String query, int page) {
         return this.shipRepository.findDistinctByNameContainingIgnoreCaseOrStartingPointContainingIgnoreCaseOrDroppingPointContainingIgnoreCaseAndDeletedFalse(query, query, query, PageAttr.getPageRequest(page));
+    }
+
+    /*this method will find Ship running map from a date range
+    * @param shipId     id of ship the map is looking for
+    * @param startDate  start date of the map that is looking for
+    * @param endDate    end date fo the map that is looking for
+    * @return  map<date, boolean>  map of ship that is looking for*/
+    @Override
+    public Map<LocalDate, Boolean> getShipMap(Long shipId, LocalDate startDate, LocalDate endDate) throws NotFoundException {
+        Ship ship = this.getOne(shipId);
+        List<LocalDate> dates = DateUtil.getLocalDatesBetween(startDate, endDate);
+        Map<LocalDate, Boolean> shipMap = new HashMap<>();
+        for (int i = 0; i < dates.size(); i++) {
+            Boolean shipM = ship.getShipMap().get(dates.get(i));
+            if(shipM == null) shipM = false;
+            shipMap.put(dates.get(i), shipM);
+        }
+        return shipMap;
+    }
+
+    @Override
+    public boolean isShipActive(Long shipId, LocalDate date) throws NotFoundException {
+        Ship ship = this.getOne(shipId);
+        Boolean shipM = ship.getShipMap().get(date);
+
+        if(shipM == null) shipM = false;
+
+        return shipM;
+    }
+
+    @Override
+    public boolean updateShipMap(Long shipId, LocalDate date, Boolean value) throws NotFoundException, ForbiddenException, InvalidException {
+        Ship ship = this.getOne(shipId);
+//        Boolean shipM = ship.getShipMap().get(date);
+        ship.getShipMap().put(date, value);
+        this.save(ship);
+        return value;
     }
 
     @Override

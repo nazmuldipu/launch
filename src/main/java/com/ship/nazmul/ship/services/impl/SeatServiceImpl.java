@@ -112,6 +112,11 @@ public class SeatServiceImpl implements SeatService {
     @Override
     public List<Seat> getAvailableSeatByShipId(Long shipId, LocalDate date) throws NotFoundException, ParseException {
 //        List<Seat> seatList = this.seatRepository.findByShipIdOrderBySeatNumber(shipId);
+        // Check if this ship is running
+        if(!this.shipService.isShipActive(shipId, date)){
+            return null;
+        }
+
         List<Category> categoryList = this.categoryService.getCategoryByShipId(shipId);
         List<Seat> seatList = new ArrayList<>();
         for (Category category : categoryList) {

@@ -1,10 +1,13 @@
 package com.ship.nazmul.ship.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.ship.nazmul.ship.commons.utils.LocalDateAttributeConverter;
 import com.ship.nazmul.ship.entities.base.BaseEntity;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @Entity
 public class Ship extends BaseEntity {
@@ -49,6 +52,12 @@ public class Ship extends BaseEntity {
 
     @ManyToOne
     private User admin;
+
+    @JsonIgnore
+    @ElementCollection(fetch = FetchType.EAGER)
+    @MapKeyColumn(name = "date")
+    @Convert(converter = LocalDateAttributeConverter.class, attributeName = "key")
+    private Map<LocalDate, Boolean> shipMap;
 
     public enum ShipName{
         SUKANTO_BABU("Sukanto Babu"),
@@ -292,6 +301,14 @@ public class Ship extends BaseEntity {
 
     public void setAdmin(User admin) {
         this.admin = admin;
+    }
+
+    public Map<LocalDate, Boolean> getShipMap() {
+        return shipMap;
+    }
+
+    public void setShipMap(Map<LocalDate, Boolean> shipMap) {
+        this.shipMap = shipMap;
     }
 
     @Override
