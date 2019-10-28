@@ -197,7 +197,6 @@ public class UserServiceImpl implements UserService {
             throw new ForbiddenException("Access denied, this user already agent for another account.");
         }
 
-
         if (oldUser != null) {
             oldUser.setName(user.getName());
             oldUser.setEmail(user.getEmail());
@@ -329,9 +328,10 @@ public class UserServiceImpl implements UserService {
 
         //If user exists and user doesn't belongs to my hotel then access denied
         User oldUser = this.userRepo.findByPhoneNumber(user.getPhoneNumber());
-        if (oldUser != null && !oldUser.isOnlyUser() && oldUser.getShips().size() != 0 && !this.containsShipListFromAnotherList(ships, oldUser.getShips()))
+        if (oldUser != null &&
+                ((!oldUser.isOnlyUser() && oldUser.getShips().size() != 0 && !this.containsShipListFromAnotherList(ships, oldUser.getShips()) )
+                        || (oldUser.hasRole(Role.ERole.ROLE_AGENT.toString()))))
             throw new ForbiddenException("Access denied");
-
 
         if (oldUser != null) {
             oldUser.setCommission(user.getCommission());
@@ -359,11 +359,15 @@ public class UserServiceImpl implements UserService {
     * @return true  if any ship of user ship set contains in admin ship set
     * */
     private boolean containsShipListFromAnotherList(Set<Ship> adminShips, Set<Ship> userShips){
-        Iterator<Ship> itr = adminShips.iterator();
-        while(itr.hasNext()){
-            boolean shipContain = adminShips.stream().anyMatch(c -> c.getId().equals(itr.next().getId()));
-            if(shipContain){
-                return true;
+        Iterator<Ship> adminShipsItr = adminShips.iterator();
+        Iterator<Ship> userShipsItr = userShips.iterator();
+        while(adminShipsItr.hasNext()){
+            Ship adminShip = adminShipsItr.next();
+            while (userShipsItr.hasNext()){
+                Ship userShip = userShipsItr.next();
+                if(adminShip.getId().equals(userShip.getId())){
+                    return true;
+                }
             }
         }
         return false;
