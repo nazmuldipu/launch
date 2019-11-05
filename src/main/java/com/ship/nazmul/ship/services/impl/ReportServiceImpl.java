@@ -318,7 +318,6 @@ public class ReportServiceImpl implements ReportService {
     //Populate ServiceAdminBookingReport from SubBooking and Booking
     private ServiceAdminSellsReport populateServiceAdminBookingReport(Booking booking) throws ParseException {
         ServiceAdminSellsReport serviceAdminSellsReport = new ServiceAdminSellsReport();
-        serviceAdminSellsReport.setJourneyDate(booking.getSubBookingList().get(0).getDate());
         serviceAdminSellsReport.setBookingId(booking.getId());
         serviceAdminSellsReport.setBookingDate(booking.getCreated());
         serviceAdminSellsReport.setBookingStatus(booking.geteStatus());
@@ -327,11 +326,14 @@ public class ReportServiceImpl implements ReportService {
         serviceAdminSellsReport.setShipName(booking.getShip().getName());
         serviceAdminSellsReport.setShipNumber(booking.getShip().getShipNumber());
         serviceAdminSellsReport.setRoutes(booking.getShip().getStartingPoint() + " - " + booking.getShip().getDroppingPoint());
-        String[] sets = new String[booking.getSubBookingList().size()];
-        for (int i = 0; i < booking.getSubBookingList().size(); i++) {
-            sets[i] = booking.getSubBookingList().get(i).getSeat().getSeatNumber();
+        if(booking.getSubBookingList().size() > 0) {
+            serviceAdminSellsReport.setJourneyDate(booking.getSubBookingList().get(0).getDate());
+            String[] sets = new String[booking.getSubBookingList().size()];
+            for (int i = 0; i < booking.getSubBookingList().size(); i++) {
+                sets[i] = booking.getSubBookingList().get(i).getSeat().getSeatNumber();
+            }
+            serviceAdminSellsReport.setSeatNumbers(sets);
         }
-        serviceAdminSellsReport.setSeatNumbers(sets);
         serviceAdminSellsReport.setPrice(booking.getTotalPayablePrice());
         serviceAdminSellsReport.setSoldBy(booking.getCreatedBy().getName());
         serviceAdminSellsReport.setRole(booking.getCreatedBy().getRoles().get(0).getName());
