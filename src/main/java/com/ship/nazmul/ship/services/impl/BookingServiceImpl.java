@@ -270,7 +270,7 @@ public class BookingServiceImpl implements BookingService {
 //            shipAgentCommission += booking.getSubBookingList().get(i).getSeat().getCategory().getAgentDiscount();
 //        }
         String explanation = (cancel ? "Cancel " : "") + "Booking for booking id " + booking.getId();
-
+        System.out.println("D3 : " + explanation);
         //1) Debit ShipAgentLedger = total_advance - shipAgentCommission
         ShipAgentLedger shipAgentLedger;
         if (cancel) {
@@ -281,6 +281,7 @@ public class BookingServiceImpl implements BookingService {
         shipAgentLedger.setRef(booking.getId().toString());
         shipAgentLedger.setApproved(true);
         shipAgentLedger = this.shipAgentLedgerService.updateBalanceAndSave(SecurityConfig.getCurrentUser().getId(), shipAgentLedger);
+        System.out.println("D4 : " + shipAgentLedger.getId());
     }
 
     private void adminAgentSellsSeatAccount(Booking booking, boolean cancel) throws NotFoundException {
@@ -531,7 +532,7 @@ public class BookingServiceImpl implements BookingService {
     public void cancelBooking(Long bookingId) throws ForbiddenException, NotFoundException, ParseException {
         User currentUser = SecurityConfig.getCurrentUser();
         Booking booking = this.getOne(bookingId);
-
+        System.out.println("D1 : Cancel Booking");
         if (!booking.isCancelled()) {
             if (booking.getCreatedBy().hasRole(Role.ERole.ROLE_ADMIN.toString())) {
                 if (!currentUser.isAdmin()) throw new ForbiddenException("Access denied");
@@ -546,6 +547,7 @@ public class BookingServiceImpl implements BookingService {
             } else if (booking.getCreatedBy().hasRole(Role.ERole.ROLE_SERVICE_AGENT.toString())) {
                 if (!currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()))
                     throw new ForbiddenException("Access denied");
+                System.out.println("D2 : Service agent Cancel Booking");
                 this.shipAgentSellsSeatAccount(booking, true);
 //            } else if (booking.getCreatedBy().hasRole(Role.ERole.ROLE_USER.toString())) {
 //                if (!currentUser.isAdmin()) throw new ForbiddenException("Access denied");
