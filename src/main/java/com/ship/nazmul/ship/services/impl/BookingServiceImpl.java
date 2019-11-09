@@ -274,7 +274,7 @@ public class BookingServiceImpl implements BookingService {
         //1) Debit ShipAgentLedger = total_advance - shipAgentCommission
         ShipAgentLedger shipAgentLedger;
         if (cancel) {
-            shipAgentLedger = new ShipAgentLedger(SecurityConfig.getCurrentUser(), LocalDateTime.now(), explanation, 0, booking.getTotalPayablePrice() - shipAgentCommission);
+            shipAgentLedger = new ShipAgentLedger(booking.getCreatedBy(), LocalDateTime.now(), explanation, 0, booking.getTotalPayablePrice() - shipAgentCommission);
         } else {
             shipAgentLedger = new ShipAgentLedger(SecurityConfig.getCurrentUser(), LocalDateTime.now(), explanation, booking.getTotalPayablePrice() - shipAgentCommission, 0);
         }
