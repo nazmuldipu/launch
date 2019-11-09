@@ -280,7 +280,8 @@ public class BookingServiceImpl implements BookingService {
         }
         shipAgentLedger.setRef(booking.getId().toString());
         shipAgentLedger.setApproved(true);
-        shipAgentLedger = this.shipAgentLedgerService.updateBalanceAndSave(SecurityConfig.getCurrentUser().getId(), shipAgentLedger);
+
+        shipAgentLedger = this.shipAgentLedgerService.updateBalanceAndSave(shipAgentLedger.getAgent().getId(), shipAgentLedger);
         System.out.println("D4 : " + shipAgentLedger.getId());
     }
 
