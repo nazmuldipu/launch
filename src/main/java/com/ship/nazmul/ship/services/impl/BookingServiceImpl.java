@@ -230,7 +230,7 @@ public class BookingServiceImpl implements BookingService {
         return true;
     }
 
-    /*1) Admin_Cashbook debit total booking amount
+    /* 1) Admin_Cashbook debit total booking amount
      * 2) Admin_Ship_Ledger credit ( total amount - hotelswave discount)
      * */
     private void adminSellSeatAccounting(Booking booking, boolean cancel) throws NotFoundException {
@@ -543,10 +543,10 @@ public class BookingServiceImpl implements BookingService {
             } else if (booking.getCreatedBy().hasRole(Role.ERole.ROLE_AGENT.toString())) {
                 if (!currentUser.isAdmin()) throw new ForbiddenException("Access denied");
                 this.adminAgentSellsSeatAccount(booking, true);
-//            } else if (booking.getCreatedBy().hasRole(Role.ERole.ROLE_SERVICE_AGENT.toString())) {
-//                if (!currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()))
-//                    throw new ForbiddenException("Access denied");
-//                this.subtractFromServiceAgentLedger(booking, true);
+            } else if (booking.getCreatedBy().hasRole(Role.ERole.ROLE_SERVICE_AGENT.toString())) {
+                if (!currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()))
+                    throw new ForbiddenException("Access denied");
+                this.shipAgentSellsSeatAccount(booking, true);
 //            } else if (booking.getCreatedBy().hasRole(Role.ERole.ROLE_USER.toString())) {
 //                if (!currentUser.isAdmin()) throw new ForbiddenException("Access denied");
 //                this.userPaymentAccounting(booking, true);
