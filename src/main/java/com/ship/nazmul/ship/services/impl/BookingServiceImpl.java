@@ -411,6 +411,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public Booking createServiceAdminBooking(Booking booking) throws ForbiddenException, NotFoundException, ParseException, UserAlreadyExistsException, NullPasswordException, UserInvalidException {
+        System.out.println("D2 : " + new Date());
         //1) Security check if user has sufficient permission for this action
         User user = SecurityConfig.getCurrentUser();
         if (!user.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString())) throw new ForbiddenException("Access denied");
@@ -422,14 +423,18 @@ public class BookingServiceImpl implements BookingService {
         booking.setShipName(booking.getShip().getName());
         booking.setCategoryName(booking.getSubBookingList().get(0).getSeat().getCategory().getName());
 
+        System.out.println("D3 : " + new Date());
         if (user.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString())) {
             booking = this.save(booking);
+            System.out.println("D4 : " + new Date());
             if (this.confirmBooking(booking)) {
+                System.out.println("D5 : " + new Date());
                 if (booking.geteStatus() == Seat.EStatus.SEAT_SOLD) {
                     booking = this.approveBooking(booking);
                 } else if (booking.geteStatus() == Seat.EStatus.SEAT_RESERVED) {
                     booking = this.reserveBooking(booking);
                 }
+                System.out.println("D6 : " + new Date());
                 return booking;
             }
         }
