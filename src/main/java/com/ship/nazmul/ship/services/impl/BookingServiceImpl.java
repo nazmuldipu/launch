@@ -23,7 +23,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.awt.print.Book;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -353,35 +352,34 @@ public class BookingServiceImpl implements BookingService {
         List<SubBooking> newSubBookingList = new ArrayList<>();
         System.out.println("C01 : " + new Date());
         for (SubBooking subBooking : subBookingList) {
-            System.out.println("C02 : " + new Date());
             Seat seat = this.seatService.getOne(subBooking.getSeat().getId());
-            System.out.println("C03 : " + new Date());
+            System.out.println("C02 : " + new Date());
             // 3) Create SubBooking for each room and each date
             SubBooking newSubBooking = new SubBooking();
-            System.out.println("C04 : " + new Date());
+            System.out.println("C03 : " + new Date());
 
             newSubBooking.setSeat(seat);
-            System.out.println("C05 : " + new Date());
+            System.out.println("C04 : " + new Date());
 
             LocalDate ld = subBooking.getDate();
             newSubBooking.setDate(ld);
-            System.out.println("C06 :" + new Date());
+            System.out.println("C05 : " + new Date());
 
             int discount = subBooking.getDiscount();
             newSubBooking.setDiscount(discount);
-            System.out.println("C07 :" + new Date());
+            System.out.println("C06 : " + new Date());
 
             int commit = subBooking.getCommission();
             newSubBooking.setCommission(commit);
-            System.out.println("C08 :" + new Date());
-
+            System.out.println("C07 : " + new Date());
+//            SubBooking newSubBooking = new SubBooking(subBooking.getDate(), subBooking.getDiscount(), subBooking.getCommission(), seat);
             // 4) Calculate each subBooking and add to subBookingList
-            System.out.println("C09 : " + new Date());
             newSubBooking = this.calculateSubBooking(newSubBooking);
-            System.out.println("C10 : " + new Date());
+            System.out.println("C08 : " + new Date());
+
             newSubBookingList.add(newSubBooking);
         }
-        System.out.println("D11 : " + new Date());
+        System.out.println("C09 : " + new Date());
         return newSubBookingList;
     }
 
@@ -514,13 +512,13 @@ public class BookingServiceImpl implements BookingService {
     }
 
     /*Remove a seat from a booking without calculation part
-    * @param seatId     id of seat that to be remove
-    * @param bookingId  id of booking that to be remove from
-    *
-    * Steps : 1) Clear seat status map and booking id map
-    *         2) Update discounts
-    *         3) Recalculate all subBooking and Booking object
-    *         */
+     * @param seatId     id of seat that to be remove
+     * @param bookingId  id of booking that to be remove from
+     *
+     * Steps : 1) Clear seat status map and booking id map
+     *         2) Update discounts
+     *         3) Recalculate all subBooking and Booking object
+     *         */
     @Override
     public void cancelReservationSeat(Long seatId, Long bookingId) throws NotFoundException, ForbiddenException, ParseException, UserAlreadyExistsException, NullPasswordException, UserInvalidException {
         Booking booking = this.getOne(bookingId);
@@ -540,9 +538,9 @@ public class BookingServiceImpl implements BookingService {
 
         //Update discounts and commissions
         booking.setBookingDiscount(booking.getBookingDiscount() - (booking.getBookingDiscount() / booking.getSubBookingList().size()));
-        booking.setHotelswaveDiscount(booking.getHotelswaveDiscount() - (booking.getHotelswaveDiscount()/booking.getSubBookingList().size()));
-        booking.setHotelswaveAgentDiscount(booking.getHotelswaveAgentDiscount() - (booking.getHotelswaveAgentDiscount()/booking.getSubBookingList().size()));
-        booking.setAgentDiscount(booking.getAgentDiscount()-(booking.getAgentDiscount()/booking.getSubBookingList().size()));
+        booking.setHotelswaveDiscount(booking.getHotelswaveDiscount() - (booking.getHotelswaveDiscount() / booking.getSubBookingList().size()));
+        booking.setHotelswaveAgentDiscount(booking.getHotelswaveAgentDiscount() - (booking.getHotelswaveAgentDiscount() / booking.getSubBookingList().size()));
+        booking.setAgentDiscount(booking.getAgentDiscount() - (booking.getAgentDiscount() / booking.getSubBookingList().size()));
 
         //Recalculate and update booking
         booking.setSubBookingList(this.calculateSubBookingList(subBookingList));
@@ -551,9 +549,9 @@ public class BookingServiceImpl implements BookingService {
     }
 
     /*Remove a list of seat from booking without accounting
-    * @param booingId   id of booking that to be remove from
-    * @param seatIds    id's of seat that to be remove
-    * */
+     * @param booingId   id of booking that to be remove from
+     * @param seatIds    id's of seat that to be remove
+     * */
     @Override
     public void cancelReservationSeats(Long bookingId, List<Long> seatIds) throws UserInvalidException, ForbiddenException, ParseException, NullPasswordException, NotFoundException, UserAlreadyExistsException {
         for (Long seatId : seatIds) {
@@ -724,16 +722,16 @@ public class BookingServiceImpl implements BookingService {
         amount -= (seatIds.size() * (booking.getBookingDiscount() / size));
 
         //1) Credit amount into AdminAgentLedger
-        int commission = seatIds.size() * (booking.getHotelswaveAgentDiscount()/size);
+        int commission = seatIds.size() * (booking.getHotelswaveAgentDiscount() / size);
         String explanation = "Cancel Partial booking seats " + seatList + " for booking id " + booking.getId();
-        AdminAgentLedger adminAgentLedger = new AdminAgentLedger(booking.getCreatedBy(), LocalDateTime.now(), explanation, 0 ,amount - commission);
+        AdminAgentLedger adminAgentLedger = new AdminAgentLedger(booking.getCreatedBy(), LocalDateTime.now(), explanation, 0, amount - commission);
         adminAgentLedger.setRef(booking.getId().toString());
         adminAgentLedger.setApproved(true);
         adminAgentLedger = this.adminAgentLedgerService.updateBalanceAndSave(booking.getCreatedBy().getId(), adminAgentLedger);
 
 
         //2) Debit amount from ShipAdminLedger
-        ShipAdminLedger shipAdminLedger = new ShipAdminLedger(booking.getShip().getAdmin(), LocalDateTime.now(), explanation, amount - (2*commission), 0);
+        ShipAdminLedger shipAdminLedger = new ShipAdminLedger(booking.getShip().getAdmin(), LocalDateTime.now(), explanation, amount - (2 * commission), 0);
         shipAdminLedger.setApproved(true);
         shipAdminLedger.setRef(booking.getId().toString());
         this.shipAdminLedgerService.addShipAdminLedger(booking.getShip().getAdmin().getId(), shipAdminLedger);
