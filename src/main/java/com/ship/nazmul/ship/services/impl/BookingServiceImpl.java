@@ -355,7 +355,8 @@ public class BookingServiceImpl implements BookingService {
         for (SubBooking subBooking : subBookingList) {
             Seat seat = this.seatService.getOne(subBooking.getSeat().getId());
             System.out.println("D2 : " + new Date());
-            Category category = this.categoryService.getOne(seat.getCategory().getId());
+            long cid = seat.getCategory().getId();
+//            Category category = this.categoryService.getOne(seat.getCategory().getId());
             // 3) Create SubBooking for each room and each date
 //            SubBooking newSubBooking = new SubBooking(subBooking.getDate(), subBooking.getDiscount(), subBooking.getCommission(), seat);
             // 4) Calculate each subBooking and add to subBookingList
@@ -364,7 +365,7 @@ public class BookingServiceImpl implements BookingService {
             System.out.println("D3 : " + new Date());
             subBooking.setSeat(seat);
             System.out.println("D4 : " + new Date());
-            subBooking = this.calculateSubBooking(subBooking, category.getId());
+            subBooking = this.calculateSubBooking(subBooking, cid);
             System.out.println("D10 : " + new Date() + " \t Fare : " + subBooking.getFare() + " : " + subBooking.getSeat().getCategory().getFare());
             newSubBookingList.add(subBooking);
             System.out.println();
