@@ -392,7 +392,12 @@ public class BookingServiceImpl implements BookingService {
 //        System.out.println("F01 " + new Date());
 //        subBooking.setFare(fare);
 //        System.out.println("C05 : " + new Date());
-        Integer discount = this.categoryService.getDiscount(subBooking.getSeat().getCategory().getId(), subBooking.getDate());//subBooking.getDiscount();
+        System.out.println("Y01 : " + new Date());
+        long cid = subBooking.getSeat().getId();
+        System.out.println("Y02 : " + new Date());
+        LocalDate ld = subBooking.getDate();
+        System.out.println("Y03 : " + new Date());
+        Integer discount = this.categoryService.getDiscount(cid, ld);//subBooking.getDiscount();
         System.out.println("C05 : " + new Date());
         if (discount == null) {
             discount = subBooking.getDiscount();
