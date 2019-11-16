@@ -416,6 +416,7 @@ public class BookingServiceImpl implements BookingService {
         User user = SecurityConfig.getCurrentUser();
         if (!user.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString())) throw new ForbiddenException("Access denied");
 
+        System.out.println("D2AAA : " + new Date());
         // 2) Add subBookingList to booking and Calculate Booking
         booking.setSubBookingList(this.calculateSubBookingList(booking.getSubBookingList()));
         System.out.println("D2A : " + new Date());
