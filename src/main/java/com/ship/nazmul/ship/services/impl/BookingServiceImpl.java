@@ -353,26 +353,29 @@ public class BookingServiceImpl implements BookingService {
         List<SubBooking> newSubBookingList = new ArrayList<>();
         System.out.println("C01 : " + new Date());
         for (SubBooking subBooking : subBookingList) {
-            System.out.println("SS : " + subBooking.toString());
-            Seat seat = this.seatService.getOne(subBooking.getSeat().getId());
-            // 3) Create SubBooking for each room and each date
-            System.out.println("C02 : " + new Date());
-            SubBooking newSubBooking = new SubBooking(seat);
+//            System.out.println("SS : " + subBooking.toString());
+//            Seat seat = this.seatService.getOne(subBooking.getSeat().getId());
+//            // 3) Create SubBooking for each room and each date
+//            System.out.println("C02 : " + new Date());
+//            SubBooking newSubBooking = new SubBooking(seat);
+//
+//            newSubBooking.setDate(subBooking.getDate());
+//            System.out.println("B01 : " + new Date());
+//
+//            newSubBooking.setDiscount(subBooking.getDiscount());
+//            System.out.println("B02 : " + new Date());
+//
+//            newSubBooking.setCommission(subBooking.getCommission());
+//            System.out.println("B03 : " + new Date());
+//
+//            // 4) Calculate each subBooking and add to subBookingList
+//            System.out.println("C03 : " + new Date());
+//            newSubBooking = this.calculateSubBooking(newSubBooking);
+//            System.out.println("C10 : " + new Date());
+//            newSubBookingList.add(newSubBooking);
 
-            newSubBooking.setDate(subBooking.getDate());
-            System.out.println("B01 : " + new Date());
-
-            newSubBooking.setDiscount(subBooking.getDiscount());
-            System.out.println("B02 : " + new Date());
-
-            newSubBooking.setCommission(subBooking.getCommission());
-            System.out.println("B03 : " + new Date());
-
-            // 4) Calculate each subBooking and add to subBookingList
-            System.out.println("C03 : " + new Date());
-            newSubBooking = this.calculateSubBooking(newSubBooking);
-            System.out.println("C10 : " + new Date());
-            newSubBookingList.add(newSubBooking);
+            subBooking = this.calculateSubBooking(subBooking);
+            newSubBookingList.add(subBooking);
         }
         System.out.println("C11 : " + new Date());
         return newSubBookingList;
@@ -380,11 +383,11 @@ public class BookingServiceImpl implements BookingService {
 
     SubBooking calculateSubBooking(SubBooking subBooking) {
         System.out.println("C04 : " + new Date());
-        System.out.println("SS2 " + subBooking.toString());
-        int fare = subBooking.getSeat().getCategory().getFare();
-        System.out.println("F01 " + new Date());
-        subBooking.setFare(fare);
-        System.out.println("C05 : " + new Date());
+//        System.out.println("SS2 " + subBooking.toString());
+//        int fare = subBooking.getSeat().getCategory().getFare();
+//        System.out.println("F01 " + new Date());
+//        subBooking.setFare(fare);
+//        System.out.println("C05 : " + new Date());
         Integer discount = this.categoryService.getDiscount(subBooking.getSeat().getCategory().getId(), subBooking.getDate());//subBooking.getDiscount();
         System.out.println("C06 : " + new Date());
         if (discount == null) {
