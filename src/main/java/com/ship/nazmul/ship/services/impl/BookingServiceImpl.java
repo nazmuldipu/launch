@@ -23,6 +23,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.awt.print.Book;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -353,44 +354,33 @@ public class BookingServiceImpl implements BookingService {
         System.out.println("C01 : " + new Date());
         for (SubBooking subBooking : subBookingList) {
             Seat seat = this.seatService.getOne(subBooking.getSeat().getId());
-            System.out.println("C02 : " + new Date());
             // 3) Create SubBooking for each room and each date
-            SubBooking newSubBooking = new SubBooking();
-            System.out.println("C03 : " + new Date());
-
-            newSubBooking.setSeat(seat);
-            System.out.println("C04 : " + new Date());
-
-            LocalDate ld = subBooking.getDate();
-            newSubBooking.setDate(ld);
-            System.out.println("C05 : " + new Date());
-
-            int discount = subBooking.getDiscount();
-            newSubBooking.setDiscount(discount);
-            System.out.println("C06 : " + new Date());
-
-            int commit = subBooking.getCommission();
-            newSubBooking.setCommission(commit);
-            System.out.println("C07 : " + new Date());
-//            SubBooking newSubBooking = new SubBooking(subBooking.getDate(), subBooking.getDiscount(), subBooking.getCommission(), seat);
+            System.out.println("C02 : " + new Date());
+            SubBooking newSubBooking = new SubBooking(subBooking.getDate(), subBooking.getDiscount(), subBooking.getCommission(), seat);
             // 4) Calculate each subBooking and add to subBookingList
+            System.out.println("C03 : " + new Date());
             newSubBooking = this.calculateSubBooking(newSubBooking);
-            System.out.println("C08 : " + new Date());
-
+            System.out.println("C10 : " + new Date());
             newSubBookingList.add(newSubBooking);
         }
-        System.out.println("C09 : " + new Date());
+        System.out.println("C11 : " + new Date());
         return newSubBookingList;
     }
 
     SubBooking calculateSubBooking(SubBooking subBooking) {
+        System.out.println("C04 : " + new Date());
         subBooking.setFare(subBooking.getSeat().getCategory().getFare());
+        System.out.println("C05 : " + new Date());
         Integer discount = this.categoryService.getDiscount(subBooking.getSeat().getCategory().getId(), subBooking.getDate());//subBooking.getDiscount();
+        System.out.println("C06 : " + new Date());
         if (discount == null) {
             discount = subBooking.getDiscount();
         }
+        System.out.println("C07 : " + new Date());
         subBooking.setDiscount(discount);
+        System.out.println("C08 : " + new Date());
         subBooking.setPayablePrice(subBooking.getFare() - subBooking.getDiscount());
+        System.out.println("C09 : " + new Date());
         return subBooking;
     }
 
