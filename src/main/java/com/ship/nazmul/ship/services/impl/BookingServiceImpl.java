@@ -194,7 +194,6 @@ public class BookingServiceImpl implements BookingService {
             for (int i = 0; i < booking.getSubBookingList().size(); i++) {
                 hotelswaveCommission += booking.getShip().getHotelswaveCommission();
             }
-            System.out.println("Hotelswave commission : " + hotelswaveCommission);
             booking.setHotelswaveDiscount(hotelswaveCommission / 2);
             booking.setHotelswaveAgentDiscount(hotelswaveCommission / 2);
             this.adminAgentSellsSeatAccount(booking, false);
@@ -270,7 +269,6 @@ public class BookingServiceImpl implements BookingService {
 //            shipAgentCommission += booking.getSubBookingList().get(i).getSeat().getCategory().getAgentDiscount();
 //        }
         String explanation = (cancel ? "Cancel " : "") + "Booking for booking id " + booking.getId();
-        System.out.println("D3 : " + explanation);
         //1) Debit ShipAgentLedger = total_advance - shipAgentCommission
         ShipAgentLedger shipAgentLedger;
         if (cancel) {
@@ -282,7 +280,6 @@ public class BookingServiceImpl implements BookingService {
         shipAgentLedger.setApproved(true);
 
         shipAgentLedger = this.shipAgentLedgerService.updateBalanceAndSave(shipAgentLedger.getAgent().getId(), shipAgentLedger);
-        System.out.println("D4 : " + shipAgentLedger.getId());
     }
 
     private void adminAgentSellsSeatAccount(Booking booking, boolean cancel) throws NotFoundException {
@@ -349,64 +346,33 @@ public class BookingServiceImpl implements BookingService {
         return booking;
     }
 
-    List<SubBooking> calculateSubBookingList(List<SubBooking> subBookingList) throws NotFoundException {
+    List<SubBooking> calculateSubBookingList(List<SubBooking> subBookingList) throws NotFoundException, ParseException {
         List<SubBooking> newSubBookingList = new ArrayList<>();
-        System.out.println("C01 : " + new Date());
         for (SubBooking subBooking : subBookingList) {
-//            System.out.println("SS : " + subBooking.toString());
-//            Seat seat = this.seatService.getOne(subBooking.getSeat().getId());
-//            // 3) Create SubBooking for each room and each date
-//            System.out.println("C02 : " + new Date());
-//            SubBooking newSubBooking = new SubBooking(seat);
-//
-//            newSubBooking.setDate(subBooking.getDate());
-//            System.out.println("B01 : " + new Date());
-//
-//            newSubBooking.setDiscount(subBooking.getDiscount());
-//            System.out.println("B02 : " + new Date());
-//
-//            newSubBooking.setCommission(subBooking.getCommission());
-//            System.out.println("B03 : " + new Date());
-//
-//            // 4) Calculate each subBooking and add to subBookingList
-//            System.out.println("C03 : " + new Date());
-//            newSubBooking = this.calculateSubBooking(newSubBooking);
-//            System.out.println("C10 : " + new Date());
-//            newSubBookingList.add(newSubBooking);
             Seat seat = this.seatService.getOne(subBooking.getSeat().getId());
-            System.out.println("C02 : " + new Date());
+            long cid = seat.getCategory().getId();
+//            Category category = this.categoryService.getOne(seat.getCategory().getId());
+            // 3) Create SubBooking for each room and each date
+//            SubBooking newSubBooking = new SubBooking(subBooking.getDate(), subBooking.getDiscount(), subBooking.getCommission(), seat);
+            // 4) Calculate each subBooking and add to subBookingList
+//            newSubBooking = this.calculateSubBooking(newSubBooking);
+//            newSubBookingList.add(newSubBooking);
             subBooking.setSeat(seat);
-            System.out.println("C03 : " + new Date());
-            subBooking = this.calculateSubBooking(subBooking);
-            System.out.println("C09 : " + new Date());
+            subBooking = this.calculateSubBooking(subBooking, cid);
             newSubBookingList.add(subBooking);
         }
-        System.out.println("C11 : " + new Date());
+
         return newSubBookingList;
     }
 
-    SubBooking calculateSubBooking(SubBooking subBooking) {
-        System.out.println("C04 : " + new Date());
-//        System.out.println("SS2 " + subBooking.toString());
-//        int fare = subBooking.getSeat().getCategory().getFare();
-//        System.out.println("F01 " + new Date());
-//        subBooking.setFare(fare);
-//        System.out.println("C05 : " + new Date());
-        System.out.println("Y01 : " + new Date());
-        long cid = subBooking.getSeat().getId();
-        System.out.println("Y02 : " + new Date());
+    SubBooking calculateSubBooking(SubBooking subBooking, Long categoryId) {
         LocalDate ld = subBooking.getDate();
-        System.out.println("Y03 : " + new Date());
-        Integer discount = this.categoryService.getDiscount(cid, ld);//subBooking.getDiscount();
-        System.out.println("C05 : " + new Date());
+        Integer discount = this.categoryService.getDiscount(categoryId, ld);//subBooking.getDiscount();
         if (discount == null) {
             discount = subBooking.getDiscount();
         }
-        System.out.println("C06 : " + new Date());
         subBooking.setDiscount(discount);
-        System.out.println("C07 : " + new Date());
         subBooking.setPayablePrice(subBooking.getFare() - subBooking.getDiscount());
-        System.out.println("C08 : " + new Date());
         return subBooking;
     }
 
@@ -447,35 +413,25 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public Booking createServiceAdminBooking(Booking booking) throws ForbiddenException, NotFoundException, ParseException, UserAlreadyExistsException, NullPasswordException, UserInvalidException {
-        System.out.println("D2 : " + new Date());
         //1) Security check if user has sufficient permission for this action
         User user = SecurityConfig.getCurrentUser();
         if (!user.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString())) throw new ForbiddenException("Access denied");
 
-        System.out.println("D2AAA : " + new Date());
         // 2) Add subBookingList to booking and Calculate Booking
         booking.setSubBookingList(this.calculateSubBookingList(booking.getSubBookingList()));
-        System.out.println("D2A : " + new Date());
         booking = this.calculateBooking(booking);
-        System.out.println("D2B : " + new Date());
         booking.setShip(booking.getSubBookingList().get(0).getSeat().getCategory().getShip());
-        System.out.println("D2C : " + new Date());
         booking.setShipName(booking.getShip().getName());
-        System.out.println("D2D : " + new Date());
         booking.setCategoryName(booking.getSubBookingList().get(0).getSeat().getCategory().getName());
 
-        System.out.println("D3 : " + new Date());
         if (user.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString())) {
             booking = this.save(booking);
-            System.out.println("D4 : " + new Date());
             if (this.confirmBooking(booking)) {
-                System.out.println("D5 : " + new Date());
                 if (booking.geteStatus() == Seat.EStatus.SEAT_SOLD) {
                     booking = this.approveBooking(booking);
                 } else if (booking.geteStatus() == Seat.EStatus.SEAT_RESERVED) {
                     booking = this.reserveBooking(booking);
                 }
-                System.out.println("D6 : " + new Date());
                 return booking;
             }
         }
@@ -554,9 +510,9 @@ public class BookingServiceImpl implements BookingService {
 
         //Update discounts and commissions
         booking.setBookingDiscount(booking.getBookingDiscount() - (booking.getBookingDiscount() / booking.getSubBookingList().size()));
-        booking.setHotelswaveDiscount(booking.getHotelswaveDiscount() - (booking.getHotelswaveDiscount() / booking.getSubBookingList().size()));
-        booking.setHotelswaveAgentDiscount(booking.getHotelswaveAgentDiscount() - (booking.getHotelswaveAgentDiscount() / booking.getSubBookingList().size()));
-        booking.setAgentDiscount(booking.getAgentDiscount() - (booking.getAgentDiscount() / booking.getSubBookingList().size()));
+        booking.setHotelswaveDiscount(booking.getHotelswaveDiscount() - (booking.getHotelswaveDiscount()/booking.getSubBookingList().size()));
+        booking.setHotelswaveAgentDiscount(booking.getHotelswaveAgentDiscount() - (booking.getHotelswaveAgentDiscount()/booking.getSubBookingList().size()));
+        booking.setAgentDiscount(booking.getAgentDiscount()-(booking.getAgentDiscount()/booking.getSubBookingList().size()));
 
         //Recalculate and update booking
         booking.setSubBookingList(this.calculateSubBookingList(subBookingList));
@@ -579,7 +535,6 @@ public class BookingServiceImpl implements BookingService {
     public void cancelBooking(Long bookingId) throws ForbiddenException, NotFoundException, ParseException {
         User currentUser = SecurityConfig.getCurrentUser();
         Booking booking = this.getOne(bookingId);
-        System.out.println("D1 : Cancel Booking");
         if (!booking.isCancelled()) {
             if (booking.getCreatedBy().hasRole(Role.ERole.ROLE_ADMIN.toString())) {
                 if (!currentUser.isAdmin()) throw new ForbiddenException("Access denied");
@@ -594,7 +549,6 @@ public class BookingServiceImpl implements BookingService {
             } else if (booking.getCreatedBy().hasRole(Role.ERole.ROLE_SERVICE_AGENT.toString())) {
                 if (!currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()))
                     throw new ForbiddenException("Access denied");
-                System.out.println("D2 : Service agent Cancel Booking");
                 this.shipAgentSellsSeatAccount(booking, true);
 //            } else if (booking.getCreatedBy().hasRole(Role.ERole.ROLE_USER.toString())) {
 //                if (!currentUser.isAdmin()) throw new ForbiddenException("Access denied");
@@ -738,16 +692,16 @@ public class BookingServiceImpl implements BookingService {
         amount -= (seatIds.size() * (booking.getBookingDiscount() / size));
 
         //1) Credit amount into AdminAgentLedger
-        int commission = seatIds.size() * (booking.getHotelswaveAgentDiscount() / size);
+        int commission = seatIds.size() * (booking.getHotelswaveAgentDiscount()/size);
         String explanation = "Cancel Partial booking seats " + seatList + " for booking id " + booking.getId();
-        AdminAgentLedger adminAgentLedger = new AdminAgentLedger(booking.getCreatedBy(), LocalDateTime.now(), explanation, 0, amount - commission);
+        AdminAgentLedger adminAgentLedger = new AdminAgentLedger(booking.getCreatedBy(), LocalDateTime.now(), explanation, 0 ,amount - commission);
         adminAgentLedger.setRef(booking.getId().toString());
         adminAgentLedger.setApproved(true);
         adminAgentLedger = this.adminAgentLedgerService.updateBalanceAndSave(booking.getCreatedBy().getId(), adminAgentLedger);
 
 
         //2) Debit amount from ShipAdminLedger
-        ShipAdminLedger shipAdminLedger = new ShipAdminLedger(booking.getShip().getAdmin(), LocalDateTime.now(), explanation, amount - (2 * commission), 0);
+        ShipAdminLedger shipAdminLedger = new ShipAdminLedger(booking.getShip().getAdmin(), LocalDateTime.now(), explanation, amount - (2*commission), 0);
         shipAdminLedger.setApproved(true);
         shipAdminLedger.setRef(booking.getId().toString());
         this.shipAdminLedgerService.addShipAdminLedger(booking.getShip().getAdmin().getId(), shipAdminLedger);
