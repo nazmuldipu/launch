@@ -18,7 +18,7 @@ public class Seat extends BaseEntity{
     private boolean discounted;
     private boolean available;
 
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    @ManyToOne
     private Category category;
 
     @ManyToOne
