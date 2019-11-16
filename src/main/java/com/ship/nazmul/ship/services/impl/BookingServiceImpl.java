@@ -362,7 +362,7 @@ public class BookingServiceImpl implements BookingService {
 //            newSubBookingList.add(newSubBooking);
             subBooking.setSeat(seat);
             System.out.println("D3 : " + new Date());
-            subBooking = this.calculateSubBooking(subBooking);
+            subBooking = this.calculateSubBooking(subBooking, seat.getCategory().getId());
             System.out.println("D10 : " + new Date() + " \t Fare : " + subBooking.getFare() + " : " + subBooking.getSeat().getCategory().getFare());
             newSubBookingList.add(subBooking);
             System.out.println();
@@ -371,14 +371,14 @@ public class BookingServiceImpl implements BookingService {
         return newSubBookingList;
     }
 
-    SubBooking calculateSubBooking(SubBooking subBooking) {
+    SubBooking calculateSubBooking(SubBooking subBooking, Long categoryId) {
 //        subBooking.setFare(subBooking.getSeat().getCategory().getFare());
         System.out.println("D4 : " + new Date());
-        Long cid = subBooking.getSeat().getCategory().getId();
-        System.out.println("D5 : " + new Date());
+//        Long cid = subBooking.getSeat().getCategory().getId();
+//        System.out.println("D5 : " + new Date());
         LocalDate ld = subBooking.getDate();
         System.out.println("D6 : " + new Date());
-        Integer discount = this.categoryService.getDiscount(cid, ld);//subBooking.getDiscount();
+        Integer discount = this.categoryService.getDiscount(categoryId, ld);//subBooking.getDiscount();
         System.out.println("D7 : " + new Date());
         if (discount == null) {
             discount = subBooking.getDiscount();
