@@ -364,7 +364,7 @@ public class BookingServiceImpl implements BookingService {
             System.out.println("D3 : " + new Date());
             subBooking.setSeat(seat);
             System.out.println("D4 : " + new Date());
-            subBooking = this.calculateSubBooking(subBooking, seat.getCategory().getId());
+            subBooking = this.calculateSubBooking(subBooking, category.getId());
             System.out.println("D10 : " + new Date() + " \t Fare : " + subBooking.getFare() + " : " + subBooking.getSeat().getCategory().getFare());
             newSubBookingList.add(subBooking);
             System.out.println();
