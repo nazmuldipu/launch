@@ -349,17 +349,23 @@ public class BookingServiceImpl implements BookingService {
         return booking;
     }
 
-    List<SubBooking> calculateSubBookingList(List<SubBooking> subBookingList) throws NotFoundException, ParseException {
+    List<SubBooking> calculateSubBookingList(List<SubBooking> subBookingList) throws NotFoundException {
         List<SubBooking> newSubBookingList = new ArrayList<>();
-
+        System.out.println("CB 01 : " + new Date());
         for (SubBooking subBooking : subBookingList) {
+            System.out.println("CB 02 : " + new Date());
             Seat seat = this.seatService.getOne(subBooking.getSeat().getId());
+            System.out.println("CB 03 : " + new Date());
             // 3) Create SubBooking for each room and each date
             SubBooking newSubBooking = new SubBooking(subBooking.getDate(), subBooking.getDiscount(), subBooking.getCommission(), seat);
+            System.out.println("CB 04 : " + new Date());
             // 4) Calculate each subBooking and add to subBookingList
+            System.out.println("CB 05 : " + new Date());
             newSubBooking = this.calculateSubBooking(newSubBooking);
+            System.out.println("CB 06 : " + new Date());
             newSubBookingList.add(newSubBooking);
         }
+        System.out.println("CB 07 : " + new Date());
         return newSubBookingList;
     }
 
