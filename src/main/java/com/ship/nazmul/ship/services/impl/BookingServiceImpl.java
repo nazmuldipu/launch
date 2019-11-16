@@ -351,26 +351,42 @@ public class BookingServiceImpl implements BookingService {
 
     List<SubBooking> calculateSubBookingList(List<SubBooking> subBookingList) throws NotFoundException, ParseException {
         List<SubBooking> newSubBookingList = new ArrayList<>();
-
+        System.out.println("D1 : " + new Date());
         for (SubBooking subBooking : subBookingList) {
             Seat seat = this.seatService.getOne(subBooking.getSeat().getId());
+            System.out.println("D2 : " + new Date());
             // 3) Create SubBooking for each room and each date
-            SubBooking newSubBooking = new SubBooking(subBooking.getDate(), subBooking.getDiscount(), subBooking.getCommission(), seat);
+//            SubBooking newSubBooking = new SubBooking(subBooking.getDate(), subBooking.getDiscount(), subBooking.getCommission(), seat);
             // 4) Calculate each subBooking and add to subBookingList
-            newSubBooking = this.calculateSubBooking(newSubBooking);
-            newSubBookingList.add(newSubBooking);
+//            newSubBooking = this.calculateSubBooking(newSubBooking);
+//            newSubBookingList.add(newSubBooking);
+            subBooking.setSeat(seat);
+            System.out.println("D3 : " + new Date());
+            subBooking = this.calculateSubBooking(subBooking);
+            System.out.println("D10 : " + new Date());
+            newSubBookingList.add(subBooking);
+            System.out.println();
         }
+
         return newSubBookingList;
     }
 
     SubBooking calculateSubBooking(SubBooking subBooking) {
         subBooking.setFare(subBooking.getSeat().getCategory().getFare());
-        Integer discount = this.categoryService.getDiscount(subBooking.getSeat().getCategory().getId(), subBooking.getDate());//subBooking.getDiscount();
+        System.out.println("D4 : " + new Date());
+        Long cid = subBooking.getSeat().getCategory().getId();
+        System.out.println("D5 : " + new Date());
+        LocalDate ld = subBooking.getDate();
+        System.out.println("D6 : " + new Date());
+        Integer discount = this.categoryService.getDiscount(cid, ld);//subBooking.getDiscount();
+        System.out.println("D7 : " + new Date());
         if (discount == null) {
             discount = subBooking.getDiscount();
         }
         subBooking.setDiscount(discount);
+        System.out.println("D8 : " + new Date());
         subBooking.setPayablePrice(subBooking.getFare() - subBooking.getDiscount());
+        System.out.println("D9 : " + new Date());
         return subBooking;
     }
 
