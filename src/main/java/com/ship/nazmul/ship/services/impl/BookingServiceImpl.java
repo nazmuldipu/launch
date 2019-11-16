@@ -373,8 +373,12 @@ public class BookingServiceImpl implements BookingService {
 //            newSubBooking = this.calculateSubBooking(newSubBooking);
 //            System.out.println("C10 : " + new Date());
 //            newSubBookingList.add(newSubBooking);
-
+            Seat seat = this.seatService.getOne(subBooking.getSeat().getId());
+            System.out.println("C02 : " + new Date());
+            subBooking.setSeat(seat);
+            System.out.println("C03 : " + new Date());
             subBooking = this.calculateSubBooking(subBooking);
+            System.out.println("C09 : " + new Date());
             newSubBookingList.add(subBooking);
         }
         System.out.println("C11 : " + new Date());
@@ -389,15 +393,15 @@ public class BookingServiceImpl implements BookingService {
 //        subBooking.setFare(fare);
 //        System.out.println("C05 : " + new Date());
         Integer discount = this.categoryService.getDiscount(subBooking.getSeat().getCategory().getId(), subBooking.getDate());//subBooking.getDiscount();
-        System.out.println("C06 : " + new Date());
+        System.out.println("C05 : " + new Date());
         if (discount == null) {
             discount = subBooking.getDiscount();
         }
-        System.out.println("C07 : " + new Date());
+        System.out.println("C06 : " + new Date());
         subBooking.setDiscount(discount);
-        System.out.println("C08 : " + new Date());
+        System.out.println("C07 : " + new Date());
         subBooking.setPayablePrice(subBooking.getFare() - subBooking.getDiscount());
-        System.out.println("C09 : " + new Date());
+        System.out.println("C08 : " + new Date());
         return subBooking;
     }
 
