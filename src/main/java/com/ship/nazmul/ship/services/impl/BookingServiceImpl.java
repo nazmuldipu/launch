@@ -357,6 +357,12 @@ public class BookingServiceImpl implements BookingService {
             Seat seat = this.seatService.getOne(subBooking.getSeat().getId());
             System.out.println("CB 03 : " + new Date());
             // 3) Create SubBooking for each room and each date
+            LocalDate ld = subBooking.getDate();
+            System.out.println("BB1 :" + new Date());
+            int discount = subBooking.getDiscount();
+            System.out.println("BB2 :" + new Date());
+            int commit = subBooking.getCommission();
+            System.out.println("BB3 :" + new Date());
             SubBooking newSubBooking = new SubBooking(subBooking.getDate(), subBooking.getDiscount(), subBooking.getCommission(), seat);
             System.out.println("CB 04 : " + new Date());
             // 4) Calculate each subBooking and add to subBookingList
