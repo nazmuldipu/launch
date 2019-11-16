@@ -100,6 +100,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Integer getDiscount(Long categoryId, LocalDate date) {
+        System.out.println("K00 : " + new Date());
         Category category = this.getOne(categoryId);
         System.out.println("K01 : " + new Date());
         Map<LocalDate, Integer> discountMap = category.getDiscountMap();
