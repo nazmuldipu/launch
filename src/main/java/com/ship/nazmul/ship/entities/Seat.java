@@ -28,14 +28,16 @@ public class Seat extends BaseEntity{
 
 
     @JsonIgnore
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @MapKeyColumn(name = "date")
+    @Convert(converter = LocalDateAttributeConverter.class, attributeName = "key")
     private Map<LocalDate, EStatus> seatStatusMap;
 
 
     @JsonIgnore
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @MapKeyColumn(name = "date")
+    @Convert(converter = LocalDateAttributeConverter.class, attributeName = "key")
     private Map<LocalDate, Long> bookingIdMap;
 
     public enum EStatus {

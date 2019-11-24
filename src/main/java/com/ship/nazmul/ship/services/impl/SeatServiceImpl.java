@@ -136,7 +136,6 @@ public class SeatServiceImpl implements SeatService {
 
     @Override
     public List<Seat> getAvailableSeatByCategoryAndShipId(Long shipId, Long categoryId, LocalDate date) throws NotFoundException, ParseException {
-
         List<Seat> seatList = this.seatRepository.findByShipIdAndCategoryIdOrderById(shipId, categoryId);
         return this.getSeatAvailabilityFormSeatList(seatList, date);
     }
@@ -210,12 +209,9 @@ public class SeatServiceImpl implements SeatService {
     * */
     @Override
     public boolean checkSeatAvailability(Long seatId, LocalDate date) throws NotFoundException, ParseException {
-        System.out.println("SS01 : " + new Date());
         Seat seat = this.getOne(seatId);
-        System.out.println("SS02 : " + new Date());
         //TODO: remove print command after testing period complete
         Seat.EStatus status = seat.getSeatStatusMap().get(date);
-        System.out.println("SS03 : " + new Date());
 //        if(status == null) {
 //            System.out.println("D3 date: Found null");
 //            status = seat.getSeatStatusMap().get(date);
