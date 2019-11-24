@@ -232,7 +232,11 @@ public class BookingServiceImpl implements BookingService {
         System.out.println("BS19 : " + new Date());
         for (SubBooking subBooking : booking.getSubBookingList()) {
             System.out.println("BS20 : " + new Date());
-            boolean av = this.seatService.checkSeatAvailability(subBooking.getSeat().getId(), subBooking.getDate());
+            Long seatId = subBooking.getSeat().getId();
+            System.out.println("BS20 : " + new Date() + " C");
+            LocalDate date = subBooking.getDate();
+            System.out.println("BS20 : " + new Date() + " D");
+            boolean av = this.seatService.checkSeatAvailability(seatId, date);
             System.out.println("BS21 : " + new Date());
             if (av) {
                 this.seatService.updateSeatStatusAndBookingMap(subBooking.getSeat().getId(), subBooking.getDate(), booking.geteStatus(), booking);
@@ -240,7 +244,8 @@ public class BookingServiceImpl implements BookingService {
             } else {
                 return false;
             }
-            System.out.println("BS23 : " + new Date());        }
+            System.out.println("BS23 : " + new Date());
+        }
         return true;
     }
 
@@ -534,9 +539,9 @@ public class BookingServiceImpl implements BookingService {
 
         //Update discounts and commissions
         booking.setBookingDiscount(booking.getBookingDiscount() - (booking.getBookingDiscount() / booking.getSubBookingList().size()));
-        booking.setHotelswaveDiscount(booking.getHotelswaveDiscount() - (booking.getHotelswaveDiscount()/booking.getSubBookingList().size()));
-        booking.setHotelswaveAgentDiscount(booking.getHotelswaveAgentDiscount() - (booking.getHotelswaveAgentDiscount()/booking.getSubBookingList().size()));
-        booking.setAgentDiscount(booking.getAgentDiscount()-(booking.getAgentDiscount()/booking.getSubBookingList().size()));
+        booking.setHotelswaveDiscount(booking.getHotelswaveDiscount() - (booking.getHotelswaveDiscount() / booking.getSubBookingList().size()));
+        booking.setHotelswaveAgentDiscount(booking.getHotelswaveAgentDiscount() - (booking.getHotelswaveAgentDiscount() / booking.getSubBookingList().size()));
+        booking.setAgentDiscount(booking.getAgentDiscount() - (booking.getAgentDiscount() / booking.getSubBookingList().size()));
 
         //Recalculate and update booking
         booking.setSubBookingList(this.calculateSubBookingList(subBookingList));
@@ -716,16 +721,16 @@ public class BookingServiceImpl implements BookingService {
         amount -= (seatIds.size() * (booking.getBookingDiscount() / size));
 
         //1) Credit amount into AdminAgentLedger
-        int commission = seatIds.size() * (booking.getHotelswaveAgentDiscount()/size);
+        int commission = seatIds.size() * (booking.getHotelswaveAgentDiscount() / size);
         String explanation = "Cancel Partial booking seats " + seatList + " for booking id " + booking.getId();
-        AdminAgentLedger adminAgentLedger = new AdminAgentLedger(booking.getCreatedBy(), LocalDateTime.now(), explanation, 0 ,amount - commission);
+        AdminAgentLedger adminAgentLedger = new AdminAgentLedger(booking.getCreatedBy(), LocalDateTime.now(), explanation, 0, amount - commission);
         adminAgentLedger.setRef(booking.getId().toString());
         adminAgentLedger.setApproved(true);
         adminAgentLedger = this.adminAgentLedgerService.updateBalanceAndSave(booking.getCreatedBy().getId(), adminAgentLedger);
 
 
         //2) Debit amount from ShipAdminLedger
-        ShipAdminLedger shipAdminLedger = new ShipAdminLedger(booking.getShip().getAdmin(), LocalDateTime.now(), explanation, amount - (2*commission), 0);
+        ShipAdminLedger shipAdminLedger = new ShipAdminLedger(booking.getShip().getAdmin(), LocalDateTime.now(), explanation, amount - (2 * commission), 0);
         shipAdminLedger.setApproved(true);
         shipAdminLedger.setRef(booking.getId().toString());
         this.shipAdminLedgerService.addShipAdminLedger(booking.getShip().getAdmin().getId(), shipAdminLedger);
