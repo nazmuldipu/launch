@@ -231,6 +231,7 @@ public class BookingServiceImpl implements BookingService {
         //Update room status map and booking map
         System.out.println("BS19 : " + new Date());
         List<SubBooking> subBookingList = booking.getSubBookingList();
+        System.out.println("BS19 : " + new Date() + " A");
         for (SubBooking subBooking : subBookingList) {
             System.out.println("BS20 : " + new Date() + " B");
             Long seatId = subBooking.getSeat().getId();
