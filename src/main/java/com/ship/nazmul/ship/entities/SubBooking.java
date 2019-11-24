@@ -2,7 +2,6 @@ package com.ship.nazmul.ship.entities;
 
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.ship.nazmul.ship.commons.utils.LocalDateAttributeConverter;
@@ -31,7 +30,6 @@ public class SubBooking implements Serializable {
     private boolean paid;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JsonIgnore
     private Seat seat;
 
     private Long categoryId;
