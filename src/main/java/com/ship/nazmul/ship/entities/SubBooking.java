@@ -29,7 +29,8 @@ public class SubBooking implements Serializable {
     private int payablePrice;
     private boolean paid;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
+    @JsonBackReference
     private Seat seat;
 
     private Long categoryId;
