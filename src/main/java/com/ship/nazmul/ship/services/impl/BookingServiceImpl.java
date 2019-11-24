@@ -238,10 +238,10 @@ public class BookingServiceImpl implements BookingService {
             System.out.println("BS20 : " + new Date() + " C");
             LocalDate date = subBooking.getDate();
             System.out.println("BS20 : " + new Date() + " D");
-            boolean av = this.seatService.checkSeatAvailability(subBooking.getSeatId(), date);
+            boolean av = this.seatService.checkSeatAvailability(subBooking.getLocalSeatId(), date);
             System.out.println("BS21 : " + new Date());
             if (av) {
-                this.seatService.updateSeatStatusAndBookingMap(subBooking.getSeatId(), date, booking.geteStatus(), booking);
+                this.seatService.updateSeatStatusAndBookingMap(subBooking.getLocalSeatId(), date, booking.geteStatus(), booking);
                 System.out.println("BS22 : " + new Date());
             } else {
                 return false;
@@ -385,7 +385,7 @@ public class BookingServiceImpl implements BookingService {
 //            newSubBookingList.add(newSubBooking);
             System.out.println("BS06 : " + new Date() + " B");
             subBooking.setSeat(seat);
-            subBooking.setSeatId(seat.getId());
+            subBooking.setLocalSeatId(seat.getId());
             System.out.println("BS07 : " + new Date());
             subBooking = this.calculateSubBooking(subBooking, cid);
             System.out.println("BS10 : " + new Date());

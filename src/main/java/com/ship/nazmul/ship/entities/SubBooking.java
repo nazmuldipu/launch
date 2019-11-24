@@ -32,7 +32,7 @@ public class SubBooking implements Serializable {
     private Seat seat;
 
     private Long categoryId;
-    private Long seatId;
+    private Long localSeatId;
 
 
     public SubBooking() {
@@ -128,12 +128,12 @@ public class SubBooking implements Serializable {
         this.categoryId = categoryId;
     }
 
-    public Long getSeatId() {
-        return seatId;
+    public Long getLocalSeatId() {
+        return localSeatId;
     }
 
-    public void setSeatId(Long seatId) {
-        this.seatId = seatId;
+    public void setLocalSeatId(Long localSeatId) {
+        this.localSeatId = localSeatId;
     }
 
     @Override
@@ -148,7 +148,7 @@ public class SubBooking implements Serializable {
                 ", paid=" + paid +
                 ", seat=" + seat +
                 ", categoryId=" + categoryId +
-                ", seatId=" + seatId +
+                ", seatId=" + localSeatId +
                 '}';
     }
 }
