@@ -154,13 +154,21 @@ public class BookingServiceImpl implements BookingService {
 //        booking.setCategoryName(booking.getSubBookingList().get(0).getSeat().getCategory().getName());
         System.out.println("BS04 : " + new Date());
         if (user.hasRole(Role.ERole.ROLE_ADMIN.toString())) {
+            System.out.println("BS11 : " + new Date());
             booking = this.save(booking);
+            System.out.println("BS12 : " + new Date());
             if (this.confirmBooking(booking)) {
+                System.out.println("BS13 : " + new Date());
                 if (booking.geteStatus() == Seat.EStatus.SEAT_SOLD) {
+                    System.out.println("BS14 : " + new Date());
                     booking = this.approveBooking(booking);
+                    System.out.println("BS15 : " + new Date());
                 } else if (booking.geteStatus() == Seat.EStatus.SEAT_RESERVED) {
+                    System.out.println("BS16 : " + new Date());
                     booking = this.reserveBooking(booking);
+                    System.out.println("BS17 : " + new Date());
                 }
+                System.out.println("BS18 : " + new Date());
                 return booking;
             }
         }
