@@ -8,11 +8,9 @@ import com.ship.nazmul.ship.commons.utils.LocalDateAttributeConverter;
 import com.ship.nazmul.ship.commons.utils.LocalDateDeserializer;
 import com.ship.nazmul.ship.commons.utils.LocalDateSerializer;
 import com.ship.nazmul.ship.commons.utils.LocalDateTimeAttributeConverter;
+import org.hibernate.annotations.Cascade;
 
-import javax.persistence.Convert;
-import javax.persistence.Embeddable;
-import javax.persistence.FetchType;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
 
@@ -29,7 +27,7 @@ public class SubBooking implements Serializable {
     private int payablePrice;
     private boolean paid;
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JsonBackReference
     private Seat seat;
 
