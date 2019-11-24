@@ -233,15 +233,15 @@ public class BookingServiceImpl implements BookingService {
         List<SubBooking> subBookingList = booking.getSubBookingList();
         System.out.println("BS19 : " + new Date() + " A");
         for (SubBooking subBooking : subBookingList) {
-            System.out.println("BS20 : " + new Date() + " B : " + subBooking.getSeat().getId());
-            Seat seat = this.seatService.getOne(subBooking.getSeat().getId());
+            System.out.println("BS20 : " + new Date() + " B : ");
+            Long cid = subBooking.getSeat().getId();
             System.out.println("BS20 : " + new Date() + " C");
             LocalDate date = subBooking.getDate();
             System.out.println("BS20 : " + new Date() + " D");
-            boolean av = this.seatService.checkSeatAvailability(seat.getId(), date);
+            boolean av = this.seatService.checkSeatAvailability(cid, date);
             System.out.println("BS21 : " + new Date());
             if (av) {
-                this.seatService.updateSeatStatusAndBookingMap(seat.getId(), date, booking.geteStatus(), booking);
+                this.seatService.updateSeatStatusAndBookingMap(cid, date, booking.geteStatus(), booking);
                 System.out.println("BS22 : " + new Date());
             } else {
                 return false;
