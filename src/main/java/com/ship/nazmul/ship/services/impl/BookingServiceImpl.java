@@ -367,7 +367,9 @@ public class BookingServiceImpl implements BookingService {
 
     SubBooking calculateSubBooking(SubBooking subBooking, Long categoryId) {
         LocalDate ld = subBooking.getDate();
+        System.out.println("BS01 : " + new Date());
         Integer discount = this.categoryService.getDiscount(categoryId, ld);//subBooking.getDiscount();
+        System.out.println("BS02 : " + new Date());
         if (discount == null) {
             discount = subBooking.getDiscount();
         }

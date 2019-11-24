@@ -18,7 +18,7 @@ public class Seat extends BaseEntity{
     private boolean discounted;
     private boolean available;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     private Category category;
 
     @ManyToOne
