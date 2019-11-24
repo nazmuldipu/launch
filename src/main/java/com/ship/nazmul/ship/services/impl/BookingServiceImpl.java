@@ -373,7 +373,8 @@ public class BookingServiceImpl implements BookingService {
         System.out.println("BS05 : " + new Date());
         for (SubBooking subBooking : subBookingList) {
             System.out.println("BS06 : " + new Date());
-            Seat seat = this.seatService.getOne(subBooking.getSeat().getId());
+            subBooking.setLocalSeatId(subBooking.getSeat().getId());
+            Seat seat = this.seatService.getOne(subBooking.getLocalSeatId());
             System.out.println("BS06 : " + new Date() + " A");
             long cid = subBooking.getCategoryId();
             System.out.println("CID : " + cid);
@@ -385,7 +386,6 @@ public class BookingServiceImpl implements BookingService {
 //            newSubBookingList.add(newSubBooking);
             System.out.println("BS06 : " + new Date() + " B");
             subBooking.setSeat(seat);
-            subBooking.setLocalSeatId(seat.getId());
             System.out.println("BS07 : " + new Date());
             subBooking = this.calculateSubBooking(subBooking, cid);
             System.out.println("BS10 : " + new Date());
