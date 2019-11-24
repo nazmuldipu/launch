@@ -143,32 +143,18 @@ public class BookingServiceImpl implements BookingService {
         if (!user.hasRole(Role.ERole.ROLE_ADMIN.toString())) throw new ForbiddenException("Access denied");
 
         // 2) Add subBookingList to booking and Calculate Booking
-        System.out.println("BS01 : " + new Date());
         booking.setSubBookingList(this.calculateSubBookingList(booking.getSubBookingList()));
-        System.out.println("BS02 : " + new Date());
         booking = this.calculateBooking(booking);
-        System.out.println("BS03 : " + new Date());
-//        booking.setShip(booking.getSubBookingList().get(0).getSeat().getCategory().getShip());
         booking.setShip(this.shipService.getOne(booking.getShip().getId()));
         booking.setShipName(booking.getShip().getName());
-//        booking.setCategoryName(booking.getSubBookingList().get(0).getSeat().getCategory().getName());
-        System.out.println("BS04 : " + new Date());
         if (user.hasRole(Role.ERole.ROLE_ADMIN.toString())) {
-            System.out.println("BS11 : " + new Date());
             booking = this.save(booking);
-            System.out.println("BS12 : " + new Date());
             if (this.confirmBooking(booking)) {
-                System.out.println("BS13 : " + new Date());
                 if (booking.geteStatus() == Seat.EStatus.SEAT_SOLD) {
-                    System.out.println("BS14 : " + new Date());
                     booking = this.approveBooking(booking);
-                    System.out.println("BS15 : " + new Date());
                 } else if (booking.geteStatus() == Seat.EStatus.SEAT_RESERVED) {
-                    System.out.println("BS16 : " + new Date());
                     booking = this.reserveBooking(booking);
-                    System.out.println("BS17 : " + new Date());
                 }
-                System.out.println("BS18 : " + new Date());
                 return booking;
             }
         }
@@ -229,24 +215,15 @@ public class BookingServiceImpl implements BookingService {
 
     private boolean confirmBooking(Booking booking) throws NotFoundException, ForbiddenException, ParseException {
         //Update room status map and booking map
-        System.out.println("BS19 : " + new Date());
         List<SubBooking> subBookingList = booking.getSubBookingList();
-        System.out.println("BS19 : " + new Date() + " A");
         for (SubBooking subBooking : subBookingList) {
-            System.out.println("BS20 : " + new Date() + " B : ");
-//            Long cid = subBooking.getSeat().getId();
-            System.out.println("BS20 : " + new Date() + " C");
             LocalDate date = subBooking.getDate();
-            System.out.println("BS20 : " + new Date() + " D");
             boolean av = this.seatService.checkSeatAvailability(subBooking.getLocalSeatId(), date);
-            System.out.println("BS21 : " + new Date());
             if (av) {
                 this.seatService.updateSeatStatusAndBookingMap(subBooking.getLocalSeatId(), date, booking.geteStatus(), booking);
-                System.out.println("BS22 : " + new Date());
             } else {
                 return false;
             }
-            System.out.println("BS23 : " + new Date());
         }
         return true;
     }
@@ -370,36 +347,20 @@ public class BookingServiceImpl implements BookingService {
 
     List<SubBooking> calculateSubBookingList(List<SubBooking> subBookingList) throws NotFoundException, ParseException {
         List<SubBooking> newSubBookingList = new ArrayList<>();
-        System.out.println("BS05 : " + new Date());
         for (SubBooking subBooking : subBookingList) {
-            System.out.println("BS06 : " + new Date());
             subBooking.setLocalSeatId(subBooking.getSeat().getId());
             Seat seat = this.seatService.getOne(subBooking.getLocalSeatId());
-            System.out.println("BS06 : " + new Date() + " A");
             long cid = subBooking.getCategoryId();
-            System.out.println("CID : " + cid);
-//            Category category = this.categoryService.getOne(seat.getCategory().getId());
-            // 3) Create SubBooking for each room and each date
-//            SubBooking newSubBooking = new SubBooking(subBooking.getDate(), subBooking.getDiscount(), subBooking.getCommission(), seat);
-            // 4) Calculate each subBooking and add to subBookingList
-//            newSubBooking = this.calculateSubBooking(newSubBooking);
-//            newSubBookingList.add(newSubBooking);
-            System.out.println("BS06 : " + new Date() + " B");
             subBooking.setSeat(seat);
-            System.out.println("BS07 : " + new Date());
             subBooking = this.calculateSubBooking(subBooking, cid);
-            System.out.println("BS10 : " + new Date());
             newSubBookingList.add(subBooking);
         }
-
         return newSubBookingList;
     }
 
     SubBooking calculateSubBooking(SubBooking subBooking, Long categoryId) {
         LocalDate ld = subBooking.getDate();
-        System.out.println("BS08 : " + new Date());
         Integer discount = this.categoryService.getDiscount(categoryId, ld);//subBooking.getDiscount();
-        System.out.println("BS09 : " + new Date());
         if (discount == null) {
             discount = subBooking.getDiscount();
         }
