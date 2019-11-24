@@ -145,11 +145,15 @@ public class BookingServiceImpl implements BookingService {
         if (!user.hasRole(Role.ERole.ROLE_ADMIN.toString())) throw new ForbiddenException("Access denied");
 
         // 2) Add subBookingList to booking and Calculate Booking
+        System.out.println("BS01 : " + new Date());
         booking.setSubBookingList(this.calculateSubBookingList(booking.getSubBookingList()));
+        System.out.println("BS02 : " + new Date());
         booking = this.calculateBooking(booking);
+        System.out.println("BS03 : " + new Date());
         booking.setShip(booking.getSubBookingList().get(0).getSeat().getCategory().getShip());
         booking.setShipName(booking.getShip().getName());
         booking.setCategoryName(booking.getSubBookingList().get(0).getSeat().getCategory().getName());
+        System.out.println("BS04 : " + new Date());
         if (user.hasRole(Role.ERole.ROLE_ADMIN.toString())) {
             booking = this.save(booking);
             if (this.confirmBooking(booking)) {
@@ -348,7 +352,9 @@ public class BookingServiceImpl implements BookingService {
 
     List<SubBooking> calculateSubBookingList(List<SubBooking> subBookingList) throws NotFoundException, ParseException {
         List<SubBooking> newSubBookingList = new ArrayList<>();
+        System.out.println("BS05 : " + new Date());
         for (SubBooking subBooking : subBookingList) {
+            System.out.println("BS06 : " + new Date());
             Seat seat = this.seatService.getOne(subBooking.getSeat().getId());
             long cid = seat.getCategory().getId();
 //            Category category = this.categoryService.getOne(seat.getCategory().getId());
@@ -358,7 +364,9 @@ public class BookingServiceImpl implements BookingService {
 //            newSubBooking = this.calculateSubBooking(newSubBooking);
 //            newSubBookingList.add(newSubBooking);
             subBooking.setSeat(seat);
+            System.out.println("BS07 : " + new Date());
             subBooking = this.calculateSubBooking(subBooking, cid);
+            System.out.println("BS10 : " + new Date());
             newSubBookingList.add(subBooking);
         }
 
@@ -367,9 +375,9 @@ public class BookingServiceImpl implements BookingService {
 
     SubBooking calculateSubBooking(SubBooking subBooking, Long categoryId) {
         LocalDate ld = subBooking.getDate();
-        System.out.println("BS01 : " + new Date());
+        System.out.println("BS08 : " + new Date());
         Integer discount = this.categoryService.getDiscount(categoryId, ld);//subBooking.getDiscount();
-        System.out.println("BS02 : " + new Date());
+        System.out.println("BS09 : " + new Date());
         if (discount == null) {
             discount = subBooking.getDiscount();
         }
