@@ -233,7 +233,7 @@ public class BookingServiceImpl implements BookingService {
         List<SubBooking> subBookingList = booking.getSubBookingList();
         System.out.println("BS19 : " + new Date() + " A");
         for (SubBooking subBooking : subBookingList) {
-            System.out.println("BS20 : " + new Date() + " B");
+            System.out.println("BS20 : " + new Date() + " B : " + subBooking.getSeat().getId());
             Seat seat = this.seatService.getOne(subBooking.getSeat().getId());
             System.out.println("BS20 : " + new Date() + " C");
             LocalDate date = subBooking.getDate();
