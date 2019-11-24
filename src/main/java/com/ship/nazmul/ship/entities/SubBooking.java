@@ -33,6 +33,8 @@ public class SubBooking implements Serializable {
 //    @JsonIgnore
     private Seat seat;
 
+    private Long categoryId;
+
 
     public SubBooking() {
     }
@@ -119,15 +121,26 @@ public class SubBooking implements Serializable {
         this.seat = seat;
     }
 
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
+
     @Override
     public String toString() {
         return "SubBooking{" +
                 "date=" + date +
-                ", payablePrice=" + payablePrice +
+                ", seatNumber='" + seatNumber + '\'' +
+                ", fare=" + fare +
                 ", discount=" + discount +
                 ", commission=" + commission +
+                ", payablePrice=" + payablePrice +
                 ", paid=" + paid +
                 ", seat=" + seat +
+                ", categoryId=" + categoryId +
                 '}';
     }
 }
