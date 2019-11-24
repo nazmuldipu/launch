@@ -11,6 +11,7 @@ import com.ship.nazmul.ship.commons.utils.LocalDateTimeAttributeConverter;
 
 import javax.persistence.Convert;
 import javax.persistence.Embeddable;
+import javax.persistence.FetchType;
 import javax.persistence.OneToOne;
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -28,7 +29,7 @@ public class SubBooking implements Serializable {
     private int payablePrice;
     private boolean paid;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER)
     @JsonBackReference
 //    @JsonIgnore
     private Seat seat;
