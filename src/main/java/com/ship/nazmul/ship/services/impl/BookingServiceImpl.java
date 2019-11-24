@@ -13,17 +13,13 @@ import com.ship.nazmul.ship.exceptions.notfound.NotFoundException;
 import com.ship.nazmul.ship.exceptions.notfound.UserNotFoundException;
 import com.ship.nazmul.ship.exceptions.nullpointer.NullPasswordException;
 import com.ship.nazmul.ship.repositories.BookingRepository;
-import com.ship.nazmul.ship.services.BookingService;
-import com.ship.nazmul.ship.services.CategoryService;
-import com.ship.nazmul.ship.services.SeatService;
-import com.ship.nazmul.ship.services.UserService;
+import com.ship.nazmul.ship.services.*;
 import com.ship.nazmul.ship.services.accountings.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.awt.print.Book;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -38,6 +34,7 @@ public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
     private final UserService userService;
+    private final ShipService shipService;
     private final CategoryService categoryService;
     private final SeatService seatService;
     private final AdminCashbookService adminCashbookService;
@@ -50,9 +47,10 @@ public class BookingServiceImpl implements BookingService {
 
 
     @Autowired
-    public BookingServiceImpl(BookingRepository bookingRepository, UserService userService, CategoryService categoryService, SeatService seatService, AdminCashbookService adminCashbookService, ShipAdminCashbookService shipAdminCashbookService, ShipAdminLedgerService shipAdminLedgerService, ShipAgentLedgerService shipAgentLedgerService, AdminAgentLedgerService adminAgentLedgerService) {
+    public BookingServiceImpl(BookingRepository bookingRepository, UserService userService, ShipService shipService, CategoryService categoryService, SeatService seatService, AdminCashbookService adminCashbookService, ShipAdminCashbookService shipAdminCashbookService, ShipAdminLedgerService shipAdminLedgerService, ShipAgentLedgerService shipAgentLedgerService, AdminAgentLedgerService adminAgentLedgerService) {
         this.bookingRepository = bookingRepository;
         this.userService = userService;
+        this.shipService = shipService;
         this.categoryService = categoryService;
         this.seatService = seatService;
         this.adminCashbookService = adminCashbookService;
@@ -150,9 +148,10 @@ public class BookingServiceImpl implements BookingService {
         System.out.println("BS02 : " + new Date());
         booking = this.calculateBooking(booking);
         System.out.println("BS03 : " + new Date());
-        booking.setShip(booking.getSubBookingList().get(0).getSeat().getCategory().getShip());
+//        booking.setShip(booking.getSubBookingList().get(0).getSeat().getCategory().getShip());
+        booking.setShip(this.shipService.getOne(booking.getShip().getId()));
         booking.setShipName(booking.getShip().getName());
-        booking.setCategoryName(booking.getSubBookingList().get(0).getSeat().getCategory().getName());
+//        booking.setCategoryName(booking.getSubBookingList().get(0).getSeat().getCategory().getName());
         System.out.println("BS04 : " + new Date());
         if (user.hasRole(Role.ERole.ROLE_ADMIN.toString())) {
             booking = this.save(booking);
@@ -400,9 +399,9 @@ public class BookingServiceImpl implements BookingService {
         // 2) Add subBookingList to booking and Calculate Booking
         booking.setSubBookingList(this.calculateSubBookingList(booking.getSubBookingList()));
         booking = this.calculateBooking(booking);
-        booking.setShip(booking.getSubBookingList().get(0).getSeat().getCategory().getShip());
+        booking.setShip(this.shipService.getOne(booking.getShip().getId()));
         booking.setShipName(booking.getShip().getName());
-        booking.setCategoryName(booking.getSubBookingList().get(0).getSeat().getCategory().getName());
+//        booking.setCategoryName(booking.getSubBookingList().get(0).getSeat().getCategory().getName());
 
         int agentCommission = booking.getShip().getHotelswaveCommission() / 2;
 
@@ -433,9 +432,9 @@ public class BookingServiceImpl implements BookingService {
         // 2) Add subBookingList to booking and Calculate Booking
         booking.setSubBookingList(this.calculateSubBookingList(booking.getSubBookingList()));
         booking = this.calculateBooking(booking);
-        booking.setShip(booking.getSubBookingList().get(0).getSeat().getCategory().getShip());
+        booking.setShip(this.shipService.getOne(booking.getShip().getId()));
         booking.setShipName(booking.getShip().getName());
-        booking.setCategoryName(booking.getSubBookingList().get(0).getSeat().getCategory().getName());
+//        booking.setCategoryName(booking.getSubBookingList().get(0).getSeat().getCategory().getName());
 
         if (user.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString())) {
             booking = this.save(booking);
@@ -461,9 +460,9 @@ public class BookingServiceImpl implements BookingService {
         // 2) Add subBookingList to booking and Calculate Booking
         booking.setSubBookingList(this.calculateSubBookingList(booking.getSubBookingList()));
         booking = this.calculateBooking(booking);
-        booking.setShip(booking.getSubBookingList().get(0).getSeat().getCategory().getShip());
+        booking.setShip(this.shipService.getOne(booking.getShip().getId()));
         booking.setShipName(booking.getShip().getName());
-        booking.setCategoryName(booking.getSubBookingList().get(0).getSeat().getCategory().getName());
+//        booking.setCategoryName(booking.getSubBookingList().get(0).getSeat().getCategory().getName());
 
         int shipAgentCommission = 0;
         for (int i = 0; i < booking.getSubBookingList().size(); i++) {
