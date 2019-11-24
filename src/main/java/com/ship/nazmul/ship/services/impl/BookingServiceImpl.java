@@ -229,14 +229,18 @@ public class BookingServiceImpl implements BookingService {
 
     private boolean confirmBooking(Booking booking) throws NotFoundException, ForbiddenException, ParseException {
         //Update room status map and booking map
+        System.out.println("BS19 : " + new Date());
         for (SubBooking subBooking : booking.getSubBookingList()) {
+            System.out.println("BS20 : " + new Date());
             boolean av = this.seatService.checkSeatAvailability(subBooking.getSeat().getId(), subBooking.getDate());
+            System.out.println("BS21 : " + new Date());
             if (av) {
                 this.seatService.updateSeatStatusAndBookingMap(subBooking.getSeat().getId(), subBooking.getDate(), booking.geteStatus(), booking);
+                System.out.println("BS22 : " + new Date());
             } else {
                 return false;
             }
-        }
+            System.out.println("BS23 : " + new Date());        }
         return true;
     }
 
