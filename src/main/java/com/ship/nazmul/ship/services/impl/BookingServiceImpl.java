@@ -496,7 +496,7 @@ public class BookingServiceImpl implements BookingService {
 
         //Get new subBooking list after remove SubBooking with provide seat Id
         List<SubBooking> subBookingList = booking.getSubBookingList().stream()
-                .filter(sb -> !Objects.equals(sb.getSeat().getId(), seatId))
+                .filter(sb -> !sb.getSeat().getId().equals(seatId))
                 .collect(Collectors.toList());
 
         this.seatService.clearSeatStatusAndBookingIdMap(seatId, subBooking.getDate(), booking);
