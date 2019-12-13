@@ -1,6 +1,7 @@
 package com.ship.nazmul.ship.services;
 
 import com.ship.nazmul.ship.entities.Booking;
+import com.ship.nazmul.ship.entities.SubBooking;
 import com.ship.nazmul.ship.exceptions.exists.UserAlreadyExistsException;
 import com.ship.nazmul.ship.exceptions.forbidden.ForbiddenException;
 import com.ship.nazmul.ship.exceptions.invalid.UserInvalidException;
@@ -10,6 +11,7 @@ import com.ship.nazmul.ship.exceptions.nullpointer.NullPasswordException;
 import org.springframework.data.domain.Page;
 
 import java.text.ParseException;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -55,4 +57,6 @@ public interface BookingService {
     void cancelBooking(Long bookingId) throws ForbiddenException, NotFoundException, ParseException;
 
     void cancelBookingSeats(Long bookingId, List<Long> seatIds) throws ForbiddenException, UserInvalidException, NullPasswordException, ParseException, UserAlreadyExistsException, NotFoundException;
+
+    List<Booking> getBookingListByShipIdAndDate(Long shipId, LocalDate date);
 }

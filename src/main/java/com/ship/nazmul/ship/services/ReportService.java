@@ -34,5 +34,7 @@ public interface ReportService {
 
     List<ServiceAdminSellsReportRange> getServiceAdminReservationReportRange(Long shipId, LocalDate startDate, LocalDate endDate) throws ForbiddenException, ParseException;
 
+    List<ServiceAdminSellsReport> getBookingListReport(Long shipId, LocalDate date) throws ParseException;
+
     JSONObject getServiceAdminDashboardReport(LocalDate date) throws JSONException, ForbiddenException, ParseException;
 }

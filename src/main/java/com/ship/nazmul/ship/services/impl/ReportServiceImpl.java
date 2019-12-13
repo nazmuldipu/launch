@@ -189,6 +189,39 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    public List<ServiceAdminSellsReport> getBookingListReport(Long shipId, LocalDate date) throws ParseException {
+        List<Booking> bookingList = this.bookingService.getBookingListByShipIdAndDate(shipId, date);
+        List<ServiceAdminSellsReport> reportList = new ArrayList<>();
+
+        for(Booking booking: bookingList){
+            for(SubBooking sb : booking.getSubBookingList()){
+                ServiceAdminSellsReport report = new ServiceAdminSellsReport();
+                String[] seats = {sb.getSeat().getSeatNumber()};
+                report.setJourneyDate(sb.getDate());
+                report.setBookingDate(booking.getCreated());
+                report.setBookingId(booking.getId());
+                report.setBookingStatus(booking.geteStatus());
+                report.setCustomerName(booking.getUser().getName());
+                report.setCustomerPhone(booking.getUser().getPhoneNumber());
+                report.setShipName(booking.getShip().getName());
+                report.setShipNumber(booking.getShip().getShipNumber());
+                report.setSeatNumbers(seats);
+                report.setPrice(sb.getPayablePrice());
+                report.setSoldBy(booking.getCreatedBy().getName());
+                report.setRole(booking.getCreatedBy().getRoles().get(0).getRole());
+                report.setPaid(booking.isPaid());
+                report.setRoutes(sb.getSeat().getShip().getStartingPoint() + " - " + sb.getSeat().getShip().getDroppingPoint());
+
+                reportList.add(report);
+            }
+        }
+//        System.out.println("DD3 :" + "Booking list size :" + bookingList.size());
+//        List<ServiceAdminSellsReport> reportList = this.getAdminBookingReportFromBookingList(bookingList);
+//        System.out.println("DD4 : " + "Report list size : " + reportList.size());
+        return reportList;
+    }
+
+    @Override
     public JSONObject getServiceAdminDashboardReport(LocalDate date) throws JSONException, ForbiddenException, ParseException {
         User currentUser = SecurityConfig.getCurrentUser();
         if (currentUser.getShips() == null || !currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()))
