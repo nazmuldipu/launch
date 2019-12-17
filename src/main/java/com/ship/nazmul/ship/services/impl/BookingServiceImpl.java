@@ -23,10 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -408,7 +405,16 @@ public class BookingServiceImpl implements BookingService {
     public Booking createServiceAdminBooking(Booking booking) throws ForbiddenException, NotFoundException, ParseException, UserAlreadyExistsException, NullPasswordException, UserInvalidException {
         //1) Security check if user has sufficient permission for this action
         User user = SecurityConfig.getCurrentUser();
-        if (!user.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString())) throw new ForbiddenException("Access denied");
+        Set<Ship> userShips = user.getShips();
+        Ship ship = this.shipService.getOne(booking.getShip().getId());
+
+        boolean valid = false;
+        for(Ship sh : userShips){
+            if(sh.getId().equals(ship.getId())){
+                valid = true;
+            }
+        }
+        if (!user.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()) || !valid) throw new ForbiddenException("Access denied");
 
         // 2) Add subBookingList to booking and Calculate Booking
         booking.setSubBookingList(this.calculateSubBookingList(booking.getSubBookingList()));
@@ -435,13 +441,22 @@ public class BookingServiceImpl implements BookingService {
     public Booking createServiceAgentBooking(Booking booking) throws ForbiddenException, NotFoundException, ParseException, UserAlreadyExistsException, NullPasswordException, UserInvalidException {
         //1) Security check if user has sufficient permission for this action
         User user = SecurityConfig.getCurrentUser();
-        if (!user.hasRole(Role.ERole.ROLE_SERVICE_AGENT.toString())) throw new ForbiddenException("Access denied");
+        Set<Ship> userShips = user.getShips();
+        Ship ship = this.shipService.getOne(booking.getShip().getId());
+
+        boolean valid = false;
+        for(Ship sh : userShips){
+            if(sh.getId().equals(ship.getId())){
+                valid = true;
+            }
+        }
+        if (!user.hasRole(Role.ERole.ROLE_SERVICE_AGENT.toString()) || !valid) throw new ForbiddenException("Access denied");
 
         int agentBalance = this.shipAgentLedgerService.getServiceAgentBalance(user.getId());
         // 2) Add subBookingList to booking and Calculate Booking
         booking.setSubBookingList(this.calculateSubBookingList(booking.getSubBookingList()));
         booking = this.calculateBooking(booking);
-        booking.setShip(this.shipService.getOne(booking.getShip().getId()));
+        booking.setShip(ship);
         booking.setShipName(booking.getShip().getName());
 //        booking.setCategoryName(booking.getSubBookingList().get(0).getSeat().getCategory().getName());
 
