@@ -25,6 +25,8 @@ public interface ReportService {
 
     List<ServiceAdminSellsReport> getAdminReservationReportByShipId(LocalDate date, Long shipId) throws ForbiddenException, ParseException;
 
+    List<ServiceAdminSellsReport> getAdminAgentReport(Long shipId, Long userId, LocalDate date) throws ParseException;
+
     /************************************Service Admin modules***************************************/
     List<ServiceAdminSellsReport> getServiceAdminSellsReport(Long shipId, LocalDate date) throws ForbiddenException, ParseException;
 

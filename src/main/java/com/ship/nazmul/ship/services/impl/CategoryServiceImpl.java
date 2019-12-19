@@ -50,8 +50,9 @@ public class CategoryServiceImpl implements CategoryService {
 
         category.setShip(ship);
         if(category.getId() != null){
-            category.setImagePaths(this.getOne(category.getId()).getImagePaths());
-            category.setDiscountMap(this.getOne(category.getId()).getDiscountMap());
+            Category oldCategory = this.getOne(category.getId());
+            category.setImagePaths(oldCategory.getImagePaths());
+            category.setDiscountMap(oldCategory.getDiscountMap());
         }
         ship = this.updateStartsFrom(ship,category);
 

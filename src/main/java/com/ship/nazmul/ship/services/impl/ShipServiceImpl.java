@@ -39,6 +39,10 @@ public class ShipServiceImpl implements ShipService {
 
         if (ship.getShipFacilities() == null) ship.setShipFacilities(new ShipFacilities());
         if (ship.getId() != null) {
+            Ship oldShipObject = this.getOne(ship.getId());
+            ship.setShipMap(oldShipObject.getShipMap());
+            ship.setCategoryList(oldShipObject.getCategoryList());
+            ship.setAdmin(oldShipObject.getAdmin());
 //            List<String> imagePaths = this.getOne(ship.getId()).getImagePaths();
 //            ship.setImagePaths(imagePaths);
             //TODO: setStartsFrom

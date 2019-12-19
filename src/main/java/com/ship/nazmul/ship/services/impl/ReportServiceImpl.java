@@ -131,6 +131,12 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    public List<ServiceAdminSellsReport> getAdminAgentReport(Long shipId, Long userId, LocalDate date) throws ParseException {
+        List<Booking> bookingList = this.bookingService.getBookingListByCreatedIdAndShipIdAndDate(userId,shipId,date);
+        return this.getAdminBookingReportFromBookingList(bookingList);
+    }
+
+    @Override
     public List<ServiceAdminSellsReport> getServiceAdminSellsReport(Long shipId, LocalDate date) throws ForbiddenException, ParseException {
         User user = SecurityConfig.getCurrentUser();
         if (user.getShips() == null || !user.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()))

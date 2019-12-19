@@ -35,6 +35,7 @@ public class Ship extends BaseEntity {
     private int startsFrom;
     private float rating;
     private int numberOfReviews;
+    private int priority;
 
     private Integer hotelswaveCommission;
 
@@ -311,6 +312,14 @@ public class Ship extends BaseEntity {
         this.shipMap = shipMap;
     }
 
+    public int getPriority() {
+        return priority;
+    }
+
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
+
     @Override
     public String toString() {
         return "Ship{" +
@@ -326,6 +335,7 @@ public class Ship extends BaseEntity {
                 ", droppingPoint='" + droppingPoint + '\'' +
                 ", startTime='" + startTime + '\'' +
                 ", route='" + route + '\'' +
+                ", shipName=" + shipName +
                 ", ac=" + ac +
                 ", containCabin=" + containCabin +
                 ", online=" + online +
@@ -335,9 +345,12 @@ public class Ship extends BaseEntity {
                 ", startsFrom=" + startsFrom +
                 ", rating=" + rating +
                 ", numberOfReviews=" + numberOfReviews +
+                ", priority=" + priority +
                 ", hotelswaveCommission=" + hotelswaveCommission +
-//                ", imagePaths=" + imagePaths +
                 ", shipFacilities=" + shipFacilities +
+                ", categoryList=" + categoryList +
+                ", admin=" + admin +
+                ", shipMap=" + shipMap +
                 '}';
     }
 }

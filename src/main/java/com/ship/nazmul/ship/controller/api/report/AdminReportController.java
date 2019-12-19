@@ -7,6 +7,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.SQLOutput;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.Date;
@@ -49,5 +50,10 @@ public class AdminReportController {
     @GetMapping("/shipReservation/{shipId}")
     private ResponseEntity getAdminReservationReportByHotelId(@PathVariable("shipId")Long shipId, @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) throws NotFoundException, ForbiddenException, ParseException {
         return ResponseEntity.ok(this.reportService.getAdminReservationReportByShipId(date, shipId));
+    }
+
+    @GetMapping("/agentReport/{shipId}")
+    private ResponseEntity getAgentReportByShip(@PathVariable("shipId")Long shipId, @RequestParam("userId")Long userId,@RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) throws ParseException {
+        return ResponseEntity.ok(this.reportService.getAdminAgentReport(shipId, userId, date));
     }
 }

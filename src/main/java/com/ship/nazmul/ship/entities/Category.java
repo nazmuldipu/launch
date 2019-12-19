@@ -20,6 +20,7 @@ public class Category extends BaseEntity {
     private int fare;
     private int discount;
     private int agentDiscount;
+    private int priority;
 
     @JsonIgnore
     @ElementCollection
@@ -136,6 +137,14 @@ public class Category extends BaseEntity {
         this.agentDiscount = agentDiscount;
     }
 
+    public int getPriority() {
+        return priority;
+    }
+
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
+
     @Override
     public String toString() {
         return "Category{" +
@@ -146,9 +155,11 @@ public class Category extends BaseEntity {
                 ", fare=" + fare +
                 ", discount=" + discount +
                 ", agentDiscount=" + agentDiscount +
+                ", priority=" + priority +
                 ", imagePaths=" + imagePaths +
                 ", categoryFacilities=" + categoryFacilities +
                 ", ship=" + ship +
+                ", discountMap=" + discountMap +
                 '}';
     }
 }

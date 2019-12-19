@@ -59,4 +59,6 @@ public interface BookingService {
     void cancelBookingSeats(Long bookingId, List<Long> seatIds) throws ForbiddenException, UserInvalidException, NullPasswordException, ParseException, UserAlreadyExistsException, NotFoundException;
 
     List<Booking> getBookingListByShipIdAndDate(Long shipId, LocalDate date);
+
+    List<Booking> getBookingListByCreatedIdAndShipIdAndDate(Long userId, Long shipId, LocalDate date);
 }
