@@ -47,7 +47,7 @@ public class UserAdminController {
     }
 
     @PostMapping("")
-    private ResponseEntity<User> createAdminUser(@RequestBody User user) throws UserAlreadyExistsException, NullPasswordException, UserInvalidException {
+    private ResponseEntity<User> createAdminUser(@RequestBody User user) throws UserAlreadyExistsException, NullPasswordException, UserInvalidException, UserNotFoundException {
         return ResponseEntity.ok(this.userService.save(user));
     }
 

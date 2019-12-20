@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Set;
 
 public interface UserService {
-    User save(User user) throws UserAlreadyExistsException, UserInvalidException, NullPasswordException;
+    User save(User user) throws UserAlreadyExistsException, UserInvalidException, NullPasswordException, UserNotFoundException;
 
     User getOne(Long id) throws UserNotFoundException;
 
@@ -46,7 +46,7 @@ public interface UserService {
 
     User toggleUser(Long id, boolean enabled) throws UserAlreadyExistsException, NullPasswordException, UserInvalidException, UserNotFoundException;
 
-    User changePassword(Long userId, String password) throws ForbiddenException, NullPasswordException;
+    User changePassword(Long userId, String password) throws ForbiddenException, NullPasswordException, UserAlreadyExistsException, UserInvalidException, UserNotFoundException;
 
     // *******************************ADMIN MODULES ****************************************
     User createAdminAgent(User user) throws ForbiddenException, NullPasswordException;
@@ -63,7 +63,7 @@ public interface UserService {
 
     User assignShipAgent(Long userId, Long shipId) throws NotFoundException;
     // **************************** Service admin modules **********************************
-    User addServiceAdminUser(User user) throws UserAlreadyExistsException, NullPasswordException, UserInvalidException;
+    User addServiceAdminUser(User user) throws UserAlreadyExistsException, NullPasswordException, UserInvalidException, UserNotFoundException;
 
     User createServiceAdminAgent(User user) throws ForbiddenException, NullPasswordException;
 

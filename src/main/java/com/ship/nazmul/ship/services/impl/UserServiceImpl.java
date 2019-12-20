@@ -53,7 +53,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User save(User user) throws UserAlreadyExistsException, UserInvalidException, NullPasswordException {
+    public User save(User user) throws UserAlreadyExistsException, UserInvalidException, NullPasswordException, UserNotFoundException {
         if (!this.isValid(user)) throw new UserInvalidException("User invalid");
 
         // check if user already exists
@@ -76,12 +76,10 @@ public class UserServiceImpl implements UserService {
             if (user.getPhoneNumber().equals(this.adminPhone1) || user.getPhoneNumber().equals(this.adminPhone2)) {
                 user.grantRole(this.roleService.findRole(Role.ERole.ROLE_ADMIN));
             }
-
-            // flood control
-//            String ip = NetworkUtil.getClientIP();
-//            if (this.registrationAttemptService.isBlocked(ip))
-//                throw new UserInvalidException("Maximum limit exceed!");
-//            this.registrationAttemptService.registrationSuccess(ip);
+        } else {
+            User oldUser = this.getOne(user.getId());
+            user.setShips(oldUser.getShips());
+            user.setRoles(oldUser.getRoles());
         }
 
         return this.userRepo.save(user);
@@ -178,11 +176,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User changePassword(Long userId, String password) throws ForbiddenException, NullPasswordException {
+    public User changePassword(Long userId, String password) throws ForbiddenException, NullPasswordException, UserAlreadyExistsException, UserInvalidException, UserNotFoundException {
         User user = SecurityConfig.getCurrentUser();
         if (user == null || user.getId() != userId) throw new ForbiddenException("A slap on your face, idiot");
         user.setPassword(PasswordUtil.encryptPassword(password, PasswordUtil.EncType.BCRYPT_ENCODER, null));
-        return this.userRepo.save(user);
+        return this.save(user);
     }
 
     @Override
@@ -299,7 +297,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User addServiceAdminUser(User user) throws UserAlreadyExistsException, NullPasswordException, UserInvalidException {
+    public User addServiceAdminUser(User user) throws UserAlreadyExistsException, NullPasswordException, UserInvalidException, UserNotFoundException {
         User oldUser = this.userRepo.findByPhoneNumber(user.getPhoneNumber());
         if (oldUser != null) return oldUser;
 
