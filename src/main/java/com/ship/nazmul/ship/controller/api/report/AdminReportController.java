@@ -56,4 +56,11 @@ public class AdminReportController {
     private ResponseEntity getAgentReportByShip(@PathVariable("shipId")Long shipId, @RequestParam("userId")Long userId,@RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) throws ParseException {
         return ResponseEntity.ok(this.reportService.getAdminAgentReport(shipId, userId, date));
     }
+
+    @GetMapping("/agentReportRange/{shipId}")
+    private ResponseEntity getAgentReportRangeByShip(@PathVariable("shipId")Long shipId, @RequestParam("userId")Long userId,
+                                                     @RequestParam("startDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+                                                     @RequestParam("endDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) throws ParseException {
+        return ResponseEntity.ok(this.reportService.getAdminAgentReportRange(shipId, userId, startDate, endDate));
+    }
 }

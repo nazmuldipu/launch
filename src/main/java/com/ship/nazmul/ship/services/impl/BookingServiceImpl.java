@@ -602,8 +602,10 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<Booking> getBookingListByCreatedIdAndShipIdAndDate(Long userId, Long shipId, LocalDate date) {
-        return this.bookingRepository.findDistinctByCreatedByIdAndShipIdAndSubBookingListDateAndCancelledFalse(userId, shipId, date);
+    public List<Booking> getBookingListByCreatedIdAndShipIdAndDate(Long userId, Long shipId, Date date) {
+        Date begin = DateUtil.getDayStart(date);
+        Date end = DateUtil.getDayEnd(date);
+        return this.bookingRepository.findByCreatedBetweenAndCreatedByIdAndShipIdAndCancelledFalse(begin, end, userId, shipId);
     }
 
     /*Remove sold booking seats from booking for SERVICE_ADMIN

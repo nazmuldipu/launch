@@ -46,10 +46,10 @@ public class ReportServiceImpl implements ReportService {
     }
 
     /*GET Sells report for admin for a date range
-    * @param startDate      report start date
-    * @param endDate        report end date
-    * @return List<ServiceAdminSellsReportRange>    list of Service admin sells report
-    * */
+     * @param startDate      report start date
+     * @param endDate        report end date
+     * @return List<ServiceAdminSellsReportRange>    list of Service admin sells report
+     * */
     @Override
     public List<ServiceAdminSellsReportRange> getAdminSellsReportRange(LocalDate startDate, LocalDate endDate) throws ForbiddenException, ParseException {
         List<LocalDate> dateList = DateUtil.getLocalDatesBetween(startDate, endDate);
@@ -64,20 +64,20 @@ public class ReportServiceImpl implements ReportService {
 
     //
     /*Populate ServiceAdminBookingReportRange using ServiceAdminBookingReport List and date
-    * @param List<ServiceAdminSellsReport>          row data that needs to be organized
-    * @param date                                   provided information date
-    * @param List<ServiceAdminSellsReportRange>     existed ServiceAdminSellsReportRange list
-    * @return List<ServiceAdminSellsReportRange>    populated ServiceAdminSellsReportRange list*/
+     * @param List<ServiceAdminSellsReport>          row data that needs to be organized
+     * @param date                                   provided information date
+     * @param List<ServiceAdminSellsReportRange>     existed ServiceAdminSellsReportRange list
+     * @return List<ServiceAdminSellsReportRange>    populated ServiceAdminSellsReportRange list*/
     private List<ServiceAdminSellsReportRange> populateServiceAdminSellsReportRangeList(List<ServiceAdminSellsReport> sasrList, LocalDate date, List<ServiceAdminSellsReportRange> sasrrList) {
-        for(ServiceAdminSellsReport sasr: sasrList){
-            if(sasr.getBookingStatus()!= null && !sasr.getBookingStatus().toString().equals(Seat.EStatus.SEAT_SOLD.toString())) //if booking status is not sold then skip
+        for (ServiceAdminSellsReport sasr : sasrList) {
+            if (sasr.getBookingStatus() != null && !sasr.getBookingStatus().toString().equals(Seat.EStatus.SEAT_SOLD.toString())) //if booking status is not sold then skip
                 continue;
 
             ServiceAdminSellsReportRange sasrr = sasrrList.stream()
                     .filter(sa -> sasr.getShipName().equals(sa.getShipName()) && sa.getDate().compareTo(date) == 0)
                     .findAny()
                     .orElse(null);
-            if(sasrr == null){
+            if (sasrr == null) {
                 ServiceAdminSellsReportRange sasrN = new ServiceAdminSellsReportRange(date, sasr.getShipNumber(), sasr.getShipName(), sasr.getSeatNumbers().length, sasr.getPrice());
                 sasrrList.add(sasrN);
             } else {
@@ -132,8 +132,20 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public List<ServiceAdminSellsReport> getAdminAgentReport(Long shipId, Long userId, LocalDate date) throws ParseException {
-        List<Booking> bookingList = this.bookingService.getBookingListByCreatedIdAndShipIdAndDate(userId,shipId,date);
+        List<Booking> bookingList = this.bookingService.getBookingListByCreatedIdAndShipIdAndDate(userId, shipId, DateUtil.convertToDateViaSqlDate(date));
         return this.getAdminBookingReportFromBookingList(bookingList);
+    }
+
+    @Override
+    public List<ServiceAdminSellsReportRange> getAdminAgentReportRange(Long shipId, Long userId, LocalDate startDate, LocalDate endDate) throws ParseException {
+        List<LocalDate> dateList = DateUtil.getLocalDatesBetween(startDate, endDate);
+        List<ServiceAdminSellsReportRange> serviceAdminSellsReportRanges = new ArrayList<>();
+
+        for (LocalDate date : dateList) {
+            List<ServiceAdminSellsReport> sasrList = this.getAdminAgentReport(shipId, userId, date);
+            serviceAdminSellsReportRanges = this.populateServiceAdminSellsReportRangeList(sasrList, date, serviceAdminSellsReportRanges);
+        }
+        return serviceAdminSellsReportRanges;
     }
 
     @Override
@@ -147,10 +159,10 @@ public class ReportServiceImpl implements ReportService {
     }
 
     /*Get service admin sell report range for ship admin
-    * @param Long shipId                        required report for the ship id
-    * @param startDate                          report starting date
-    * @param endDate                            report ending date
-    * @return ServiceAdminSellsReportRange      for the ship using provided id*/
+     * @param Long shipId                        required report for the ship id
+     * @param startDate                          report starting date
+     * @param endDate                            report ending date
+     * @return ServiceAdminSellsReportRange      for the ship using provided id*/
     @Override
     public List<ServiceAdminSellsReportRange> getServiceAdminSellsReportRange(Long shipId, LocalDate startDate, LocalDate endDate) throws ForbiddenException, ParseException {
         List<LocalDate> dateList = DateUtil.getLocalDatesBetween(startDate, endDate);
@@ -164,9 +176,9 @@ public class ReportServiceImpl implements ReportService {
     }
 
     /*Get service admin reservation report for  ship admin
-    * @param shipId                         ship id that report required for
-    * @param date                           report date
-    * @return ServiceAdminSellsReport       final reservation report*/
+     * @param shipId                         ship id that report required for
+     * @param date                           report date
+     * @return ServiceAdminSellsReport       final reservation report*/
     @Override
     public List<ServiceAdminSellsReport> getServiceAdminReservationReport(Long shipId, LocalDate date) throws ForbiddenException, ParseException {
         User user = SecurityConfig.getCurrentUser();
@@ -199,8 +211,8 @@ public class ReportServiceImpl implements ReportService {
         List<Booking> bookingList = this.bookingService.getBookingListByShipIdAndDate(shipId, date);
         List<ServiceAdminSellsReport> reportList = new ArrayList<>();
 
-        for(Booking booking: bookingList){
-            for(SubBooking sb : booking.getSubBookingList()){
+        for (Booking booking : bookingList) {
+            for (SubBooking sb : booking.getSubBookingList()) {
                 ServiceAdminSellsReport report = new ServiceAdminSellsReport();
                 String[] seats = {sb.getSeat().getSeatNumber()};
                 report.setJourneyDate(sb.getDate());
@@ -235,7 +247,7 @@ public class ReportServiceImpl implements ReportService {
 
         JSONObject obj = new JSONObject();
         obj.put("numberOfShips", currentUser.getShips().size());
-        obj.put("ships",  new JSONArray(this.getUserShipsReportObjects(currentUser, date)));
+        obj.put("ships", new JSONArray(this.getUserShipsReportObjects(currentUser, date)));
 
         return obj;
     }
@@ -270,14 +282,14 @@ public class ReportServiceImpl implements ReportService {
         return list;
     }
 
-   JSONObject getReservationReport(Category category, LocalDate date) throws JSONException, ParseException {
+    JSONObject getReservationReport(Category category, LocalDate date) throws JSONException, ParseException {
         int reserved = 0;
         int blocked = 0;
         int sold = 0;
         List<Seat> seatList = this.seatService.getSeatListByCategoryId(category.getId());
         for (Seat seat : seatList) {
             Seat.EStatus status = seat.getSeatStatusMap().get(date);
-            if(status == null) {
+            if (status == null) {
                 status = seat.getSeatStatusMap().get(date);
             }
             if (status == null || status.equals(Seat.EStatus.SEAT_FREE)) {
@@ -299,11 +311,11 @@ public class ReportServiceImpl implements ReportService {
 
     //Generate booking report from RoomList
     /*Generate ServiceAdminSellsReport from seatList
-    * @param seatList                   list of seat that report to be generate
-    * @param date                       report date
-    * @param isAdmin                    if this report generating for admin then skip unsold seat
-    * @report ServiceAdminSellsReport   report for provided seat list
-    * */
+     * @param seatList                   list of seat that report to be generate
+     * @param date                       report date
+     * @param isAdmin                    if this report generating for admin then skip unsold seat
+     * @report ServiceAdminSellsReport   report for provided seat list
+     * */
     private List<ServiceAdminSellsReport> getAdminBookingReportFromSeatList(List<Seat> seatList, LocalDate date, boolean isAdmin) throws ParseException {
         List<ServiceAdminSellsReport> serviceAdminSellsReportList = new ArrayList<>();
 
@@ -329,7 +341,7 @@ public class ReportServiceImpl implements ReportService {
                     serviceAdminSellsReport.setBookingDate(booking.getCreated());
                     serviceAdminSellsReport.setCustomerName(booking.getUser().getName());
                     serviceAdminSellsReport.setCustomerPhone(booking.getUser().getPhoneNumber());
-                    serviceAdminSellsReport.setPrice(booking.getTotalPayablePrice()/booking.getSubBookingList().size());
+                    serviceAdminSellsReport.setPrice(booking.getTotalPayablePrice() / booking.getSubBookingList().size());
                     serviceAdminSellsReport.setSoldBy(booking.getCreatedBy().getName());
                     serviceAdminSellsReport.setRole(booking.getCreatedBy().getRoles().get(0).getRole());
                     serviceAdminSellsReport.setPaid(booking.isPaid());
@@ -365,7 +377,7 @@ public class ReportServiceImpl implements ReportService {
         serviceAdminSellsReport.setShipName(booking.getShip().getName());
         serviceAdminSellsReport.setShipNumber(booking.getShip().getShipNumber());
         serviceAdminSellsReport.setRoutes(booking.getShip().getStartingPoint() + " - " + booking.getShip().getDroppingPoint());
-        if(booking.getSubBookingList().size() > 0) {
+        if (booking.getSubBookingList().size() > 0) {
             serviceAdminSellsReport.setJourneyDate(booking.getSubBookingList().get(0).getDate());
             String[] sets = new String[booking.getSubBookingList().size()];
             for (int i = 0; i < booking.getSubBookingList().size(); i++) {
