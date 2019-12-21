@@ -24,7 +24,7 @@ public class UserServiceAdminController {
 
     // Create user while booking a room by service admin
     @PostMapping("")
-    private ResponseEntity<User> createServiceAdminUser(@RequestBody User user) throws UserAlreadyExistsException, NullPasswordException, UserInvalidException {
+    private ResponseEntity<User> createServiceAdminUser(@RequestBody User user) throws UserAlreadyExistsException, NullPasswordException, UserInvalidException, UserNotFoundException {
         return ResponseEntity.ok(this.userService.addServiceAdminUser(user));
     }
 
