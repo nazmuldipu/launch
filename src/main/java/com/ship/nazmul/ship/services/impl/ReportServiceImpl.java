@@ -137,6 +137,16 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    public List<ServiceAdminSellsReport> getShipAdminAgentReportRange(Long shipId, Long userId, LocalDate startDate, LocalDate endDate) throws ParseException {
+        List<ServiceAdminSellsReport> reportList = new ArrayList<>();
+        List<LocalDate> dateList = DateUtil.getLocalDatesBetween(startDate, endDate);
+        for(LocalDate localDate: dateList){
+            reportList.addAll(this.getAdminAgentReport(shipId, userId, localDate));
+        }
+        return reportList;
+    }
+
+    @Override
     public List<ServiceAdminSellsReportRange> getAdminAgentReportRange(Long shipId, Long userId, LocalDate startDate, LocalDate endDate) throws ParseException {
         List<LocalDate> dateList = DateUtil.getLocalDatesBetween(startDate, endDate);
         List<ServiceAdminSellsReportRange> serviceAdminSellsReportRanges = new ArrayList<>();

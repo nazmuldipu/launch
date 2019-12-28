@@ -27,6 +27,8 @@ public interface ReportService {
 
     List<ServiceAdminSellsReport> getAdminAgentReport(Long shipId, Long userId, LocalDate date) throws ParseException;
 
+    List<ServiceAdminSellsReport> getShipAdminAgentReportRange(Long shipId, Long userId, LocalDate startDate, LocalDate endDate) throws ParseException;
+
     List<ServiceAdminSellsReportRange> getAdminAgentReportRange(Long shipId, Long userId, LocalDate startDate, LocalDate endDate) throws ParseException;
 
     /************************************Service Admin modules***************************************/
