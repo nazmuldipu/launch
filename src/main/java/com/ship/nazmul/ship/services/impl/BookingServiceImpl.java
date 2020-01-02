@@ -605,7 +605,13 @@ public class BookingServiceImpl implements BookingService {
     public List<Booking> getBookingListByCreatedIdAndShipIdAndDate(Long userId, Long shipId, Date date) {
         Date begin = DateUtil.getDayStart(date);
         Date end = DateUtil.getDayEnd(date);
-        return this.bookingRepository.findDistinctByCreatedBetweenAndCreatedByIdAndShipIdAndCancelledFalse(begin, end, userId, shipId);
+        List<Booking> bookingList =this.bookingRepository.findDistinctByCreatedBetweenAndCreatedByIdAndShipIdAndCancelledFalse(begin, end, userId, shipId);
+        System.out.println("DDD1 : Booking size : " + bookingList.size());
+        for(Booking booking: bookingList){
+            System.out.print(booking.getId() + ", ");
+        }
+        System.out.println("");
+        return bookingList;
     }
 
     /*Remove sold booking seats from booking for SERVICE_ADMIN
