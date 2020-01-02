@@ -35,5 +35,5 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findDistinctByCreatedByIdAndShipIdAndSubBookingListDateAndCancelledFalse(Long userId, Long shipId, LocalDate date);
 
-    List<Booking> findByCreatedBetweenAndCreatedByIdAndShipIdAndCancelledFalse(Date begin, Date end, Long userId, Long shipId);
+    List<Booking> findDistinctByCreatedBetweenAndCreatedByIdAndShipIdAndCancelledFalse(Date begin, Date end, Long userId, Long shipId);
 }
