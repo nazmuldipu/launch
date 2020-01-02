@@ -606,11 +606,6 @@ public class BookingServiceImpl implements BookingService {
         Date begin = DateUtil.getDayStart(date);
         Date end = DateUtil.getDayEnd(date);
         List<Booking> bookingList =this.bookingRepository.findDistinctByCreatedBetweenAndCreatedByIdAndShipIdAndCancelledFalse(begin, end, userId, shipId);
-        System.out.println("DDD1 : Booking size : " + bookingList.size() + "Date : " + date + " Start :" + begin + ", End : " + end);
-        for(Booking booking: bookingList){
-            System.out.print(booking.getId() + ", ");
-        }
-        System.out.println("");
         return bookingList;
     }
 

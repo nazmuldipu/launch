@@ -6,6 +6,8 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -173,23 +175,40 @@ public class DateUtil {
 
 
     public static Date getDayStart(Date date) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        calendar.set(Calendar.HOUR, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 1);
-        calendar.set(Calendar.ZONE_OFFSET, 0);
-        return calendar.getTime();
+        LocalDateTime localDateTime = dateToLocalDateTime(date);
+        LocalDateTime startOfDay = localDateTime.with(LocalTime.MIN);
+        return localDateTimeToDate(startOfDay);
+//        Calendar calendar = Calendar.getInstance();
+//        calendar.setTime(date);
+//        calendar.set(Calendar.HOUR, 0);
+//        calendar.set(Calendar.MINUTE, 0);
+//        calendar.set(Calendar.SECOND, 1);
+//        calendar.set(Calendar.ZONE_OFFSET, 0);
+//        return calendar.getTime();
     }
 
     public static Date getDayEnd(Date date) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        calendar.add(Calendar.DAY_OF_MONTH, 0);
-        calendar.setTime(getDayStart(calendar.getTime()));
-        calendar.add(Calendar.SECOND, -2);
-        calendar.set(Calendar.ZONE_OFFSET, 0);
-        return calendar.getTime();
+        LocalDateTime localDateTime = dateToLocalDateTime(date);
+        LocalDateTime endOfDay = localDateTime.with(LocalTime.MAX);
+        return localDateTimeToDate(endOfDay);
+//        Calendar calendar = Calendar.getInstance();
+//        calendar.setTime(date);
+//        calendar.add(Calendar.DAY_OF_MONTH, 1);
+//        calendar.setTime(getDayStart(calendar.getTime()));
+//        calendar.add(Calendar.SECOND, -2);
+//        calendar.set(Calendar.ZONE_OFFSET, 0);
+//        return calendar.getTime();
+    }
+
+    private static LocalDateTime dateToLocalDateTime(Date date) {
+        return new java.sql.Timestamp(
+                date.getTime()).toLocalDateTime();
+    }
+
+    private static Date localDateTimeToDate(LocalDateTime localDateTime) {
+        return java.util.Date
+                .from(localDateTime.atZone(ZoneId.systemDefault())
+                        .toInstant());
     }
 
 //    public static Map<DateRangeType, Calendar> buildDateRange(Period period) {
