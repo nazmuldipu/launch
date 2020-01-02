@@ -185,7 +185,7 @@ public class DateUtil {
     public static Date getDayEnd(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
-        calendar.add(Calendar.DAY_OF_MONTH, 1);
+        calendar.add(Calendar.DAY_OF_MONTH, 0);
         calendar.setTime(getDayStart(calendar.getTime()));
         calendar.add(Calendar.SECOND, -2);
         calendar.set(Calendar.ZONE_OFFSET, 0);

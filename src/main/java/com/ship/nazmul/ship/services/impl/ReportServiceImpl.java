@@ -133,7 +133,6 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public List<ServiceAdminSellsReport> getAdminAgentReport(Long shipId, Long userId, LocalDate date) throws ParseException {
         List<Booking> bookingList = this.bookingService.getBookingListByCreatedIdAndShipIdAndDate(userId, shipId, DateUtil.convertToDateViaSqlDate(date));
-        System.out.println("DDD2 : Booking size : " + bookingList.size());
         return this.getAdminBookingReportFromBookingList(bookingList);
     }
 
