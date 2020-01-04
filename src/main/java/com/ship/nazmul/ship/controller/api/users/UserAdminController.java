@@ -41,6 +41,11 @@ public class UserAdminController {
         return ResponseEntity.ok(userPage);
     }
 
+    @GetMapping("/byRole")
+    public ResponseEntity getUsersByRole(@RequestParam(value="role")String role){
+        return ResponseEntity.ok(this.userService.findByRole(role));
+    }
+
     @GetMapping("/getShipAdminList")
     public ResponseEntity getAllShipAdmin(@RequestParam(value = "page", defaultValue = "0") Integer page){
         return ResponseEntity.ok(this.userService.findByRole(Role.ERole.ROLE_SERVICE_ADMIN.getValue(),page));
