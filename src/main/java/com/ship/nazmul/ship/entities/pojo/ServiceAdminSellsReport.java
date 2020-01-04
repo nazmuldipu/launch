@@ -24,6 +24,9 @@ public class ServiceAdminSellsReport {
     private String routes;
     private String seatNumbers[];
     private int price;
+    private int hotelswaveCommission;
+    private int hotelswaveAgentCommission;
+    private int shipAgentCommission;
     private String soldBy;
     private String role;
     private boolean paid;
@@ -142,6 +145,30 @@ public class ServiceAdminSellsReport {
         this.paid = paid;
     }
 
+    public int getHotelswaveCommission() {
+        return hotelswaveCommission;
+    }
+
+    public void setHotelswaveCommission(int hotelswaveCommission) {
+        this.hotelswaveCommission = hotelswaveCommission;
+    }
+
+    public int getHotelswaveAgentCommission() {
+        return hotelswaveAgentCommission;
+    }
+
+    public void setHotelswaveAgentCommission(int hotelswaveAgentCommission) {
+        this.hotelswaveAgentCommission = hotelswaveAgentCommission;
+    }
+
+    public int getShipAgentCommission() {
+        return shipAgentCommission;
+    }
+
+    public void setShipAgentCommission(int shipAgentCommission) {
+        this.shipAgentCommission = shipAgentCommission;
+    }
+
     @Override
     public String toString() {
         return "ServiceAdminSellsReport{" +
@@ -156,6 +183,9 @@ public class ServiceAdminSellsReport {
                 ", routes='" + routes + '\'' +
                 ", seatNumbers=" + Arrays.toString(seatNumbers) +
                 ", price=" + price +
+                ", hotelswaveCommission=" + hotelswaveCommission +
+                ", hotelswaveAgentCommission=" + hotelswaveAgentCommission +
+                ", shipAgentCommission=" + shipAgentCommission +
                 ", soldBy='" + soldBy + '\'' +
                 ", role='" + role + '\'' +
                 ", paid=" + paid +

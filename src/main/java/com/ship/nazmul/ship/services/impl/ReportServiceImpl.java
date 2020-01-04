@@ -140,7 +140,7 @@ public class ReportServiceImpl implements ReportService {
     public List<ServiceAdminSellsReport> getShipAdminAgentReportRange(Long shipId, Long userId, LocalDate startDate, LocalDate endDate) throws ParseException {
         List<ServiceAdminSellsReport> reportList = new ArrayList<>();
         List<LocalDate> dateList = DateUtil.getLocalDatesBetween(startDate, endDate);
-        for(LocalDate localDate: dateList){
+        for (LocalDate localDate : dateList) {
             reportList.addAll(this.getAdminAgentReport(shipId, userId, localDate));
         }
         return reportList;
@@ -351,9 +351,13 @@ public class ReportServiceImpl implements ReportService {
                     serviceAdminSellsReport.setBookingDate(booking.getCreated());
                     serviceAdminSellsReport.setCustomerName(booking.getUser().getName());
                     serviceAdminSellsReport.setCustomerPhone(booking.getUser().getPhoneNumber());
-                    serviceAdminSellsReport.setPrice(booking.getTotalPayablePrice() / booking.getSubBookingList().size());
+                    int bookingSize = booking.getSubBookingList().size();
+                    serviceAdminSellsReport.setPrice(booking.getTotalPayablePrice() / bookingSize);
+                    serviceAdminSellsReport.setHotelswaveCommission(booking.getHotelswaveDiscount() / bookingSize);
+                    serviceAdminSellsReport.setHotelswaveAgentCommission(booking.getHotelswaveAgentDiscount() / bookingSize);
+                    serviceAdminSellsReport.setShipAgentCommission(booking.getAgentDiscount() / bookingSize);
                     serviceAdminSellsReport.setSoldBy(booking.getCreatedBy().getName());
-                    serviceAdminSellsReport.setRole(booking.getCreatedBy().getRoles().get(0).getRole());
+                    serviceAdminSellsReport.setRole(booking.getCreatedBy().getRoles().get(0).getName());
                     serviceAdminSellsReport.setPaid(booking.isPaid());
                 }
             } else if (isAdmin) {
@@ -396,6 +400,9 @@ public class ReportServiceImpl implements ReportService {
             serviceAdminSellsReport.setSeatNumbers(sets);
         }
         serviceAdminSellsReport.setPrice(booking.getTotalPayablePrice());
+        serviceAdminSellsReport.setHotelswaveCommission(booking.getHotelswaveDiscount());
+        serviceAdminSellsReport.setHotelswaveAgentCommission(booking.getHotelswaveAgentDiscount());
+        serviceAdminSellsReport.setShipAgentCommission(booking.getAgentDiscount());
         serviceAdminSellsReport.setSoldBy(booking.getCreatedBy().getName());
         serviceAdminSellsReport.setRole(booking.getCreatedBy().getRoles().get(0).getName());
         if (booking.isPaid()) {
@@ -403,7 +410,6 @@ public class ReportServiceImpl implements ReportService {
         } else {
             serviceAdminSellsReport.setPaid(false);
         }
-
         return serviceAdminSellsReport;
     }
 }
