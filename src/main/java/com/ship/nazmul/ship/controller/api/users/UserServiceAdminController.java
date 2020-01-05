@@ -28,6 +28,11 @@ public class UserServiceAdminController {
         return ResponseEntity.ok(this.userService.addServiceAdminUser(user));
     }
 
+    @GetMapping("/byRole")
+    public ResponseEntity getUsersByRole(@RequestParam(value="role")String role){
+        return ResponseEntity.ok(this.userService.findByRole(role));
+    }
+
     // Create Agent for Service admin
     @PostMapping("/createAgent")
     private ResponseEntity<User> creatServiceAdminAgent(@RequestBody User user) throws ForbiddenException, NullPasswordException {
