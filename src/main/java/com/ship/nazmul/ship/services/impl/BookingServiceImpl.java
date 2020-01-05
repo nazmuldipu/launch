@@ -609,6 +609,11 @@ public class BookingServiceImpl implements BookingService {
         return bookingList;
     }
 
+    @Override
+    public List<Booking> getReservationListByUserIdShipIdAndDate(Long userId, Long shipId, LocalDate date) {
+        return this.bookingRepository.findDistinctByCreatedByIdAndShipIdAndSubBookingListDateAndCancelledFalse(userId, shipId, date);
+    }
+
     /*Remove sold booking seats from booking for SERVICE_ADMIN
      * @param booking    booking object that from remove
      * @param setIds     list of seat id's that to be remove

@@ -65,4 +65,18 @@ public class ServiceAdminReportController {
         return ResponseEntity.ok(this.reportService.getBookingListReport(shipId, date));
     }
 
+    @GetMapping("/userSellsReportRange/{shipId}")
+    private ResponseEntity getAgentSellsReportRangeByShip(@PathVariable("shipId")Long shipId, @RequestParam("userId")Long userId,
+                                                          @RequestParam("startDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+                                                          @RequestParam("endDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) throws ParseException {
+        return ResponseEntity.ok(this.reportService.getAdminSellsReportRange(shipId, userId, startDate, endDate));
+    }
+
+    @GetMapping("/userReservationReportRange/{shipId}")
+    private ResponseEntity getAgentReservationReportRangeByShip(@PathVariable("shipId")Long shipId, @RequestParam("userId")Long userId,
+                                                                @RequestParam("startDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+                                                                @RequestParam("endDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) throws ParseException {
+        return ResponseEntity.ok(this.reportService.getAdminReservationReportRange(userId, shipId, startDate, endDate));
+    }
+
 }

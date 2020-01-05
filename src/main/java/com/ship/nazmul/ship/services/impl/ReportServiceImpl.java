@@ -147,15 +147,35 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public List<ServiceAdminSellsReportRange> getAdminAgentReportRange(Long shipId, Long userId, LocalDate startDate, LocalDate endDate) throws ParseException {
+    public List<ServiceAdminSellsReport> getAdminSellsReportRange(Long shipId, Long userId, LocalDate startDate, LocalDate endDate) throws ParseException {
         List<LocalDate> dateList = DateUtil.getLocalDatesBetween(startDate, endDate);
-        List<ServiceAdminSellsReportRange> serviceAdminSellsReportRanges = new ArrayList<>();
+        List<ServiceAdminSellsReport> reportList = new ArrayList<>();
 
         for (LocalDate date : dateList) {
             List<ServiceAdminSellsReport> sasrList = this.getAdminAgentReport(shipId, userId, date);
-            serviceAdminSellsReportRanges = this.populateServiceAdminSellsReportRangeList(sasrList, date, serviceAdminSellsReportRanges);
+            reportList.addAll(sasrList);
         }
-        return serviceAdminSellsReportRanges;
+        return reportList;
+    }
+
+    @Override
+    public List<ServiceAdminSellsReport> getAdminReservationReport(Long userId, Long shipId, LocalDate date) throws ParseException {
+        List<Booking> bookingList = this.bookingService.getReservationListByUserIdShipIdAndDate(userId, shipId, date);
+
+        List<ServiceAdminSellsReport> reportList = this.getAdminBookingReportFromBookingList(bookingList);
+        return reportList;
+    }
+
+    @Override
+    public List<ServiceAdminSellsReport> getAdminReservationReportRange(Long userId, Long shipId, LocalDate startDate, LocalDate endDate) throws ParseException {
+        List<LocalDate> dateList = DateUtil.getLocalDatesBetween(startDate, endDate);
+        List<ServiceAdminSellsReport> reportList = new ArrayList<>();
+
+        for (LocalDate date : dateList) {
+            List<ServiceAdminSellsReport> sasrList = this.getAdminReservationReport(userId, shipId, date);
+            reportList.addAll(sasrList);
+        }
+        return reportList;
     }
 
     @Override

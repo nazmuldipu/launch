@@ -61,4 +61,6 @@ public interface BookingService {
     List<Booking> getBookingListByShipIdAndDate(Long shipId, LocalDate date);
 
     List<Booking> getBookingListByCreatedIdAndShipIdAndDate(Long userId, Long shipId, Date date);
+
+    List<Booking> getReservationListByUserIdShipIdAndDate(Long userId, Long shipId, LocalDate date);
 }
