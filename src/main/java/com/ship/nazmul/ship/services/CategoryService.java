@@ -30,13 +30,19 @@ public interface CategoryService {
 
     Integer getFare(Long categoryId, LocalDate date);
 
+    Integer getPriceMapFare(Long categoryId, LocalDate date);
+
     Integer getDiscount(Long categoryId, LocalDate date);
 
     Map<LocalDate, Integer> getFareMap(Long categoryId, LocalDate startDate, LocalDate endDate) throws NotFoundException;
 
     Map<LocalDate, Integer> getDiscountMap(Long categoryId, LocalDate startDate, LocalDate endDate) throws NotFoundException;
 
+    Map<LocalDate, Integer> getPriceMap(Long categoryId, LocalDate startDate, LocalDate endDate) throws NotFoundException;
+
     Map<String, String> updateCategoryDiscount(Long categoryId, LocalDate startDate, LocalDate endDate, int discountAmount) throws ForbiddenException;
+
+    Map<String, String> updateCategoryPrice(Long categoryId, LocalDate startDate, LocalDate endDate, int price) throws ForbiddenException;
 
     boolean exists(Long id);
 

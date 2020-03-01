@@ -59,7 +59,7 @@ public class CategoryAdminController {
     }
 
     @GetMapping("/discountMap/{categoryId}")
-    private ResponseEntity seatPriceMap(@PathVariable("categoryId") Long categoryId,
+    private ResponseEntity seatDiscountMap(@PathVariable("categoryId") Long categoryId,
                                         @RequestParam("startDate")@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
                                         @RequestParam("endDate")@DateTimeFormat(pattern = "yyyy-MM-dd")  LocalDate endDate) throws NotFoundException {
         return ResponseEntity.ok(this.categoryService.getDiscountMap(categoryId, startDate, endDate));
@@ -72,6 +72,21 @@ public class CategoryAdminController {
                                                @RequestParam("endDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate,
                                                @RequestParam("amount") int amount) throws ForbiddenException {
         return ResponseEntity.ok(this.categoryService.updateCategoryDiscount(categoryId, startDate, endDate, amount));
+    }
+
+    @GetMapping("/priceMap/{categoryId}")
+    private ResponseEntity seatPriceMap(@PathVariable("categoryId") Long categoryId,
+                                        @RequestParam("startDate")@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+                                        @RequestParam("endDate")@DateTimeFormat(pattern = "yyyy-MM-dd")  LocalDate endDate) throws NotFoundException {
+        return ResponseEntity.ok(this.categoryService.getPriceMap(categoryId, startDate, endDate));
+    }
+
+    @PatchMapping("/priceMap/{categoryId}")
+    private ResponseEntity categoryPriceMapping(@PathVariable("categoryId") Long categoryId,
+                                               @RequestParam("startDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+                                               @RequestParam("endDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate,
+                                               @RequestParam("amount") int amount) throws ForbiddenException {
+        return ResponseEntity.ok(this.categoryService.updateCategoryPrice(categoryId, startDate, endDate, amount));
     }
 
     @PutMapping("/{categoryId}/images/upload")

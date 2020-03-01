@@ -34,10 +34,16 @@ public class Category extends BaseEntity {
     private Ship ship;
 
     @JsonIgnore
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @MapKeyColumn(name = "date")
     @Convert(converter = LocalDateAttributeConverter.class, attributeName = "key")
     private Map<LocalDate, Integer> discountMap;
+
+    @JsonIgnore
+    @ElementCollection(fetch = FetchType.LAZY)
+    @MapKeyColumn(name = "date")
+    @Convert(converter = LocalDateAttributeConverter.class, attributeName = "key")
+    private Map<LocalDate, Integer> priceMap;
 //    private Map<LocalDate, Integer> discountMap;
 
 
@@ -143,6 +149,14 @@ public class Category extends BaseEntity {
 
     public void setPriority(int priority) {
         this.priority = priority;
+    }
+
+    public Map<LocalDate, Integer> getPriceMap() {
+        return priceMap;
+    }
+
+    public void setPriceMap(Map<LocalDate, Integer> priceMap) {
+        this.priceMap = priceMap;
     }
 
     @Override

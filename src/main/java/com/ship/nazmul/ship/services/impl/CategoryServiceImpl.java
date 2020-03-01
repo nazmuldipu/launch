@@ -100,6 +100,13 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    public Integer getPriceMapFare(Long categoryId, LocalDate date) {
+        Category category = this.getOne(categoryId);
+
+        return category.getPriceMap().get(date);
+    }
+
+    @Override
     public Integer getDiscount(Long categoryId, LocalDate date) {
         Category category = this.getOne(categoryId);
         Map<LocalDate, Integer> discountMap = category.getDiscountMap();
@@ -134,6 +141,19 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    public Map<LocalDate, Integer> getPriceMap(Long categoryId, LocalDate startDate, LocalDate endDate) throws NotFoundException {
+        Category category = this.getOne(categoryId);
+        List<LocalDate> dates = DateUtil.getLocalDatesBetween(startDate, endDate);
+        Map<LocalDate, Integer> priceMap = new HashMap<>();
+        for (int i = 0; i < dates.size(); i++) {
+            Integer discount = category.getPriceMap().get(dates.get(i));
+            if (discount == null) discount = 0;
+            priceMap.put(dates.get(i),  discount);
+        }
+        return priceMap;
+    }
+
+    @Override
     public Map<String, String> updateCategoryDiscount(Long categoryId, LocalDate startDate, LocalDate endDate, int discountAmount) throws ForbiddenException {
         User user = SecurityConfig.getCurrentUser();
         Category category = this.getOne(categoryId);
@@ -143,6 +163,23 @@ public class CategoryServiceImpl implements CategoryService {
         List<LocalDate> dates = DateUtil.getLocalDatesBetween(startDate, endDate);
         for (int i = 0; i < dates.size(); i++) {
             category.getDiscountMap().put(dates.get(i), discountAmount);
+        }
+        category = this.categoryRepo.save(category);
+        Map<String, String> response = new HashMap<>();
+        response.put("response", "success");
+        return response;
+    }
+
+    @Override
+    public Map<String, String> updateCategoryPrice(Long categoryId, LocalDate startDate, LocalDate endDate, int price) throws ForbiddenException {
+        User user = SecurityConfig.getCurrentUser();
+        Category category = this.getOne(categoryId);
+        if (user.isOnlyUser() || (!user.isAdmin() && !user.getShips().contains(category.getShip())))
+            throw new ForbiddenException("Access denied");
+
+        List<LocalDate> dates = DateUtil.getLocalDatesBetween(startDate, endDate);
+        for (int i = 0; i < dates.size(); i++) {
+            category.getPriceMap().put(dates.get(i), price);
         }
         category = this.categoryRepo.save(category);
         Map<String, String> response = new HashMap<>();

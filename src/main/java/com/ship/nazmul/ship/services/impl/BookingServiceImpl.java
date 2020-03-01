@@ -169,7 +169,6 @@ public class BookingServiceImpl implements BookingService {
         for (SubBooking subBooking : booking.getSubBookingList()) {
             this.seatService.updateStatusMap(subBooking.getSeat().getId(), subBooking.getDate(), booking.geteStatus());
         }
-
         booking.setConfirmed(true);
         booking.setApproved(true);
         booking.setPaid(true);
@@ -177,7 +176,13 @@ public class BookingServiceImpl implements BookingService {
         if (SecurityConfig.getCurrentUser().hasRole(Role.ERole.ROLE_ADMIN.toString())) {
             int hotelswaveCommission = 0;
             for (int i = 0; i < booking.getSubBookingList().size(); i++) {
-                hotelswaveCommission += booking.getShip().getHotelswaveCommission();
+                SubBooking sb = booking.getSubBookingList().get(i);
+                Integer priceMapFare = this.categoryService.getPriceMapFare(sb.getSeat().getCategory().getId(), sb.getDate());
+                if (priceMapFare != null && priceMapFare > 0) {
+                    hotelswaveCommission += (sb.getFare() - priceMapFare);
+                } else {
+                    hotelswaveCommission += booking.getShip().getHotelswaveCommission();
+                }
             }
             booking.setHotelswaveDiscount(hotelswaveCommission);
             this.adminSellSeatAccounting(booking, false);
@@ -186,7 +191,13 @@ public class BookingServiceImpl implements BookingService {
         } else if (SecurityConfig.getCurrentUser().hasRole(Role.ERole.ROLE_AGENT.toString())) {
             int hotelswaveCommission = 0;
             for (int i = 0; i < booking.getSubBookingList().size(); i++) {
-                hotelswaveCommission += booking.getShip().getHotelswaveCommission();
+                SubBooking sb = booking.getSubBookingList().get(i);
+                Integer priceMapFare = this.categoryService.getPriceMapFare(sb.getSeat().getCategory().getId(), sb.getDate());
+                if (priceMapFare != null && priceMapFare > 0) {
+                    hotelswaveCommission += (sb.getFare() - priceMapFare);
+                } else {
+                    hotelswaveCommission += booking.getShip().getHotelswaveCommission();
+                }
             }
             booking.setHotelswaveDiscount(hotelswaveCommission / 2);
             booking.setHotelswaveAgentDiscount(hotelswaveCommission / 2);
@@ -194,7 +205,13 @@ public class BookingServiceImpl implements BookingService {
         } else if (SecurityConfig.getCurrentUser().hasRole(Role.ERole.ROLE_SERVICE_AGENT.toString())) {
             int agentDiscount = 0;
             for (int i = 0; i < booking.getSubBookingList().size(); i++) {
-                agentDiscount += SecurityConfig.getCurrentUser().getCommission();
+                SubBooking sb = booking.getSubBookingList().get(i);
+                Integer priceMapFare = this.categoryService.getPriceMapFare(sb.getSeat().getCategory().getId(), sb.getDate());
+                if (priceMapFare != null && priceMapFare > 0) {
+                    agentDiscount += (sb.getFare() - priceMapFare);
+                } else {
+                    agentDiscount += SecurityConfig.getCurrentUser().getCommission();
+                }
             }
             booking.setAgentDiscount(agentDiscount);
             this.shipAgentSellsSeatAccount(booking, false);
@@ -409,12 +426,13 @@ public class BookingServiceImpl implements BookingService {
         Ship ship = this.shipService.getOne(booking.getShip().getId());
 
         boolean valid = false;
-        for(Ship sh : userShips){
-            if(sh.getId().equals(ship.getId())){
+        for (Ship sh : userShips) {
+            if (sh.getId().equals(ship.getId())) {
                 valid = true;
             }
         }
-        if (!user.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()) || !valid) throw new ForbiddenException("Access denied");
+        if (!user.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()) || !valid)
+            throw new ForbiddenException("Access denied");
 
         // 2) Add subBookingList to booking and Calculate Booking
         booking.setSubBookingList(this.calculateSubBookingList(booking.getSubBookingList()));
@@ -445,12 +463,13 @@ public class BookingServiceImpl implements BookingService {
         Ship ship = this.shipService.getOne(booking.getShip().getId());
 
         boolean valid = false;
-        for(Ship sh : userShips){
-            if(sh.getId().equals(ship.getId())){
+        for (Ship sh : userShips) {
+            if (sh.getId().equals(ship.getId())) {
                 valid = true;
             }
         }
-        if (!user.hasRole(Role.ERole.ROLE_SERVICE_AGENT.toString()) || !valid) throw new ForbiddenException("Access denied");
+        if (!user.hasRole(Role.ERole.ROLE_SERVICE_AGENT.toString()) || !valid)
+            throw new ForbiddenException("Access denied");
 
         int agentBalance = this.shipAgentLedgerService.getServiceAgentBalance(user.getId());
         // 2) Add subBookingList to booking and Calculate Booking
@@ -605,7 +624,7 @@ public class BookingServiceImpl implements BookingService {
     public List<Booking> getBookingListByCreatedIdAndShipIdAndDate(Long userId, Long shipId, Date date) {
         Date begin = DateUtil.getDayStart(date);
         Date end = DateUtil.getDayEnd(date);
-        List<Booking> bookingList =this.bookingRepository.findDistinctByCreatedBetweenAndCreatedByIdAndShipIdAndCancelledFalse(begin, end, userId, shipId);
+        List<Booking> bookingList = this.bookingRepository.findDistinctByCreatedBetweenAndCreatedByIdAndShipIdAndCancelledFalse(begin, end, userId, shipId);
         return bookingList;
     }
 
