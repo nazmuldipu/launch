@@ -81,7 +81,7 @@ public class ShipServiceImpl implements ShipService {
 
     @Override
     public Page<Ship> searchShip(String query, int page) {
-        return this.shipRepository.findDistinctByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrStartingPointContainingIgnoreCaseOrDroppingPointContainingIgnoreCaseAndDeletedFalse(query, query, query, PageAttr.getPageRequest(page));
+        return this.shipRepository.findDistinctByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrStartingPointContainingIgnoreCaseOrDroppingPointContainingIgnoreCaseAndDeletedFalse(query, query, query, query, PageAttr.getPageRequest(page));
     }
 
     /*this method will find Ship running map from a date range
