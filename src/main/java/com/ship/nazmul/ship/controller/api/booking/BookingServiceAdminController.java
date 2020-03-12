@@ -30,7 +30,6 @@ public class BookingServiceAdminController {
 
     @PostMapping("/sell")
     private ResponseEntity createBooking(@RequestBody Booking booking) throws ParseException, NotFoundException, ForbiddenException, UserAlreadyExistsException, NullPasswordException, UserInvalidException, javassist.NotFoundException {
-        System.out.println("D1 : " + new Date());
         return ResponseEntity.ok(this.bookingService.createServiceAdminBooking(booking));
     }
 

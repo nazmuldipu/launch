@@ -172,7 +172,6 @@ public class Category extends BaseEntity {
                 ", priority=" + priority +
                 ", imagePaths=" + imagePaths +
                 ", categoryFacilities=" + categoryFacilities +
-                ", ship=" + ship +
                 ", discountMap=" + discountMap +
                 '}';
     }
