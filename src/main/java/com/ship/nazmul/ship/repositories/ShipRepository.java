@@ -17,7 +17,7 @@ public interface ShipRepository extends JpaRepository<Ship, Long> {
 
     Page<Ship> findByDeletedFalse(Pageable pageable);
 
-    Page<Ship> findDistinctByNameContainingIgnoreCaseOrStartingPointContainingIgnoreCaseOrDroppingPointContainingIgnoreCaseAndDeletedFalse(String name, String startingPoint,  String droppingPoint, Pageable pageable);
+    Page<Ship> findDistinctByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrStartingPointContainingIgnoreCaseOrDroppingPointContainingIgnoreCaseAndDeletedFalse(String name, String startingPoint,  String droppingPoint, Pageable pageable);
 
 
 }
