@@ -179,6 +179,24 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    public JSONObject countTicket(Long shipId, LocalDate startDate, LocalDate endDate) throws JSONException {
+        List<LocalDate> dateList = DateUtil.getLocalDatesBetween(startDate, endDate);
+        int totalBooking = 0;
+        int totalSeat = 0;
+        for (LocalDate date : dateList) {
+            List<Booking> bookingList = this.bookingService.getBookingListByShipIdAndDate(shipId, date);
+            totalBooking += bookingList.size();
+            for (Booking booking : bookingList) {
+                totalSeat += booking.getSubBookingList().size();
+            }
+        }
+        JSONObject obj = new JSONObject();
+        obj.put("totalBooking", totalBooking);
+        obj.put("totalSeat", totalSeat);
+        return obj;
+    }
+
+    @Override
     public List<ServiceAdminSellsReport> getServiceAdminSellsReport(Long shipId, LocalDate date) throws ForbiddenException, ParseException {
         User user = SecurityConfig.getCurrentUser();
         if (user.getShips() == null || !user.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()))

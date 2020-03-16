@@ -35,6 +35,8 @@ public interface ReportService {
 
     List<ServiceAdminSellsReport> getAdminReservationReportRange(Long userId, Long shipId, LocalDate startDate, LocalDate endDate) throws ParseException;
 
+    JSONObject countTicket(Long shipId, LocalDate startDate, LocalDate endDate) throws JSONException;
+
     /************************************Service Admin modules***************************************/
     List<ServiceAdminSellsReport> getServiceAdminSellsReport(Long shipId, LocalDate date) throws ForbiddenException, ParseException;
 

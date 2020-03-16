@@ -3,6 +3,7 @@ package com.ship.nazmul.ship.controller.api.report;
 import com.ship.nazmul.ship.exceptions.forbidden.ForbiddenException;
 import com.ship.nazmul.ship.exceptions.notfound.NotFoundException;
 import com.ship.nazmul.ship.services.ReportService;
+import org.json.JSONException;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -43,32 +44,39 @@ public class AdminReportController {
 
 
     @GetMapping("/shipSells/{shipId}")
-    private ResponseEntity getAdminBookingReportByHotelId(@PathVariable("shipId")Long shipId, @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) throws ForbiddenException, ParseException {
+    private ResponseEntity getAdminBookingReportByHotelId(@PathVariable("shipId") Long shipId, @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) throws ForbiddenException, ParseException {
         return ResponseEntity.ok(this.reportService.getAdminSellsReportByShipId(date, shipId));
     }
 
     @GetMapping("/shipReservation/{shipId}")
-    private ResponseEntity getAdminReservationReportByHotelId(@PathVariable("shipId")Long shipId, @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) throws NotFoundException, ForbiddenException, ParseException {
+    private ResponseEntity getAdminReservationReportByHotelId(@PathVariable("shipId") Long shipId, @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) throws NotFoundException, ForbiddenException, ParseException {
         return ResponseEntity.ok(this.reportService.getAdminReservationReportByShipId(date, shipId));
     }
 
     @GetMapping("/agentReport/{shipId}")
-    private ResponseEntity getAgentReportByShip(@PathVariable("shipId")Long shipId, @RequestParam("userId")Long userId,@RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) throws ParseException {
+    private ResponseEntity getAgentReportByShip(@PathVariable("shipId") Long shipId, @RequestParam("userId") Long userId, @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) throws ParseException {
         return ResponseEntity.ok(this.reportService.getAdminAgentReport(shipId, userId, date));
     }
 
     @GetMapping("/userSellsReportRange/{shipId}")
-    private ResponseEntity getAgentSellsReportRangeByShip(@PathVariable("shipId")Long shipId, @RequestParam("userId")Long userId,
-                                                     @RequestParam("startDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
-                                                     @RequestParam("endDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) throws ParseException {
+    private ResponseEntity getAgentSellsReportRangeByShip(@PathVariable("shipId") Long shipId, @RequestParam("userId") Long userId,
+                                                          @RequestParam("startDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+                                                          @RequestParam("endDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) throws ParseException {
         return ResponseEntity.ok(this.reportService.getAdminSellsReportRange(shipId, userId, startDate, endDate));
     }
 
     @GetMapping("/userReservationReportRange/{shipId}")
-    private ResponseEntity getAgentReservationReportRangeByShip(@PathVariable("shipId")Long shipId, @RequestParam("userId")Long userId,
-                                                     @RequestParam("startDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
-                                                     @RequestParam("endDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) throws ParseException {
+    private ResponseEntity getAgentReservationReportRangeByShip(@PathVariable("shipId") Long shipId, @RequestParam("userId") Long userId,
+                                                                @RequestParam("startDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+                                                                @RequestParam("endDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) throws ParseException {
         return ResponseEntity.ok(this.reportService.getAdminReservationReportRange(userId, shipId, startDate, endDate));
+    }
+
+    @GetMapping("/countTicketReport")
+    private ResponseEntity countTicketReport(@PathVariable("shipId") Long shipId,
+                                       @RequestParam("startDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+                                       @RequestParam("endDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) throws JSONException {
+        return ResponseEntity.ok(this.reportService.countTicket(shipId, startDate, endDate));
     }
 
 }
