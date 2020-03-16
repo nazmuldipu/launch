@@ -72,7 +72,7 @@ public class AdminReportController {
         return ResponseEntity.ok(this.reportService.getAdminReservationReportRange(userId, shipId, startDate, endDate));
     }
 
-    @GetMapping("/countTicketReport")
+    @GetMapping("/countTicketReport/{shipId}")
     private ResponseEntity countTicketReport(@PathVariable("shipId") Long shipId,
                                        @RequestParam("startDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
                                        @RequestParam("endDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) throws JSONException {
