@@ -193,6 +193,7 @@ public class ReportServiceImpl implements ReportService {
         JSONObject obj = new JSONObject();
         obj.put("totalBooking", totalBooking);
         obj.put("totalSeat", totalSeat);
+        System.out.println(obj);
         return obj;
     }
 

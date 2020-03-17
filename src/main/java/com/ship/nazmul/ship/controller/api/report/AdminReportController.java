@@ -76,7 +76,7 @@ public class AdminReportController {
     private ResponseEntity countTicketReport(@PathVariable("shipId") Long shipId,
                                        @RequestParam("startDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
                                        @RequestParam("endDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) throws JSONException {
-        return ResponseEntity.ok(this.reportService.countTicket(shipId, startDate, endDate));
+        return ResponseEntity.ok(this.reportService.countTicket(shipId, startDate, endDate).toString());
     }
 
 }
