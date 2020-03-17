@@ -181,22 +181,26 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public JSONObject countTicket(Long shipId, LocalDate startDate, LocalDate endDate) throws JSONException {
         List<LocalDate> dateList = DateUtil.getLocalDatesBetween(startDate, endDate);
-        List<JSONObject> list = new ArrayList<JSONObject>();
+        List<JSONObject> list = new ArrayList<>();
         int totalBooking = 0;
         int totalSeat = 0;
         for (LocalDate date : dateList) {
             List<Booking> bookingList = this.bookingService.getBookingListByShipIdAndDate(shipId, date);
             int seats = 0;
+            int bookingCount = 0;
             for (Booking booking : bookingList) {
+                if(booking.geteStatus().equals(Seat.EStatus.SEAT_SOLD)) {
+                    seats += booking.getSubBookingList().size();
+                    bookingCount ++;
 
-                seats += booking.getSubBookingList().size();
+                }
             }
-            totalBooking += bookingList.size();
-            totalSeat += seats;
 
+            totalSeat += seats;
+            totalBooking += bookingCount;
             JSONObject dayObj = new JSONObject();
             dayObj.put("date", date.toString());
-            dayObj.put("booking", bookingList.size());
+            dayObj.put("booking", bookingCount);
             dayObj.put("seat", seats);
             list.add(dayObj);
         }
@@ -206,7 +210,6 @@ public class ReportServiceImpl implements ReportService {
         obj.put("totalBooking", totalBooking);
         obj.put("totalSeat", totalSeat);
         obj.put("count", new JSONArray(list));
-        System.out.println(obj);
         return obj;
     }
 
