@@ -37,6 +37,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Long countByCreatedBetween(Date fromDate, Date toDate);
 
+    Page<User> findByNameContainingIgnoreCaseOrPhoneNumberContainingIgnoreCase(String name, String phoneNumber, Pageable pageable);
+
+    Page<User> findByNameContainingIgnoreCaseAndRolesNameOrPhoneNumberContainingIgnoreCaseAndRolesName(String name, String role1, String phoneNumber, String role2, Pageable pageable);
+
 //    Page<User> findByHotelIdAndRolesName(Long hotelId, String role, Pageable pageable);
 //    List<User> findByHotelIdAndRolesName(Long hotelId, String role);
 

@@ -429,6 +429,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Page<User> findByUserNameOrPhoneAndRole(String query, String role, int page) {
+        if (role == null) {
+            return this.userRepo.findByNameContainingIgnoreCaseOrPhoneNumberContainingIgnoreCase(query, query, PageAttr.getPageRequest(page));
+        } else {
+            return this.userRepo.findByNameContainingIgnoreCaseAndRolesNameOrPhoneNumberContainingIgnoreCaseAndRolesName(query, role, query, role, PageAttr.getPageRequest(page));
+        }
+    }
+
+    @Override
     public List<User> getUserListByShipId(Long shipId) {
         return this.userRepo.findByShipsId(shipId);
     }

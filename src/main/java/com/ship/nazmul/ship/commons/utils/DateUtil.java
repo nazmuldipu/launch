@@ -116,7 +116,6 @@ public class DateUtil {
     }
     public static List<LocalDate> getLocalDatesBetween(
             LocalDate startDate, LocalDate endDate) {
-
         long numOfDaysBetween = ChronoUnit.DAYS.between(startDate, endDate);
         return IntStream.iterate(0, i -> i + 1)
                 .limit(numOfDaysBetween)

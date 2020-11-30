@@ -44,7 +44,7 @@ public class SeatServiceImpl implements SeatService {
         Category category = this.categoryService.getOne(seat.getCategory().getId());
         if (ship.getId() != category.getShip().getId()) throw new ForbiddenException("Access denied");
 
-        if(seat.getId() != null){
+        if (seat.getId() != null) {
             seat.setBookingIdMap(seat.getBookingIdMap());
             seat.setSeatStatusMap(seat.getSeatStatusMap());
         }
@@ -113,7 +113,7 @@ public class SeatServiceImpl implements SeatService {
     public List<Seat> getAvailableSeatByShipId(Long shipId, LocalDate date) throws NotFoundException, ParseException {
 //        List<Seat> seatList = this.seatRepository.findByShipIdOrderBySeatNumber(shipId);
         // Check if this ship is running
-        if(!this.shipService.isShipActive(shipId, date)){
+        if (!this.shipService.isShipActive(shipId, date)) {
             return null;
         }
 
@@ -163,7 +163,10 @@ public class SeatServiceImpl implements SeatService {
             JSONObject obj = new JSONObject();
             obj.put("id", seat.getId());
             obj.put("seatNumber", seat.getSeatNumber());
-            obj.put("category", seat.getCategory().getName());
+            JSONObject cat = new JSONObject();
+            cat.put("name", seat.getCategory().getName());
+            cat.put("priority", seat.getCategory().getPriority());
+            obj.put("category", cat);
             if (!this.checkSeatAvailability(seat.getId(), date)) {
                 //TODO: remove following condition after debug period
                 Long bookingId = seat.getBookingIdMap().get(date);
@@ -171,9 +174,9 @@ public class SeatServiceImpl implements SeatService {
 //                    bookingId = seat.getBookingIdMap().get(date);
 //                }
                 obj.put("bookingId", bookingId);
-                Seat.EStatus status =  seat.getSeatStatusMap().get(date);
-                if(status == null){
-                    status =  seat.getSeatStatusMap().get(date);
+                Seat.EStatus status = seat.getSeatStatusMap().get(date);
+                if (status == null) {
+                    status = seat.getSeatStatusMap().get(date);
                 }
                 obj.put("status", status);
             } else {
@@ -199,7 +202,6 @@ public class SeatServiceImpl implements SeatService {
 //        }
         return fareMap;
     }
-
 
 
     /*Check if a seat is available on a particular date
@@ -247,7 +249,7 @@ public class SeatServiceImpl implements SeatService {
         //TODO: remove following one line after debug period
         final Map<LocalDate, Seat.EStatus> seatStatusMap = new HashMap<>();
         for (final Map.Entry<LocalDate, Seat.EStatus> entry : seat.getSeatStatusMap().entrySet()) {
-            if(!entry.getKey().equals(date)) {
+            if (!entry.getKey().equals(date)) {
                 seatStatusMap.put(entry.getKey(), entry.getValue());
             }
         }

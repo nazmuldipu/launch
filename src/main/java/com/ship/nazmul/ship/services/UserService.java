@@ -36,6 +36,8 @@ public interface UserService {
 
     List<User> findByRole(String role);
 
+    Page<User> findByUserNameOrPhoneAndRole(String query, String role, int page);
+
     List<User> getUserListByShipId(Long shipId);
 
     Set<Ship> getUserShipList(Long userId) throws UserNotFoundException;
@@ -49,6 +51,7 @@ public interface UserService {
     User changePassword(Long userId, String password) throws ForbiddenException, NullPasswordException, UserAlreadyExistsException, UserInvalidException, UserNotFoundException;
 
     // *******************************ADMIN MODULES ****************************************
+
     User createAdminAgent(User user) throws ForbiddenException, NullPasswordException;
 
     Page<User> getAdminAgents(int page);

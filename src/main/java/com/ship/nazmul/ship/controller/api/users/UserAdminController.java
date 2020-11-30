@@ -67,11 +67,11 @@ public class UserAdminController {
         return ResponseEntity.ok(this.userService.getOne(userId));
     }
 
-    //Search user by phone number
-    @PutMapping("/searchUser")
-    private ResponseEntity<User> findUserByPhoneNumber(@RequestParam("phone") String phone) throws UserNotFoundException {
-        return ResponseEntity.ok(this.userService.findByUsernameOrPhone(phone));
-    }
+//    //Search user by phone number
+//    @PutMapping("/searchUser")
+//    private ResponseEntity<User> findUserByPhoneNumber(@RequestParam("phone") String phone) throws UserNotFoundException {
+//        return ResponseEntity.ok(this.userService.findByUsernameOrPhone(phone));
+//    }
 
     // Create Agent for Service admin
     @PostMapping("/createAgent")
@@ -127,5 +127,13 @@ public class UserAdminController {
                                           @RequestParam("shipId") Long shipId) throws InvalidException, NotFoundException, ForbiddenException {
         User user = this.userService.assignShipAdmin(userId, shipId);
         return ResponseEntity.ok(user);
+    }
+
+    //Search user by phone number or name
+    @PutMapping("/searchUser")
+    private ResponseEntity<Page<User>> findUserByPhoneNumber(@RequestParam(value = "query", defaultValue = "") String query,
+                                                             @RequestParam(value = "role", required = false) String role,
+                                                             @RequestParam(value = "page", defaultValue = "0") Integer page) throws UserNotFoundException {
+        return ResponseEntity.ok(this.userService.findByUserNameOrPhoneAndRole(query, role, page));
     }
 }
