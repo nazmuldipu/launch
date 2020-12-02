@@ -1,6 +1,7 @@
 package com.ship.nazmul.ship.controller.api.booking;
 
 import com.ship.nazmul.ship.entities.Booking;
+import com.ship.nazmul.ship.entities.pojo.Ticket;
 import com.ship.nazmul.ship.exceptions.exists.UserAlreadyExistsException;
 import com.ship.nazmul.ship.exceptions.forbidden.ForbiddenException;
 import com.ship.nazmul.ship.exceptions.invalid.UserInvalidException;
@@ -30,7 +31,8 @@ public class BookingAdminAgentController {
 
     @PostMapping("/sell")
     private ResponseEntity createAdminAgentBooking(@RequestBody Booking booking) throws ParseException, NotFoundException, ForbiddenException, UserAlreadyExistsException, NullPasswordException, UserInvalidException, javassist.NotFoundException {
-        return ResponseEntity.ok(this.bookingService.createAdminAgentBooking(booking));
+        Ticket ticket = new Ticket(this.bookingService.createAdminAgentBooking(booking));
+        return ResponseEntity.ok(ticket);
     }
 
     @PutMapping("/confirmReservation/{bookingId}")

@@ -211,8 +211,14 @@ public class BookingServiceImpl implements BookingService {
                     hotelswaveCommission += booking.getShip().getHotelswaveCommission();
                 }
             }
-            booking.setHotelswaveDiscount(hotelswaveCommission / 2);
-            booking.setHotelswaveAgentDiscount(hotelswaveCommission / 2);
+            Integer commissionRate = SecurityConfig.getCurrentUser().getCommission();
+            if(commissionRate == null || commissionRate.equals(0)){
+                commissionRate = 50;
+            } else if(commissionRate < 0){
+                commissionRate = 0;
+            }
+            booking.setHotelswaveDiscount((hotelswaveCommission * (100 - commissionRate)) / 100);
+            booking.setHotelswaveAgentDiscount((hotelswaveCommission * commissionRate) / 100);
             this.adminAgentSellsSeatAccount(booking, false);
         } else if (SecurityConfig.getCurrentUser().hasRole(Role.ERole.ROLE_SERVICE_AGENT.toString())) {
             int agentDiscount = 0;
