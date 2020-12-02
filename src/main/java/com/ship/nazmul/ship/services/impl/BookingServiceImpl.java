@@ -85,16 +85,21 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Booking getServiceAdminBooking(Long id) {
+    public Ticket getAdminBooking(Long id) {
+        return new Ticket(this.bookingRepository.findOne(id));
+    }
+
+    @Override
+    public Ticket getServiceAdminBooking(Long id) {
         Booking booking = this.getOne(id);
         User currentUser = SecurityConfig.getCurrentUser();
         if (currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString())
                 && Validator.containsShip(currentUser.getShips(), booking.getShip())
                 && !booking.isCancelled()) {
             Ticket ticket = new Ticket(booking);
-            System.out.println(ticket.toString());
+//            System.out.println(ticket.toString());
 
-            return booking;
+            return ticket;
         }
 
         return null;
@@ -426,7 +431,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Booking createServiceAdminBooking(Booking booking) throws ForbiddenException, NotFoundException, ParseException, UserAlreadyExistsException, NullPasswordException, UserInvalidException {
+    public Ticket createServiceAdminBooking(Booking booking) throws ForbiddenException, NotFoundException, ParseException, UserAlreadyExistsException, NullPasswordException, UserInvalidException {
         //1) Security check if user has sufficient permission for this action
         User user = SecurityConfig.getCurrentUser();
         Set<Ship> userShips = user.getShips();
@@ -456,7 +461,8 @@ public class BookingServiceImpl implements BookingService {
                 } else if (booking.geteStatus() == Seat.EStatus.SEAT_RESERVED) {
                     booking = this.reserveBooking(booking);
                 }
-                return booking;
+                Ticket ticket = new Ticket(booking);
+                return ticket;
             }
         }
         return null;
@@ -505,8 +511,11 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Page<Booking> getMySells(int page) {
-        return this.bookingRepository.findByCreatedByIdAndCancelledFalse(SecurityConfig.getCurrentUser().getId(), PageAttr.getPageRequest(page));
+    public Page<Ticket> getMySells(int page) {
+        Page<Booking> bookingPage = this.bookingRepository.findByCreatedByIdAndCancelledFalse(SecurityConfig.getCurrentUser().getId(), PageAttr.getPageRequest(page));
+        Page<Ticket> entities = bookingPage.map(Ticket::new);
+
+        return entities;
     }
 
     @Override

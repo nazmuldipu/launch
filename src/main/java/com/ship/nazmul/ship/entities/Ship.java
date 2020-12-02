@@ -60,7 +60,19 @@ public class Ship extends BaseEntity {
     @Convert(converter = LocalDateAttributeConverter.class, attributeName = "key")
     private Map<LocalDate, Boolean> shipMap;
 
-    public enum ShipName{
+    public Ship() {
+    }
+
+    public Ship(String shipNumber, String name, ShipName shipName, String startingPoint, String droppingPoint, String startTime) {
+        this.shipNumber = shipNumber;
+        this.name = name;
+        this.shipName = shipName;
+        this.startingPoint = startingPoint;
+        this.droppingPoint = droppingPoint;
+        this.startTime = startTime;
+    }
+
+    public enum ShipName {
         SUKANTO_BABU("Sukanto Babu"),
         BAY_CRUISE("Bay_Cruise"),
         OTHER("Other");

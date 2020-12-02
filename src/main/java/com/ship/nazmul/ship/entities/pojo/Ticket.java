@@ -1,13 +1,8 @@
 package com.ship.nazmul.ship.entities.pojo;
 
-import com.ship.nazmul.ship.entities.Booking;
-import com.ship.nazmul.ship.entities.Ship;
-import com.ship.nazmul.ship.entities.SubBooking;
-import com.ship.nazmul.ship.entities.User;
+import com.ship.nazmul.ship.entities.*;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 public class Ticket {
     private Long id;
@@ -19,18 +14,52 @@ public class Ticket {
     private int totalFare;
     private int totalDiscount;
     private int totalCommission;
-    private String[] category;
+    private boolean cancelled;
+    private String category;
+    private Seat.EStatus eStatus;
 
     public Ticket(Booking booking) {
         this.id = booking.getId();
-        this.created = booking.getCreated();
-        this.createdBy = new User(booking.getCreatedBy().getName(), booking.getCreatedBy().getUsername(), booking.getCreatedBy().getPhoneNumber(), null);
-//        this.subBookingList = booking.getSubBookingList();
-        this.user = new User(booking.getUser().getName(), booking.getUser().getUsername(), booking.getUser().getPhoneNumber(), null);
-//        this.ship = booking.getShip();
-        this.totalFare = booking.getTotalFare();
-        this.totalDiscount = booking.getTotalDiscount();
-        this.totalCommission = booking.getTotalDiscount();
+        if(booking.isCancelled()){
+            this.cancelled = true;
+        } else {
+            this.cancelled = false;
+            this.created = booking.getCreated();
+            this.createdBy = new User(booking.getCreatedBy().getName(), booking.getCreatedBy().getUsername(), booking.getCreatedBy().getPhoneNumber(), null);
+            this.user = new User(booking.getUser().getName(), booking.getUser().getUsername(), booking.getUser().getPhoneNumber(), null);
+            this.ship = new Ship(booking.getShip().getShipNumber(), booking.getShip().getName(), booking.getShip().getShipName(), booking.getShip().getStartingPoint(), booking.getShip().getDroppingPoint(), booking.getShip().getStartTime());
+            this.totalFare = booking.getTotalFare();
+            this.totalDiscount = booking.getTotalDiscount();
+            this.totalCommission = booking.getTotalDiscount();
+            this.eStatus = booking.geteStatus();
+            //Populate subBookingList
+            this.subBookingList = new ArrayList<>();
+            final int[] categoryPrice = {0};
+            final int[] categoryPriority = {0};
+            booking.getSubBookingList().forEach(sb -> {
+                SubBooking subBooking = new SubBooking(sb.getDate(), sb.getSeatNumber(), sb.getFare(), sb.getDiscount(), sb.getPayablePrice());
+                this.subBookingList.add(subBooking);
+                if(categoryPrice[0] == 0){
+                    this.category = sb.getSeat().getCategory().getName();
+                    categoryPrice[0] = sb.getSeat().getCategory().getFare();
+                    categoryPriority[0] = sb.getSeat().getCategory().getPriority();
+                } else if(categoryPrice[0] > sb.getSeat().getCategory().getFare()){
+                    this.category = sb.getSeat().getCategory().getName();
+                    categoryPrice[0] = sb.getSeat().getCategory().getFare();
+                    categoryPriority[0] = sb.getSeat().getCategory().getPriority();
+                } else if(categoryPrice[0] == sb.getSeat().getCategory().getFare()){
+                    if(categoryPriority[0] > sb.getSeat().getCategory().getPriority()){
+                        categoryPrice[0] = sb.getSeat().getCategory().getFare();
+                        this.category = sb.getSeat().getCategory().getName();
+                    }
+                }
+//                this.category.add(sb.getSeat().getCategory().getName());
+            });
+        }
+//        Iterator<String> itr = this.category.iterator();
+//        while (itr.hasNext()) {
+//            System.out.println("ITR >"+itr.next());
+//        }
     }
 
     public Ticket() {
@@ -108,12 +137,28 @@ public class Ticket {
         this.totalCommission = totalCommission;
     }
 
-    public String[] getCategory() {
+    public String getCategory() {
         return category;
     }
 
-    public void setCategory(String[] category) {
+    public void setCategory(String category) {
         this.category = category;
+    }
+
+    public boolean isCancelled() {
+        return cancelled;
+    }
+
+    public void setCancelled(boolean cancelled) {
+        this.cancelled = cancelled;
+    }
+
+    public Seat.EStatus geteStatus() {
+        return eStatus;
+    }
+
+    public void seteStatus(Seat.EStatus eStatus) {
+        this.eStatus = eStatus;
     }
 
     @Override
@@ -128,7 +173,9 @@ public class Ticket {
                 ", totalFare=" + totalFare +
                 ", totalDiscount=" + totalDiscount +
                 ", totalCommission=" + totalCommission +
-                ", category=" + Arrays.toString(category) +
+                ", cancelled=" + cancelled +
+                ", category=" + category +
+                ", eStatus=" + eStatus +
                 '}';
     }
 }

@@ -43,6 +43,14 @@ public class SubBooking implements Serializable {
         this.seat = seat;
     }
 
+    public SubBooking(LocalDate date, String seatNumber, int fare, int discount, int payablePrice) {
+        this.date = date;
+        this.seatNumber = seatNumber;
+        this.fare = fare;
+        this.discount = discount;
+        this.payablePrice = payablePrice;
+    }
+
     public SubBooking(Seat seat) {
         this.seat = seat;
     }

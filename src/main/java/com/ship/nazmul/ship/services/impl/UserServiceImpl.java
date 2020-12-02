@@ -178,7 +178,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public User changePassword(Long userId, String password) throws ForbiddenException, NullPasswordException, UserAlreadyExistsException, UserInvalidException, UserNotFoundException {
         User user = SecurityConfig.getCurrentUser();
-        if (user == null || user.getId() != userId) throw new ForbiddenException("A slap on your face, idiot");
+        System.out.println("P1 > " + user.getId() + " : " + userId);
+        if (user == null || !user.getId().equals(userId)) throw new ForbiddenException("A slap on your face, idiot");
         user.setPassword(PasswordUtil.encryptPassword(password, PasswordUtil.EncType.BCRYPT_ENCODER, null));
         return this.save(user);
     }

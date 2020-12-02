@@ -3,6 +3,7 @@ package com.ship.nazmul.ship.controller.api.booking;
 import com.ship.nazmul.ship.entities.Booking;
 import com.ship.nazmul.ship.entities.Category;
 import com.ship.nazmul.ship.entities.SubBooking;
+import com.ship.nazmul.ship.entities.pojo.Ticket;
 import com.ship.nazmul.ship.exceptions.exists.UserAlreadyExistsException;
 import com.ship.nazmul.ship.exceptions.forbidden.ForbiddenException;
 import com.ship.nazmul.ship.exceptions.invalid.UserInvalidException;
@@ -41,7 +42,7 @@ public class BookingAdminController {
     @PostMapping("/sell")
     private ResponseEntity createBooking(@RequestBody Booking booking) throws UserInvalidException, ForbiddenException, ParseException, NullPasswordException, NotFoundException, UserAlreadyExistsException, javassist.NotFoundException {
         booking = this.bookingService.createAdminBooking(booking);
-        return ResponseEntity.ok(booking);
+        return ResponseEntity.ok(new Ticket(booking));
     }
 
     @PutMapping("/confirmReservation/{bookingId}")
@@ -52,7 +53,7 @@ public class BookingAdminController {
 
     @GetMapping("/{bookingId}")
     private ResponseEntity getBookingById(@PathVariable("bookingId")Long bookingId){
-        return ResponseEntity.ok(this.bookingService.getOne(bookingId));
+        return ResponseEntity.ok(this.bookingService.getAdminBooking(bookingId));
     }
 
     @GetMapping("/mySells")
