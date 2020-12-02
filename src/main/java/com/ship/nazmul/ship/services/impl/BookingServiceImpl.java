@@ -6,6 +6,7 @@ import com.ship.nazmul.ship.commons.utils.DateUtil;
 import com.ship.nazmul.ship.config.security.SecurityConfig;
 import com.ship.nazmul.ship.entities.*;
 import com.ship.nazmul.ship.entities.accountings.*;
+import com.ship.nazmul.ship.entities.pojo.Ticket;
 import com.ship.nazmul.ship.exceptions.exists.UserAlreadyExistsException;
 import com.ship.nazmul.ship.exceptions.forbidden.ForbiddenException;
 import com.ship.nazmul.ship.exceptions.invalid.UserInvalidException;
@@ -87,8 +88,14 @@ public class BookingServiceImpl implements BookingService {
     public Booking getServiceAdminBooking(Long id) {
         Booking booking = this.getOne(id);
         User currentUser = SecurityConfig.getCurrentUser();
-        if (currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()) && Validator.containsShip(currentUser.getShips(), booking.getShip()) && !booking.isCancelled())
+        if (currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString())
+                && Validator.containsShip(currentUser.getShips(), booking.getShip())
+                && !booking.isCancelled()) {
+            Ticket ticket = new Ticket(booking);
+            System.out.println(ticket.toString());
+
             return booking;
+        }
 
         return null;
     }
