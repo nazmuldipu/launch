@@ -360,7 +360,6 @@ public class Ship extends BaseEntity {
                 ", priority=" + priority +
                 ", hotelswaveCommission=" + hotelswaveCommission +
                 ", shipFacilities=" + shipFacilities +
-                ", admin=" + admin +
                 ", shipMap=" + shipMap +
                 '}';
     }

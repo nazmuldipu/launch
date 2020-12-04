@@ -272,7 +272,6 @@ public class User extends BaseEntity implements UserDetails {
                 ", phoneNumber='" + phoneNumber + '\'' +
                 ", password='" + password + '\'' +
                 ", roles=" + roles +
-                ", ships=" + ships +
                 ", enabled=" + enabled +
                 ", accountNonExpired=" + accountNonExpired +
                 ", accountNonLocked=" + accountNonLocked +
