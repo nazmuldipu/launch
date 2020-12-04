@@ -24,10 +24,28 @@ public class ShipAdminCashbook extends BaseEntity {
     private User user;
     private String explanation;
     private String ref;
+    private TransactionType type;
     private int debit;
     private int credit;
     private int balance;
     private boolean approved;
+
+    public enum TransactionType {
+        AGENT_BALANCE("Agent balance"),
+        BOOKING("Booking"),
+        CANCEL_BOOKING("Cancel Booking"),
+        OTHER ("Other");
+
+        String value;
+
+        TransactionType (String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+    }
 
     public ShipAdminCashbook() {
     }
@@ -104,6 +122,14 @@ public class ShipAdminCashbook extends BaseEntity {
         this.approved = approved;
     }
 
+    public TransactionType getType() {
+        return type;
+    }
+
+    public void setType(TransactionType type) {
+        this.type = type;
+    }
+
     @Override
     public String toString() {
         return "ShipAdminCashbook{" +
@@ -111,6 +137,7 @@ public class ShipAdminCashbook extends BaseEntity {
                 ", user=" + user +
                 ", explanation='" + explanation + '\'' +
                 ", ref='" + ref + '\'' +
+                ", type=" + type +
                 ", debit=" + debit +
                 ", credit=" + credit +
                 ", balance=" + balance +

@@ -33,6 +33,11 @@ public class ServiceAdminReportController {
         return ResponseEntity.ok(this.reportService.getServiceAdminSellsReport(shipId, date));
     }
 
+    @GetMapping("/agent-cash")
+    private ResponseEntity getAgentCash(@RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date){
+        return ResponseEntity.ok(this.reportService.getAdminAgentCashReport(date));
+    }
+
     @GetMapping("/shipSellsRange/{shipId}")
     private ResponseEntity getAdminBookingReportRangeByHotelId(@PathVariable("shipId") Long shipId, @RequestParam("startDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate, @RequestParam("endDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) throws ForbiddenException, ParseException {
         return ResponseEntity.ok(this.reportService.getServiceAdminSellsReportRange(shipId, startDate, endDate));

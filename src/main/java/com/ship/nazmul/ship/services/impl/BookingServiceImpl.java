@@ -6,7 +6,6 @@ import com.ship.nazmul.ship.commons.utils.DateUtil;
 import com.ship.nazmul.ship.config.security.SecurityConfig;
 import com.ship.nazmul.ship.entities.*;
 import com.ship.nazmul.ship.entities.accountings.*;
-import com.ship.nazmul.ship.entities.pojo.Ticket;
 import com.ship.nazmul.ship.exceptions.exists.UserAlreadyExistsException;
 import com.ship.nazmul.ship.exceptions.forbidden.ForbiddenException;
 import com.ship.nazmul.ship.exceptions.invalid.UserInvalidException;
@@ -85,21 +84,22 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Ticket getAdminBooking(Long id) {
-        return new Ticket(this.bookingRepository.findOne(id));
+    public Booking getAdminBooking(Long id) {
+        return this.bookingRepository.findOne(id);
     }
 
     @Override
-    public Ticket getServiceAdminBooking(Long id) {
+    public Booking getServiceAdminBooking(Long id) {
         Booking booking = this.getOne(id);
         User currentUser = SecurityConfig.getCurrentUser();
         if (currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString())
                 && Validator.containsShip(currentUser.getShips(), booking.getShip())
                 && !booking.isCancelled()) {
-            Ticket ticket = new Ticket(booking);
+//            Ticket ticket = new Ticket(booking);
 //            System.out.println(ticket.toString());
-
-            return ticket;
+            User issuby = new User(booking.getCreatedBy().getName(), booking.getCreatedBy().getUsername(), booking.getCreatedBy().getPhoneNumber(), null);
+            booking.setIssuBy(issuby);
+            return booking;
         }
 
         return null;
@@ -164,6 +164,8 @@ public class BookingServiceImpl implements BookingService {
                 } else if (booking.geteStatus() == Seat.EStatus.SEAT_RESERVED) {
                     booking = this.reserveBooking(booking);
                 }
+                User issuby = new User(booking.getCreatedBy().getName(), booking.getCreatedBy().getUsername(), booking.getCreatedBy().getPhoneNumber(), null);
+                booking.setIssuBy(issuby);
                 return booking;
             }
         }
@@ -427,6 +429,8 @@ public class BookingServiceImpl implements BookingService {
                     } else if (booking.geteStatus() == Seat.EStatus.SEAT_RESERVED) {
                         booking = this.reserveBooking(booking);
                     }
+                    User issuby = new User(booking.getCreatedBy().getName(), booking.getCreatedBy().getUsername(), booking.getCreatedBy().getPhoneNumber(), null);
+                    booking.setIssuBy(issuby);
                     return booking;
                 }
             }
@@ -437,7 +441,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Ticket createServiceAdminBooking(Booking booking) throws ForbiddenException, NotFoundException, ParseException, UserAlreadyExistsException, NullPasswordException, UserInvalidException {
+    public Booking createServiceAdminBooking(Booking booking) throws ForbiddenException, NotFoundException, ParseException, UserAlreadyExistsException, NullPasswordException, UserInvalidException {
         //1) Security check if user has sufficient permission for this action
         User user = SecurityConfig.getCurrentUser();
         Set<Ship> userShips = user.getShips();
@@ -467,8 +471,9 @@ public class BookingServiceImpl implements BookingService {
                 } else if (booking.geteStatus() == Seat.EStatus.SEAT_RESERVED) {
                     booking = this.reserveBooking(booking);
                 }
-                Ticket ticket = new Ticket(booking);
-                return ticket;
+                User issuby = new User(booking.getCreatedBy().getName(), booking.getCreatedBy().getUsername(), booking.getCreatedBy().getPhoneNumber(), null);
+                booking.setIssuBy(issuby);
+                return booking;
             }
         }
         return null;
@@ -508,6 +513,8 @@ public class BookingServiceImpl implements BookingService {
             if (this.confirmBooking(booking)) {
                 booking.seteStatus(Seat.EStatus.SEAT_SOLD);
                 booking = this.approveBooking(booking);
+                User issuby = new User(booking.getCreatedBy().getName(), booking.getCreatedBy().getUsername(), booking.getCreatedBy().getPhoneNumber(), null);
+                booking.setIssuBy(issuby);
                 return booking;
             }
         } else {
@@ -517,11 +524,13 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Page<Ticket> getMySells(int page) {
+    public Page<Booking> getMySells(int page) {
         Page<Booking> bookingPage = this.bookingRepository.findByCreatedByIdAndCancelledFalse(SecurityConfig.getCurrentUser().getId(), PageAttr.getPageRequest(page));
-        Page<Ticket> entities = bookingPage.map(Ticket::new);
-
-        return entities;
+        for(int i = 0; i < bookingPage.getContent().size(); i++){
+            User issuby = new User(bookingPage.getContent().get(i).getCreatedBy().getName(), bookingPage.getContent().get(i).getCreatedBy().getUsername(), bookingPage.getContent().get(i).getCreatedBy().getPhoneNumber(), null);
+            bookingPage.getContent().get(i).setIssuBy(issuby);
+        }
+        return bookingPage;
     }
 
     @Override

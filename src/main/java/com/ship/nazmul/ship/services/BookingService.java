@@ -1,8 +1,6 @@
 package com.ship.nazmul.ship.services;
 
 import com.ship.nazmul.ship.entities.Booking;
-import com.ship.nazmul.ship.entities.SubBooking;
-import com.ship.nazmul.ship.entities.pojo.Ticket;
 import com.ship.nazmul.ship.exceptions.exists.UserAlreadyExistsException;
 import com.ship.nazmul.ship.exceptions.forbidden.ForbiddenException;
 import com.ship.nazmul.ship.exceptions.invalid.UserInvalidException;
@@ -21,9 +19,9 @@ public interface BookingService {
 
     Booking getOne(Long id);
 
-    Ticket getAdminBooking(Long id);
+    Booking getAdminBooking(Long id);
 
-    Ticket getServiceAdminBooking(Long id);
+    Booking getServiceAdminBooking(Long id);
 
     Page<Booking> getAllBookings(int page);
 
@@ -45,11 +43,11 @@ public interface BookingService {
 
     Booking createAdminAgentBooking(Booking booking) throws ForbiddenException, NotFoundException, ParseException, UserAlreadyExistsException, NullPasswordException, UserInvalidException;
 
-    Ticket createServiceAdminBooking(Booking booking) throws ForbiddenException, NotFoundException, ParseException, UserAlreadyExistsException, NullPasswordException, UserInvalidException;
+    Booking createServiceAdminBooking(Booking booking) throws ForbiddenException, NotFoundException, ParseException, UserAlreadyExistsException, NullPasswordException, UserInvalidException;
 
     Booking createServiceAgentBooking(Booking booking) throws ForbiddenException, NotFoundException, ParseException, UserAlreadyExistsException, NullPasswordException, UserInvalidException;
 
-    Page<Ticket> getMySells(int page);
+    Page<Booking> getMySells(int page);
 
     void cancelReservation(Long bookingId) throws ParseException, NotFoundException, ForbiddenException, UserAlreadyExistsException, NullPasswordException, UserInvalidException;
 

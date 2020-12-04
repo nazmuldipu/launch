@@ -317,6 +317,12 @@ public class ReportServiceImpl implements ReportService {
         return obj;
     }
 
+    @Override
+    public JSONObject getAdminAgentCashReport(LocalDate date) {
+        System.out.println(date);
+        return null;
+    }
+
     List<JSONObject> getUserShipsReportObjects(User user, LocalDate date) throws JSONException, ParseException {
         if (user.getShips().size() < 1) return null;
         List<JSONObject> list = new ArrayList<JSONObject>();

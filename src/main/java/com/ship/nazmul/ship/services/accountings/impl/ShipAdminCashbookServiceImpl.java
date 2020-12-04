@@ -104,6 +104,7 @@ public class ShipAdminCashbookServiceImpl implements ShipAdminCashbookService {
         int lastBalance = this.getLastShipAdminLastEntryBalance(userId);
         shipAdminCashbook.setBalance(lastBalance+shipAdminCashbook.getDebit()-shipAdminCashbook.getCredit());
         shipAdminCashbook.setApproved(true);
+        shipAdminCashbook.setType(ShipAdminCashbook.TransactionType.AGENT_BALANCE);
         shipAdminCashbook = this.save(shipAdminCashbook);
         return shipAdminCashbook;
     }
