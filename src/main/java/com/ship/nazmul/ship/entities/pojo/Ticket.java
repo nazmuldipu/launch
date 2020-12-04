@@ -14,16 +14,24 @@ public class Ticket {
     private int totalFare;
     private int totalDiscount;
     private int totalCommission;
-    private boolean cancelled;
     private String category;
     private Seat.EStatus eStatus;
 
+    private boolean confirmed;
+    private boolean approved;
+    private boolean paid;
+    private boolean cancelled;
+
     public Ticket(Booking booking) {
         this.id = booking.getId();
-        if(booking.isCancelled()){
-            this.cancelled = true;
+        if (booking.isCancelled() || !booking.isConfirmed()) {
+            this.cancelled = booking.isCancelled();
+            this.confirmed = booking.isConfirmed();
         } else {
-            this.cancelled = false;
+            this.cancelled = booking.isCancelled();
+            this.confirmed = booking.isConfirmed();
+            this.approved = booking.isApproved();
+            this.paid = booking.isPaid();
             this.created = booking.getCreated();
             this.createdBy = new User(booking.getCreatedBy().getName(), booking.getCreatedBy().getUsername(), booking.getCreatedBy().getPhoneNumber(), null);
             this.user = new User(booking.getUser().getName(), booking.getUser().getUsername(), booking.getUser().getPhoneNumber(), null);
@@ -39,16 +47,16 @@ public class Ticket {
             booking.getSubBookingList().forEach(sb -> {
                 SubBooking subBooking = new SubBooking(sb.getDate(), sb.getSeatNumber(), sb.getFare(), sb.getDiscount(), sb.getPayablePrice());
                 this.subBookingList.add(subBooking);
-                if(categoryPrice[0] == 0){
+                if (categoryPrice[0] == 0) {
                     this.category = sb.getSeat().getCategory().getName();
                     categoryPrice[0] = sb.getSeat().getCategory().getFare();
                     categoryPriority[0] = sb.getSeat().getCategory().getPriority();
-                } else if(categoryPrice[0] > sb.getSeat().getCategory().getFare()){
+                } else if (categoryPrice[0] > sb.getSeat().getCategory().getFare()) {
                     this.category = sb.getSeat().getCategory().getName();
                     categoryPrice[0] = sb.getSeat().getCategory().getFare();
                     categoryPriority[0] = sb.getSeat().getCategory().getPriority();
-                } else if(categoryPrice[0] == sb.getSeat().getCategory().getFare()){
-                    if(categoryPriority[0] > sb.getSeat().getCategory().getPriority()){
+                } else if (categoryPrice[0] == sb.getSeat().getCategory().getFare()) {
+                    if (categoryPriority[0] > sb.getSeat().getCategory().getPriority()) {
                         categoryPrice[0] = sb.getSeat().getCategory().getFare();
                         this.category = sb.getSeat().getCategory().getName();
                     }
@@ -161,6 +169,30 @@ public class Ticket {
         this.eStatus = eStatus;
     }
 
+    public boolean isConfirmed() {
+        return confirmed;
+    }
+
+    public void setConfirmed(boolean confirmed) {
+        this.confirmed = confirmed;
+    }
+
+    public boolean isApproved() {
+        return approved;
+    }
+
+    public void setApproved(boolean approved) {
+        this.approved = approved;
+    }
+
+    public boolean isPaid() {
+        return paid;
+    }
+
+    public void setPaid(boolean paid) {
+        this.paid = paid;
+    }
+
     @Override
     public String toString() {
         return "Ticket{" +
@@ -173,9 +205,12 @@ public class Ticket {
                 ", totalFare=" + totalFare +
                 ", totalDiscount=" + totalDiscount +
                 ", totalCommission=" + totalCommission +
-                ", cancelled=" + cancelled +
-                ", category=" + category +
+                ", category='" + category + '\'' +
                 ", eStatus=" + eStatus +
+                ", confirmed=" + confirmed +
+                ", approved=" + approved +
+                ", paid=" + paid +
+                ", cancelled=" + cancelled +
                 '}';
     }
 }
