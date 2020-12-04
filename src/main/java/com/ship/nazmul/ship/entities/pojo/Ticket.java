@@ -24,7 +24,7 @@ public class Ticket {
 
     public Ticket(Booking booking) {
         this.id = booking.getId();
-        if (booking.isCancelled() || !booking.isConfirmed()) {
+        if (booking.isCancelled()) {
             this.cancelled = booking.isCancelled();
             this.confirmed = booking.isConfirmed();
         } else {
