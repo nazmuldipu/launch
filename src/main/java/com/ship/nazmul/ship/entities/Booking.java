@@ -30,7 +30,7 @@ public class Booking extends BaseEntity {
 
     private Seat.EStatus eStatus;
 
-    private User issuBy;
+//    private User issuBy;
 
     private boolean manualBooking;
     private boolean confirmed;
@@ -220,13 +220,13 @@ public class Booking extends BaseEntity {
     }
 
 
-    public User getIssuBy() {
-        return issuBy;
-    }
-
-    public void setIssuBy(User issuBy) {
-        this.issuBy = issuBy;
-    }
+//    public User getIssuBy() {
+//        return issuBy;
+//    }
+//
+//    public void setIssuBy(User issuBy) {
+//        this.issuBy = issuBy;
+//    }
 
     @Override
     public String toString() {

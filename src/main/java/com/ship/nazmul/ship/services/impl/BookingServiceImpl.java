@@ -98,7 +98,7 @@ public class BookingServiceImpl implements BookingService {
 //            Ticket ticket = new Ticket(booking);
 //            System.out.println(ticket.toString());
             User issuby = new User(booking.getCreatedBy().getName(), booking.getCreatedBy().getUsername(), booking.getCreatedBy().getPhoneNumber(), null);
-            booking.setIssuBy(issuby);
+//            booking.setIssuBy(issuby);
             return booking;
         }
 
@@ -165,7 +165,7 @@ public class BookingServiceImpl implements BookingService {
                     booking = this.reserveBooking(booking);
                 }
                 User issuby = new User(booking.getCreatedBy().getName(), booking.getCreatedBy().getUsername(), booking.getCreatedBy().getPhoneNumber(), null);
-                booking.setIssuBy(issuby);
+//                booking.setIssuBy(issuby);
                 return booking;
             }
         }
@@ -430,7 +430,7 @@ public class BookingServiceImpl implements BookingService {
                         booking = this.reserveBooking(booking);
                     }
                     User issuby = new User(booking.getCreatedBy().getName(), booking.getCreatedBy().getUsername(), booking.getCreatedBy().getPhoneNumber(), null);
-                    booking.setIssuBy(issuby);
+//                    booking.setIssuBy(issuby);
                     return booking;
                 }
             }
@@ -472,7 +472,7 @@ public class BookingServiceImpl implements BookingService {
                     booking = this.reserveBooking(booking);
                 }
                 User issuby = new User(booking.getCreatedBy().getName(), booking.getCreatedBy().getUsername(), booking.getCreatedBy().getPhoneNumber(), null);
-                booking.setIssuBy(issuby);
+//                booking.setIssuBy(issuby);
                 return booking;
             }
         }
@@ -514,7 +514,7 @@ public class BookingServiceImpl implements BookingService {
                 booking.seteStatus(Seat.EStatus.SEAT_SOLD);
                 booking = this.approveBooking(booking);
                 User issuby = new User(booking.getCreatedBy().getName(), booking.getCreatedBy().getUsername(), booking.getCreatedBy().getPhoneNumber(), null);
-                booking.setIssuBy(issuby);
+//                booking.setIssuBy(issuby);
                 return booking;
             }
         } else {
@@ -526,10 +526,10 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public Page<Booking> getMySells(int page) {
         Page<Booking> bookingPage = this.bookingRepository.findByCreatedByIdAndCancelledFalse(SecurityConfig.getCurrentUser().getId(), PageAttr.getPageRequest(page));
-        for(int i = 0; i < bookingPage.getContent().size(); i++){
-            User issuby = new User(bookingPage.getContent().get(i).getCreatedBy().getName(), bookingPage.getContent().get(i).getCreatedBy().getUsername(), bookingPage.getContent().get(i).getCreatedBy().getPhoneNumber(), null);
-            bookingPage.getContent().get(i).setIssuBy(issuby);
-        }
+//        for(int i = 0; i < bookingPage.getContent().size(); i++){
+//            User issuby = new User(bookingPage.getContent().get(i).getCreatedBy().getName(), bookingPage.getContent().get(i).getCreatedBy().getUsername(), bookingPage.getContent().get(i).getCreatedBy().getPhoneNumber(), null);
+//            bookingPage.getContent().get(i).setIssuBy(issuby);
+//        }
         return bookingPage;
     }
 
