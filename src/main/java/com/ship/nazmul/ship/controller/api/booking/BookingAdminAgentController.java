@@ -1,11 +1,13 @@
 package com.ship.nazmul.ship.controller.api.booking;
 
+import com.ship.nazmul.ship.dto.TicketDto;
 import com.ship.nazmul.ship.entities.Booking;
 import com.ship.nazmul.ship.exceptions.exists.UserAlreadyExistsException;
 import com.ship.nazmul.ship.exceptions.forbidden.ForbiddenException;
 import com.ship.nazmul.ship.exceptions.invalid.UserInvalidException;
 import com.ship.nazmul.ship.exceptions.notfound.NotFoundException;
 import com.ship.nazmul.ship.exceptions.nullpointer.NullPasswordException;
+import com.ship.nazmul.ship.mapper.TicketMapper;
 import com.ship.nazmul.ship.services.BookingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,10 +19,12 @@ import java.text.ParseException;
 @RequestMapping("/api/v1/adminAgent/booking")
 public class BookingAdminAgentController {
     private final BookingService bookingService;
+    private final TicketMapper ticketMapper;
 
     @Autowired
-    public BookingAdminAgentController(BookingService bookingService) {
+    public BookingAdminAgentController(BookingService bookingService, TicketMapper ticketMapper) {
         this.bookingService = bookingService;
+        this.ticketMapper = ticketMapper;
     }
 
     @GetMapping("/mySells")
@@ -30,7 +34,8 @@ public class BookingAdminAgentController {
 
     @PostMapping("/sell")
     private ResponseEntity createAdminAgentBooking(@RequestBody Booking booking) throws ParseException, NotFoundException, ForbiddenException, UserAlreadyExistsException, NullPasswordException, UserInvalidException, javassist.NotFoundException {
-        return ResponseEntity.ok(this.bookingService.createAdminAgentBooking(booking));
+        TicketDto ticketDto = ticketMapper.toTicket(this.bookingService.createAdminAgentBooking(booking));
+        return ResponseEntity.ok(ticketDto);
     }
 
     @PutMapping("/confirmReservation/{bookingId}")
