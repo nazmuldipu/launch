@@ -20,7 +20,7 @@ public class TicketMapperImpl implements TicketMapper {
 
         TicketDto ticketDto = new TicketDto();
         ticketDto.setId(booking.getId());
-        if (booking.isCancelled()) {
+        if (booking.isCancelled() || !booking.isConfirmed()) {
             ticketDto.setCancelled(booking.isCancelled());
             ticketDto.setConfirmed(booking.isConfirmed());
         } else {
