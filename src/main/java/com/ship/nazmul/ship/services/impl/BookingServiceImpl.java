@@ -167,6 +167,10 @@ public class BookingServiceImpl implements BookingService {
                 User issuby = new User(booking.getCreatedBy().getName(), booking.getCreatedBy().getUsername(), booking.getCreatedBy().getPhoneNumber(), null);
 //                booking.setIssuBy(issuby);
                 return booking;
+            } else{
+                booking.setCancelled(true);
+                booking = this.save(booking);
+                throw new NotFoundException("Seat not available");
             }
         }
         return null;
@@ -474,6 +478,10 @@ public class BookingServiceImpl implements BookingService {
                 User issuby = new User(booking.getCreatedBy().getName(), booking.getCreatedBy().getUsername(), booking.getCreatedBy().getPhoneNumber(), null);
 //                booking.setIssuBy(issuby);
                 return booking;
+            } else{
+                booking.setCancelled(true);
+                booking = this.save(booking);
+                throw new NotFoundException("Seat not available");
             }
         }
         return null;

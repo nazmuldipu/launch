@@ -4,6 +4,7 @@ import com.ship.nazmul.ship.dto.ShipDto;
 import com.ship.nazmul.ship.dto.TicketDto;
 import com.ship.nazmul.ship.dto.UserDto;
 import com.ship.nazmul.ship.entities.Booking;
+import com.ship.nazmul.ship.entities.Seat;
 import com.ship.nazmul.ship.entities.SubBooking;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +21,7 @@ public class TicketMapperImpl implements TicketMapper {
 
         TicketDto ticketDto = new TicketDto();
         ticketDto.setId(booking.getId());
-        if (booking.isCancelled() || !booking.isConfirmed()) {
+        if (booking.isCancelled() || (!booking.isConfirmed() && !booking.geteStatus().equals(Seat.EStatus.SEAT_RESERVED))) {
             ticketDto.setCancelled(booking.isCancelled());
             ticketDto.setConfirmed(booking.isConfirmed());
         } else {
