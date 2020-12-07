@@ -32,6 +32,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 //    @Query("SELECT DISTINCT u FROM User u WHERE u.ships.id = ?1 AND u.roles.name =?2")
     Page<User> findDistinctByShipsIdInAndRolesName(List<Long> shipsId, String role, Pageable pageable);
 
+    List<User> findDistinctByShipsIdInAndRolesName(List<Long> shipsId, String role);
+
     @Query("SELECT u FROM User u WHERE u.name LIKE %:query% OR u.username LIKE %:query%")
     Page<User> searchByNameOrUsername(@Param("query") String query, Pageable pageable);
 

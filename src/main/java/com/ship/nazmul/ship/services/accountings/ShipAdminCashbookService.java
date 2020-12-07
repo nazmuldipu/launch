@@ -6,6 +6,7 @@ import com.ship.nazmul.ship.exceptions.notfound.UserNotFoundException;
 import javassist.NotFoundException;
 import org.springframework.data.domain.Page;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface ShipAdminCashbookService {
@@ -14,6 +15,8 @@ public interface ShipAdminCashbookService {
     ShipAdminCashbook getShipAdminCashBook(Long id);
 
     List<ShipAdminCashbook> getAllShipAdminCashBook();
+
+    List<ShipAdminCashbook> getShipAdminCashBook(LocalDate date);
 
     Page<ShipAdminCashbook> getAllShipAdminCashBook(int page);
 
