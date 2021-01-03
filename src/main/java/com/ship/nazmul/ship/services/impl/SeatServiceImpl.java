@@ -109,23 +109,31 @@ public class SeatServiceImpl implements SeatService {
         return this.seatRepository.findByCategoryId(categoryId);
     }
 
+    /*Get available Seat list by ship Id and date
+    * @param: ShipId = ship id for seat info
+    * @param date =  Date to for the list
+    * @output: List<Seat>: list of seat with fare, category and availability info*/
     @Override
     public List<Seat> getAvailableSeatByShipId(Long shipId, LocalDate date) throws NotFoundException, ParseException {
-//        List<Seat> seatList = this.seatRepository.findByShipIdOrderBySeatNumber(shipId);
-        // Check if this ship is running
+        // If ship is not active then return null
         if (!this.shipService.isShipActive(shipId, date)) {
             return null;
         }
 
         List<Category> categoryList = this.categoryService.getCategoryByShipId(shipId);
+        System.out.println("D1 > category list size :" + categoryList.size() );
         List<Seat> seatList = new ArrayList<>();
         for (Category category : categoryList) {
             List<Seat> seats = this.getAvailableSeatByCategoryAndShipId(shipId, category.getId(), date);
+            System.out.println("D2 > seatList size : " + seats.size() );
             if (seats.size() > 0) {
                 Integer discount = this.categoryService.getDiscount(seats.get(0).getCategory().getId(), date);
+                System.out.println("D3 > discount " + discount);
                 seats.get(0).getCategory().setShip(null);
                 if (discount != null && discount > 0) {
+                    System.out.println("D4 > fare " + seats.get(0).getCategory().getFare());
                     seats.get(0).getCategory().setFare(seats.get(0).getCategory().getFare() - discount);
+                    System.out.println("D5 > fare " + seats.get(0).getCategory().getFare());
                 }
             }
             seatList.addAll(seats);
