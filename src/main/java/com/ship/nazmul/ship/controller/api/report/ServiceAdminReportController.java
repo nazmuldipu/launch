@@ -34,7 +34,7 @@ public class ServiceAdminReportController {
     }
 
     @GetMapping("/agent-cash")
-    private ResponseEntity getAgentCash(@RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date){
+    private ResponseEntity getAgentCash(@RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) throws ForbiddenException {
         return ResponseEntity.ok(this.reportService.getAdminAgentCashReport(date));
     }
 

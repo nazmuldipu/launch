@@ -109,10 +109,13 @@ public class SeatServiceImpl implements SeatService {
         return this.seatRepository.findByCategoryId(categoryId);
     }
 
+    /*Get available Seat list by ship Id and date
+    * @param: ShipId = ship id for seat info
+    * @param date =  Date to for the list
+    * @output: List<Seat>: list of seat with fare, category and availability info*/
     @Override
     public List<Seat> getAvailableSeatByShipId(Long shipId, LocalDate date) throws NotFoundException, ParseException {
-//        List<Seat> seatList = this.seatRepository.findByShipIdOrderBySeatNumber(shipId);
-        // Check if this ship is running
+        // If ship is not active then return null
         if (!this.shipService.isShipActive(shipId, date)) {
             return null;
         }

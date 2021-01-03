@@ -312,12 +312,12 @@ public class UserServiceImpl implements UserService {
     }
 
     /*Create Service admin agent
-    * @param user   user object to be add
-    * @return user  agent object after creating agent
-    * Setps: 1) Check if user with phone number exists
-    *       2) if exist and has ship list then Access denied
-    *       3) if exist but ship list size is zero then add as current user agent
-    *       4) if not exits then create user as agent*/
+     * @param user   user object to be add
+     * @return user  agent object after creating agent
+     * Setps: 1) Check if user with phone number exists
+     *       2) if exist and has ship list then Access denied
+     *       3) if exist but ship list size is zero then add as current user agent
+     *       4) if not exits then create user as agent*/
     @Override
     public User createServiceAdminAgent(User user) throws ForbiddenException, NullPasswordException {
         //Security check
@@ -329,7 +329,7 @@ public class UserServiceImpl implements UserService {
         //If user exists and user doesn't belongs to my hotel then access denied
         User oldUser = this.userRepo.findByPhoneNumber(user.getPhoneNumber());
         if (oldUser != null &&
-                ((!oldUser.isOnlyUser() && oldUser.getShips().size() != 0 && !this.containsShipListFromAnotherList(ships, oldUser.getShips()) )
+                ((!oldUser.isOnlyUser() && oldUser.getShips().size() != 0 && !this.containsShipListFromAnotherList(ships, oldUser.getShips()))
                         || (oldUser.hasRole(Role.ERole.ROLE_AGENT.toString()))))
             throw new ForbiddenException("Access denied");
 
@@ -354,18 +354,18 @@ public class UserServiceImpl implements UserService {
     }
 
     /*Find if any ship from a set of ship matches with another set of ship
-    * @param adminShips     Set of ship admin ships
-    * @param userShips      set of user ships
-    * @return true  if any ship of user ship set contains in admin ship set
-    * */
-    private boolean containsShipListFromAnotherList(Set<Ship> adminShips, Set<Ship> userShips){
+     * @param adminShips     Set of ship admin ships
+     * @param userShips      set of user ships
+     * @return true  if any ship of user ship set contains in admin ship set
+     * */
+    private boolean containsShipListFromAnotherList(Set<Ship> adminShips, Set<Ship> userShips) {
         Iterator<Ship> adminShipsItr = adminShips.iterator();
         Iterator<Ship> userShipsItr = userShips.iterator();
-        while(adminShipsItr.hasNext()){
+        while (adminShipsItr.hasNext()) {
             Ship adminShip = adminShipsItr.next();
-            while (userShipsItr.hasNext()){
+            while (userShipsItr.hasNext()) {
                 Ship userShip = userShipsItr.next();
-                if(adminShip.getId().equals(userShip.getId())){
+                if (adminShip.getId().equals(userShip.getId())) {
                     return true;
                 }
             }
@@ -386,11 +386,32 @@ public class UserServiceImpl implements UserService {
         return this.userRepo.findDistinctByShipsIdInAndRolesName(shipsId, Role.ERole.ROLE_SERVICE_AGENT.getValue(), PageAttr.getPageRequest(page));
     }
 
+
+    /*Get ship admin agent list
+     * Steps:   1) Security Check
+     *          2) Get the agent list
+     * */
+    @Override
+    public List<User> getServiceAdminAgents() throws ForbiddenException {
+        //List all ship for current logged in user
+        Set<Ship> ships = SecurityConfig.getCurrentUser().getShips();
+        if (ships == null || !SecurityConfig.getCurrentUser().hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()))
+            throw new ForbiddenException("Access denied");
+
+        //List ship admin ship id
+        List<Long> shipsId = new ArrayList<>();
+        for (Ship ship : ships) {
+            shipsId.add(ship.getId());
+        }
+
+        return this.userRepo.findDistinctByShipsIdInAndRolesName(shipsId, Role.ERole.ROLE_SERVICE_AGENT.getValue());
+    }
+
     /*Remove Service Admin Agent from ship
-    * @param userId     id of user to be remove
-    *
-    * Steps: 1) Remove balance from serviceAgent account
-    *       2)Remove all ship from service agent account*/
+     * @param userId     id of user to be remove
+     *
+     * Steps: 1) Remove balance from serviceAgent account
+     *       2)Remove all ship from service agent account*/
     @Override
     public User removeServiceAdminAgent(Long userId) throws ForbiddenException, UserNotFoundException {
         // Security check

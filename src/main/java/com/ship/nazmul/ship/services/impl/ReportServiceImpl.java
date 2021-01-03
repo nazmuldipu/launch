@@ -3,14 +3,12 @@ package com.ship.nazmul.ship.services.impl;
 import com.ship.nazmul.ship.commons.utils.DateUtil;
 import com.ship.nazmul.ship.config.security.SecurityConfig;
 import com.ship.nazmul.ship.entities.*;
+import com.ship.nazmul.ship.entities.accountings.ShipAdminCashbook;
 import com.ship.nazmul.ship.entities.pojo.ServiceAdminSellsReport;
 import com.ship.nazmul.ship.entities.pojo.ServiceAdminSellsReportRange;
 import com.ship.nazmul.ship.exceptions.forbidden.ForbiddenException;
-import com.ship.nazmul.ship.services.BookingService;
-import com.ship.nazmul.ship.services.CategoryService;
-import com.ship.nazmul.ship.services.ReportService;
-import com.ship.nazmul.ship.services.SeatService;
-import org.apache.tomcat.jni.Local;
+import com.ship.nazmul.ship.services.*;
+import com.ship.nazmul.ship.services.accountings.ShipAdminCashbookService;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -20,20 +18,24 @@ import org.springframework.stereotype.Service;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 public class ReportServiceImpl implements ReportService {
     private final SeatService seatService;
     private final BookingService bookingService;
     private final CategoryService categoryService;
+    private final ShipAdminCashbookService shipAdminCashbookService;
 
     @Autowired
-    public ReportServiceImpl(SeatService seatService, BookingService bookingService, CategoryService categoryService) {
+    public ReportServiceImpl(SeatService seatService, BookingService bookingService, CategoryService categoryService, ShipAdminCashbookService shipAdminCashbookService) {
         this.seatService = seatService;
         this.bookingService = bookingService;
         this.categoryService = categoryService;
+        this.shipAdminCashbookService = shipAdminCashbookService;
     }
 
     @Override
@@ -189,9 +191,9 @@ public class ReportServiceImpl implements ReportService {
             int seats = 0;
             int bookingCount = 0;
             for (Booking booking : bookingList) {
-                if(booking.geteStatus().equals(Seat.EStatus.SEAT_SOLD)) {
+                if (booking.geteStatus().equals(Seat.EStatus.SEAT_SOLD)) {
                     seats += booking.getSubBookingList().size();
-                    bookingCount ++;
+                    bookingCount++;
 
                 }
             }
@@ -317,10 +319,30 @@ public class ReportServiceImpl implements ReportService {
         return obj;
     }
 
+    /*Get ship admin cash
+     * Steps:   1) Security Check
+     *          2) Get the agent list
+     * */
     @Override
-    public JSONObject getAdminAgentCashReport(LocalDate date) {
-        System.out.println(date);
-        return null;
+    public List<ShipAdminCashbook> getAdminAgentCashReport(LocalDate date) throws ForbiddenException {
+        //list all ShipAdminCashbook for that date
+        List<ShipAdminCashbook> shipAdminCashbooks = this.shipAdminCashbookService.getShipAdminCashBook(date);
+
+        List<ShipAdminCashbook> newList = new ArrayList<>();
+        for (int i = 0; i < shipAdminCashbooks.size(); i++) {
+            ShipAdminCashbook cashbook = shipAdminCashbooks.get(i);
+            if (cashbook.getType() == null) {
+                String token = "\\b\\S*Agent balance\\S*";
+                Pattern pattern = Pattern.compile(token);
+                Matcher matcher = pattern.matcher(cashbook.getExplanation());
+                if (matcher.find()) {
+                    newList.add(cashbook);
+                }
+            } else if (cashbook.getType().equals(ShipAdminCashbook.TransactionType.AGENT_BALANCE)) {
+                newList.add(cashbook);
+            }
+        }
+        return newList;
     }
 
     List<JSONObject> getUserShipsReportObjects(User user, LocalDate date) throws JSONException, ParseException {

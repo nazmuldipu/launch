@@ -6,6 +6,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -13,6 +15,8 @@ public interface ShipAdminCashbookRepository  extends JpaRepository<ShipAdminCas
     ShipAdminCashbook findTopByOrderByIdDesc();
 
     List<ShipAdminCashbook> findByUserId(Long userId);
+
+    List<ShipAdminCashbook> findByDateBetween(LocalDateTime start, LocalDateTime end);
 
     Page<ShipAdminCashbook> findByUserIdOrderByIdAsc(Long userId, Pageable pageable);
 

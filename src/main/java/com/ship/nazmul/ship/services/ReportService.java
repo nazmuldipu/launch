@@ -1,5 +1,6 @@
 package com.ship.nazmul.ship.services;
 
+import com.ship.nazmul.ship.entities.accountings.ShipAdminCashbook;
 import com.ship.nazmul.ship.entities.pojo.ServiceAdminSellsReport;
 import com.ship.nazmul.ship.entities.pojo.ServiceAdminSellsReportRange;
 import com.ship.nazmul.ship.exceptions.forbidden.ForbiddenException;
@@ -50,5 +51,5 @@ public interface ReportService {
 
     JSONObject getServiceAdminDashboardReport(LocalDate date) throws JSONException, ForbiddenException, ParseException;
 
-    JSONObject getAdminAgentCashReport(LocalDate date);
+    List<ShipAdminCashbook> getAdminAgentCashReport(LocalDate date) throws ForbiddenException;
 }

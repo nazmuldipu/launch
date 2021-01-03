@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Date;
 import java.util.List;
 
@@ -48,6 +49,19 @@ public class ShipAdminCashbookServiceImpl implements ShipAdminCashbookService {
     @Override
     public List<ShipAdminCashbook> getAllShipAdminCashBook() {
         return this.shipAdminCashbookRepository.findAll();
+    }
+
+    /*Get ship admin cash book by date
+    * @param : date     LocalDate> for selected date
+    * @output: List of ShipAdminCashbook for
+    * Note: create start and end LocalDateTime for provided
+    * */
+    @Override
+    public List<ShipAdminCashbook> getShipAdminCashBook(LocalDate date) {
+        LocalDateTime start = date.atTime(LocalTime.MIN);
+        LocalDateTime end = date.atTime(LocalTime.MAX);
+
+        return this.shipAdminCashbookRepository.findByDateBetween(start, end);
     }
 
     @Override
@@ -102,14 +116,14 @@ public class ShipAdminCashbookServiceImpl implements ShipAdminCashbookService {
 
         ShipAdminCashbook shipAdminCashbook = new ShipAdminCashbook(LocalDateTime.now(), user, explanation, debit, credit);
         int lastBalance = this.getLastShipAdminLastEntryBalance(userId);
-        shipAdminCashbook.setBalance(lastBalance+shipAdminCashbook.getDebit()-shipAdminCashbook.getCredit());
+        shipAdminCashbook.setBalance(lastBalance + shipAdminCashbook.getDebit() - shipAdminCashbook.getCredit());
         shipAdminCashbook.setApproved(true);
         shipAdminCashbook.setType(ShipAdminCashbook.TransactionType.AGENT_BALANCE);
         shipAdminCashbook = this.save(shipAdminCashbook);
         return shipAdminCashbook;
     }
 
-    private int getLastShipAdminLastEntryBalance(Long userId){
+    private int getLastShipAdminLastEntryBalance(Long userId) {
         ShipAdminCashbook lastShipAdminCashbook = this.shipAdminCashbookRepository.findFirstByUserIdOrderByIdDesc(userId);
         return lastShipAdminCashbook == null ? 0 : lastShipAdminCashbook.getBalance();
     }

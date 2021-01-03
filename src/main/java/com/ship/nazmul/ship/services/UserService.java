@@ -72,6 +72,8 @@ public interface UserService {
 
     Page<User> getServiceAdminAgents(int page) throws ForbiddenException;
 
+    List<User> getServiceAdminAgents() throws ForbiddenException;
+
     User removeServiceAdminAgent(Long userId) throws ForbiddenException, UserNotFoundException;
 
 }
