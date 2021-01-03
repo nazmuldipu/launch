@@ -28,12 +28,12 @@ public class SeatController {
     @GetMapping("/available/{shipId}")
     private ResponseEntity getAllAvailableSeatForUser(@PathVariable("shipId") Long shipId,
                                                       @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) throws NotFoundException, ParseException {
-        List<Seat> seatList = this.seatService.getAvailableSeatByShipId(shipId, date);
-            if(seatList == null ){
-                Map<String, String> response = new HashMap<>();
-                response.put("response", "No ship on " + date.toString());
-                return ResponseEntity.ok(response);
-            }
+//        List<Seat> seatList = this.seatService.getAvailableSeatByShipId(shipId, date);
+//            if(seatList == null ){
+//                Map<String, String> response = new HashMap<>();
+//                response.put("response", "No ship on " + date.toString());
+//                return ResponseEntity.ok(response);
+//            }
         return ResponseEntity.ok(this.seatService.getAvailableSeatByShipId(shipId, date));
     }
 }
