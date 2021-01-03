@@ -386,6 +386,7 @@ public class BookingServiceImpl implements BookingService {
             Seat seat = this.seatService.getOne(subBooking.getLocalSeatId());
             long cid = subBooking.getCategoryId();
             subBooking.setSeat(seat);
+            subBooking.setFare(seat.getCategory().getFare());
             subBooking = this.calculateSubBooking(subBooking, cid);
             newSubBookingList.add(subBooking);
         }
