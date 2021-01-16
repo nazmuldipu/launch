@@ -268,7 +268,9 @@ public class SeatServiceImpl implements SeatService {
     @Override
     public void clearSeatStatusAndBookingIdMap(Long seatId, LocalDate date, Booking booking) throws ForbiddenException, NotFoundException, ParseException {
         User currentUser = SecurityConfig.getCurrentUser();
-        if (!currentUser.isAdmin() && !currentUser.hasRole(Role.ERole.ROLE_AGENT.toString()) && !(currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()) && Validator.containsShip(currentUser.getShips(), booking.getShip())))
+        if (!currentUser.isAdmin() && !currentUser.hasRole(Role.ERole.ROLE_AGENT.toString())
+                && !(currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()) && Validator.containsShip(currentUser.getShips(), booking.getShip()))
+        && !(currentUser.hasRole(Role.ERole.ROLE_SERVICE_AGENT.toString()) && currentUser.isCanReserve() && currentUser.getId().equals(booking.getCreatedBy().getId())))
             throw new ForbiddenException("Access denied");
         this.removeBookingMap(seatId, date);
         this.clearStatusMap(seatId, date);

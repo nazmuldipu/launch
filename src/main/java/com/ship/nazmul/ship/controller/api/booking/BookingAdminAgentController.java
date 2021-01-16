@@ -39,7 +39,7 @@ public class BookingAdminAgentController {
     }
 
     @PutMapping("/confirmReservation/{bookingId}")
-    private ResponseEntity confirmReservation(@PathVariable("bookingId")Long bookingId) throws NullPasswordException, UserAlreadyExistsException, UserInvalidException, NotFoundException, ParseException, javassist.NotFoundException {
+    private ResponseEntity confirmReservation(@PathVariable("bookingId")Long bookingId) throws NullPasswordException, UserAlreadyExistsException, UserInvalidException, NotFoundException, ParseException, javassist.NotFoundException, ForbiddenException {
 
         return ResponseEntity.ok(this.bookingService.confirmReservation(bookingId));
     }

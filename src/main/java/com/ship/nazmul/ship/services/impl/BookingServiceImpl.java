@@ -95,10 +95,22 @@ public class BookingServiceImpl implements BookingService {
         if (currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString())
                 && Validator.containsShip(currentUser.getShips(), booking.getShip())
                 && !booking.isCancelled()) {
-//            Ticket ticket = new Ticket(booking);
-//            System.out.println(ticket.toString());
-            User issuby = new User(booking.getCreatedBy().getName(), booking.getCreatedBy().getUsername(), booking.getCreatedBy().getPhoneNumber(), null);
-//            booking.setIssuBy(issuby);
+            return booking;
+        }
+
+        return null;
+    }
+
+    @Override
+    public Booking getServiceAgentBooking(Long id) throws ForbiddenException {
+        if (!SecurityConfig.getCurrentUser().isCanReserve())
+            throw new ForbiddenException("Access denied");
+
+        Booking booking = this.getOne(id);
+        User currentUser = SecurityConfig.getCurrentUser();
+        if (currentUser.hasRole(Role.ERole.ROLE_SERVICE_AGENT.toString())
+                && Validator.containsShip(currentUser.getShips(), booking.getShip())
+                && !booking.isCancelled()) {
             return booking;
         }
 
@@ -167,7 +179,7 @@ public class BookingServiceImpl implements BookingService {
                 User issuby = new User(booking.getCreatedBy().getName(), booking.getCreatedBy().getUsername(), booking.getCreatedBy().getPhoneNumber(), null);
 //                booking.setIssuBy(issuby);
                 return booking;
-            } else{
+            } else {
                 booking.setCancelled(true);
                 booking = this.save(booking);
                 throw new NotFoundException("Seat not available");
@@ -177,8 +189,11 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Booking confirmReservation(Long bookingId) throws NotFoundException, UserAlreadyExistsException, NullPasswordException, UserInvalidException, ParseException {
+    public Booking confirmReservation(Long bookingId) throws NotFoundException, UserAlreadyExistsException, NullPasswordException, UserInvalidException, ParseException, ForbiddenException {
         Booking booking = this.getOne(bookingId);
+        User createdBy = booking.getCreatedBy();
+        if (!SecurityConfig.getCurrentUser().getId().equals(createdBy.getId()))
+            throw new ForbiddenException("Access denied, this booking doesn't belongs to you.");
         return this.approveBooking(booking);
     }
 
@@ -218,9 +233,9 @@ public class BookingServiceImpl implements BookingService {
                 }
             }
             Integer commissionRate = SecurityConfig.getCurrentUser().getCommission();
-            if(commissionRate == null || commissionRate.equals(0)){
+            if (commissionRate == null || commissionRate.equals(0)) {
                 commissionRate = 50;
-            } else if(commissionRate < 0){
+            } else if (commissionRate < 0) {
                 commissionRate = 0;
             }
             booking.setHotelswaveDiscount((hotelswaveCommission * (100 - commissionRate)) / 100);
@@ -432,10 +447,13 @@ public class BookingServiceImpl implements BookingService {
                     if (booking.geteStatus() == Seat.EStatus.SEAT_SOLD) {
                         booking = this.approveBooking(booking);
                     } else if (booking.geteStatus() == Seat.EStatus.SEAT_RESERVED) {
-                        booking = this.reserveBooking(booking);
+                        if (user.isCanReserve()) {
+                            booking = this.reserveBooking(booking);
+                        } else {
+                            throw new ForbiddenException("Access denied");
+                        }
+
                     }
-                    User issuby = new User(booking.getCreatedBy().getName(), booking.getCreatedBy().getUsername(), booking.getCreatedBy().getPhoneNumber(), null);
-//                    booking.setIssuBy(issuby);
                     return booking;
                 } else {
                     booking.setCancelled(true);
@@ -468,8 +486,8 @@ public class BookingServiceImpl implements BookingService {
         // 2) Add subBookingList to booking and Calculate Booking
         booking.setSubBookingList(this.calculateSubBookingList(booking.getSubBookingList()));
         booking = this.calculateBooking(booking);
-        booking.setShip(this.shipService.getOne(booking.getShip().getId()));
-        booking.setShipName(booking.getShip().getName());
+        booking.setShip(ship);
+        booking.setShipName(ship.getName());
 //        booking.setCategoryName(booking.getSubBookingList().get(0).getSeat().getCategory().getName());
 
         if (user.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString())) {
@@ -480,10 +498,8 @@ public class BookingServiceImpl implements BookingService {
                 } else if (booking.geteStatus() == Seat.EStatus.SEAT_RESERVED) {
                     booking = this.reserveBooking(booking);
                 }
-                User issuby = new User(booking.getCreatedBy().getName(), booking.getCreatedBy().getUsername(), booking.getCreatedBy().getPhoneNumber(), null);
-//                booking.setIssuBy(issuby);
                 return booking;
-            } else{
+            } else {
                 booking.setCancelled(true);
                 booking = this.save(booking);
                 throw new NotFoundException("Seat not available");
@@ -524,14 +540,18 @@ public class BookingServiceImpl implements BookingService {
         if (agentBalance > (booking.getTotalPayablePrice() - shipAgentCommission)) {
             booking = this.save(booking);
             if (this.confirmBooking(booking)) {
-                booking.seteStatus(Seat.EStatus.SEAT_SOLD);
-                booking = this.approveBooking(booking);
-                User issuby = new User(booking.getCreatedBy().getName(), booking.getCreatedBy().getUsername(), booking.getCreatedBy().getPhoneNumber(), null);
-//                booking.setIssuBy(issuby);
+                if (booking.geteStatus() == Seat.EStatus.SEAT_SOLD) {
+                    booking = this.approveBooking(booking);
+                } else if (booking.geteStatus() == Seat.EStatus.SEAT_RESERVED) {
+                    if (user.isCanReserve()) {
+                        booking = this.reserveBooking(booking);
+                    } else
+                        throw new ForbiddenException("Access denied");
+                }
                 return booking;
-            } else{
+            } else {
                 booking.setCancelled(true);
-                booking = this.save(booking);
+                this.save(booking);
                 throw new NotFoundException("Seat not available");
             }
         } else {
@@ -621,8 +641,10 @@ public class BookingServiceImpl implements BookingService {
                 if (!currentUser.isAdmin()) throw new ForbiddenException("Access denied");
                 this.adminAgentSellsSeatAccount(booking, true);
             } else if (booking.getCreatedBy().hasRole(Role.ERole.ROLE_SERVICE_AGENT.toString())) {
-                if (!currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()))
-                    throw new ForbiddenException("Access denied");
+                boolean validUser = SecurityConfig.getCurrentUser().hasRole(Role.ERole.ROLE_SERVICE_AGENT.toString()) &&
+                        SecurityConfig.getCurrentUser().getId().equals(booking.getCreatedBy().getId());
+                if (!(currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()) || validUser))
+                    throw new ForbiddenException("Access denied -");
                 this.shipAgentSellsSeatAccount(booking, true);
 //            } else if (booking.getCreatedBy().hasRole(Role.ERole.ROLE_USER.toString())) {
 //                if (!currentUser.isAdmin()) throw new ForbiddenException("Access denied");

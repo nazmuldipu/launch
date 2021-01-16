@@ -26,4 +26,10 @@ public class UserController {
     private ResponseEntity<User> changeUserPassword(@PathVariable("userId")Long userId, @RequestParam("password")String password) throws NullPasswordException, ForbiddenException, UserAlreadyExistsException, UserInvalidException, UserNotFoundException {
         return ResponseEntity.ok(this.userService.changePassword(userId, password));
     }
+
+//    /*Get user permissions
+//    * @Output permissions
+//    */
+//    @GetMapping("/premissions")
+//    private ResponseEntity<>
 }

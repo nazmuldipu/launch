@@ -20,6 +20,9 @@ public class CustomTokenEnhancer implements TokenEnhancer {
         additionalInfo.put("username", user.getUsername());
         additionalInfo.put("phone", user.getPhoneNumber());
         additionalInfo.put("authorities", user.getAuthorities());
+        additionalInfo.put("canReserve", user.isCanReserve());
+        additionalInfo.put("canCancelReservation", user.isCanCancelReservation());
+        additionalInfo.put("canCancelBooking", user.isCanCancelBooking());
 
         ((DefaultOAuth2AccessToken) accessToken).setAdditionalInformation(additionalInfo);
 
