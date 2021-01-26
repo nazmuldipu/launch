@@ -326,7 +326,7 @@ public class UserServiceImpl implements UserService {
         if (ships == null || !currentUser.hasRole(Role.ERole.ROLE_SERVICE_ADMIN.toString()))
             throw new ForbiddenException("Access Denied");
 
-        //If user exists and user doesn't belongs to my hotel then access denied
+        //If user exists and user doesn't belongs to my ship then access denied
         User oldUser = this.userRepo.findByPhoneNumber(user.getPhoneNumber());
         if (oldUser != null &&
                 ((!oldUser.isOnlyUser() && oldUser.getShips().size() != 0 && !this.containsShipListFromAnotherList(ships, oldUser.getShips()))
@@ -335,6 +335,9 @@ public class UserServiceImpl implements UserService {
 
         if (oldUser != null) {
             oldUser.setCommission(user.getCommission());
+            oldUser.setCanReserve(user.isCanReserve());
+            oldUser.setCanCancelReservation(user.isCanCancelReservation());
+            oldUser.setCanCancelBooking(user.isCanCancelBooking());
             oldUser.setName(user.getName());
             oldUser.setEmail(user.getEmail());
             oldUser.changeRole(this.roleService.findRole(Role.ERole.ROLE_SERVICE_AGENT));
@@ -347,6 +350,10 @@ public class UserServiceImpl implements UserService {
             user.setPassword(PasswordUtil.encryptPassword(user.getPassword(), PasswordUtil.EncType.BCRYPT_ENCODER, null));
             user.changeRole(this.roleService.findRole(Role.ERole.ROLE_SERVICE_AGENT));
             user.getShips().clear();
+            user.setCommission(user.getCommission());
+            user.setCanReserve(user.isCanReserve());
+            user.setCanCancelReservation(user.isCanCancelReservation());
+            user.setCanCancelBooking(user.isCanCancelBooking());
             this.userRepo.save(user);
             user.getShips().addAll(ships);
             return this.userRepo.save(user);

@@ -57,6 +57,9 @@ public class User extends BaseEntity implements UserDetails {
     private boolean accountNonExpired = true;
     private boolean accountNonLocked = true;
     private boolean credentialsNonExpired = true;
+    private boolean canReserve = false;
+    private boolean canCancelReservation = false;
+    private boolean canCancelBooking = false;
     private int commission;
 
 
@@ -261,6 +264,30 @@ public class User extends BaseEntity implements UserDetails {
 
     public void setCommission(int commission) {
         this.commission = commission;
+    }
+
+    public boolean isCanReserve() {
+        return canReserve;
+    }
+
+    public void setCanReserve(boolean canReserve) {
+        this.canReserve = canReserve;
+    }
+
+    public boolean isCanCancelReservation() {
+        return canCancelReservation;
+    }
+
+    public void setCanCancelReservation(boolean canCancelReservation) {
+        this.canCancelReservation = canCancelReservation;
+    }
+
+    public boolean isCanCancelBooking() {
+        return canCancelBooking;
+    }
+
+    public void setCanCancelBooking(boolean canCancelBooking) {
+        this.canCancelBooking = canCancelBooking;
     }
 
     @Override
