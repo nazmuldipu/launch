@@ -406,12 +406,8 @@ public class BookingServiceImpl implements BookingService {
             subBooking.setLocalSeatId(seat.getId());
             subBooking.setCategoryId(seat.getCategory().getId());
             subBooking.setSeat(seat);
-<<<<<<< HEAD
-            long cid = subBooking.getCategoryId();
-=======
             subBooking.setFare(seat.getCategory().getFare());
->>>>>>> e9a2cafcfd1444191142ac720fc9d48791b15875
-            subBooking = this.calculateSubBooking(subBooking, cid);
+            subBooking = this.calculateSubBooking(subBooking, subBooking.getCategoryId());
             newSubBookingList.add(subBooking);
         }
         return newSubBookingList;
