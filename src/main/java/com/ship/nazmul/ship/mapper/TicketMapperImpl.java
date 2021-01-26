@@ -37,6 +37,7 @@ public class TicketMapperImpl implements TicketMapper {
             ticketDto.setTotalFare(booking.getTotalFare());
             ticketDto.setTotalDiscount(booking.getTotalDiscount());
             ticketDto.setTotalCommission(booking.getTotalCommission());
+            ticketDto.setTotalPayablePrice(booking.getTotalPayablePrice());
             ticketDto.seteStatus(booking.geteStatus());
             //Populate subBookingList
             List<SubBooking> subBookingList = new ArrayList<>();

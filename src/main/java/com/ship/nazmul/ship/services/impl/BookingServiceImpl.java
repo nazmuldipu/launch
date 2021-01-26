@@ -371,6 +371,7 @@ public class BookingServiceImpl implements BookingService {
         int totalDiscount = 0;
         int totalCommission = 0;
         for (SubBooking subBooking : booking.getSubBookingList()) {
+            booking.setShip(subBooking.getSeat().getShip());
             totalFare += subBooking.getFare();
             totalDiscount += subBooking.getDiscount();
             totalCommission += subBooking.getCommission();
@@ -386,10 +387,11 @@ public class BookingServiceImpl implements BookingService {
     List<SubBooking> calculateSubBookingList(List<SubBooking> subBookingList) throws NotFoundException, ParseException {
         List<SubBooking> newSubBookingList = new ArrayList<>();
         for (SubBooking subBooking : subBookingList) {
-            subBooking.setLocalSeatId(subBooking.getSeat().getId());
-            Seat seat = this.seatService.getOne(subBooking.getLocalSeatId());
-            long cid = subBooking.getCategoryId();
+            Seat seat = this.seatService.getOne(subBooking.getSeat().getId());
+            subBooking.setLocalSeatId(seat.getId());
+            subBooking.setCategoryId(seat.getCategory().getId());
             subBooking.setSeat(seat);
+            long cid = subBooking.getCategoryId();
             subBooking = this.calculateSubBooking(subBooking, cid);
             newSubBookingList.add(subBooking);
         }

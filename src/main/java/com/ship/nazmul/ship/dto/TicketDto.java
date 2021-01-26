@@ -15,6 +15,7 @@ public class TicketDto {
     private int totalFare;
     private int totalDiscount;
     private int totalCommission;
+    private int totalPayablePrice;
     private String category;
     private Seat.EStatus eStatus;
     private List<SubBooking> subBookingList;
@@ -145,5 +146,35 @@ public class TicketDto {
 
     public void setCancelled(boolean cancelled) {
         this.cancelled = cancelled;
+    }
+
+    public int getTotalPayablePrice() {
+        return totalPayablePrice;
+    }
+
+    public void setTotalPayablePrice(int totalPayablePrice) {
+        this.totalPayablePrice = totalPayablePrice;
+    }
+
+    @Override
+    public String toString() {
+        return "TicketDto{" +
+                "id=" + id +
+                ", created=" + created +
+                ", createdBy=" + createdBy +
+                ", user=" + user +
+                ", ship=" + ship +
+                ", totalFare=" + totalFare +
+                ", totalDiscount=" + totalDiscount +
+                ", totalCommission=" + totalCommission +
+                ", totalPayablePrice=" + totalPayablePrice +
+                ", category='" + category + '\'' +
+                ", eStatus=" + eStatus +
+                ", subBookingList=" + subBookingList +
+                ", confirmed=" + confirmed +
+                ", approved=" + approved +
+                ", paid=" + paid +
+                ", cancelled=" + cancelled +
+                '}';
     }
 }
