@@ -715,6 +715,7 @@ public class BookingServiceImpl implements BookingService {
                 Long bookingId = seat.getBookingIdMap().get(date);
                 if (bookingId != null) {
                     SubBooking subBooking = new SubBooking(date, seat.getSeatNumber(), seat.getCategory().getFare(), 150, seat.getCategory().getFare() - 150);
+                    subBooking.setSeat(seat);
                     Booking booking = this.getOne(bookingId);
                     if(!this.existBooking(booking, seat.getId())) {
                         booking.getSubBookingList().add(subBooking);
