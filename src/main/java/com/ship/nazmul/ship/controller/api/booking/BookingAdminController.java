@@ -80,8 +80,9 @@ public class BookingAdminController {
     }
 
     @PutMapping("/updateSubBooking")
-    private ResponseEntity updateSubBOokingSeat() throws NotFoundException, ForbiddenException, InvalidException {
-        this.bookingService.updateBooking();
+    private ResponseEntity updateSubBOokingSeat( @RequestParam("startDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+                                                 @RequestParam("endDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) throws NotFoundException, ForbiddenException, InvalidException {
+        this.bookingService.updateBooking(startDate, endDate);
         return ResponseEntity.ok().build();
     }
 }
