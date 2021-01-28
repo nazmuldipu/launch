@@ -727,10 +727,13 @@ public class BookingServiceImpl implements BookingService {
 
     private boolean existBooking(Booking booking, Long seatId){
         List<SubBooking> subBookings = booking.getSubBookingList();
+        if(subBookings != null && subBookings.size() > 0){
         for(SubBooking subBooking: subBookings){
-            if(subBooking.getSeat().getId().equals(seatId))
-                return  true;
-        }
+            if(subBooking.getSeat() != null && seatId != null) {
+                if (subBooking.getSeat().getId().equals(seatId))
+                    return true;
+            }
+        }}
         return false;
     }
 
