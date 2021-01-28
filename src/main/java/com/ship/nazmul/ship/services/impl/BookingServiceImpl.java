@@ -706,8 +706,8 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public void updateBooking() throws ForbiddenException {
-        LocalDate startDate = LocalDate.of(2020, 10, 01);
-        LocalDate endDate = LocalDate.of(2021, 04, 01);
+        LocalDate startDate = LocalDate.of(2021, 01, 01);
+        LocalDate endDate = LocalDate.of(2021, 04, 30);
         List<LocalDate> dateList = DateUtil.getLocalDatesBetween(startDate, endDate);
         List<Seat> seatList = this.seatService.getAll();
         for (Seat seat : seatList) {
