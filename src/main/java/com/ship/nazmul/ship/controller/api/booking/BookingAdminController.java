@@ -4,6 +4,7 @@ import com.ship.nazmul.ship.dto.TicketDto;
 import com.ship.nazmul.ship.entities.Booking;
 import com.ship.nazmul.ship.exceptions.exists.UserAlreadyExistsException;
 import com.ship.nazmul.ship.exceptions.forbidden.ForbiddenException;
+import com.ship.nazmul.ship.exceptions.invalid.InvalidException;
 import com.ship.nazmul.ship.exceptions.invalid.UserInvalidException;
 import com.ship.nazmul.ship.exceptions.notfound.NotFoundException;
 import com.ship.nazmul.ship.exceptions.nullpointer.NullPasswordException;
@@ -75,6 +76,12 @@ public class BookingAdminController {
     @DeleteMapping("/cancelReservation/{bookingId}")
     private ResponseEntity cancelReservation(@PathVariable("bookingId")Long bookingId) throws UserInvalidException, ForbiddenException, ParseException, NullPasswordException, NotFoundException, UserAlreadyExistsException {
         this.bookingService.cancelReservation(bookingId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/updateSubBooking")
+    private ResponseEntity updateSubBOokingSeat() throws NotFoundException, ForbiddenException, InvalidException {
+        this.bookingService.updateBooking();
         return ResponseEntity.ok().build();
     }
 }

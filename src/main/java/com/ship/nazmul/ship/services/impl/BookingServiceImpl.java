@@ -435,6 +435,7 @@ public class BookingServiceImpl implements BookingService {
         // 2) Add subBookingList to booking and Calculate Booking
         booking.setSubBookingList(this.calculateSubBookingList(booking.getSubBookingList()));
         booking = this.calculateBooking(booking);
+        System.out.println("DD1>" + booking.toString());
         booking.setShip(this.shipService.getOne(booking.getShip().getId()));
         booking.setShipName(booking.getShip().getName());
 //        booking.setCategoryName(booking.getSubBookingList().get(0).getSeat().getCategory().getName());
@@ -701,6 +702,36 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<Booking> getReservationListByUserIdShipIdAndDate(Long userId, Long shipId, LocalDate date) {
         return this.bookingRepository.findDistinctByCreatedByIdAndShipIdAndSubBookingListDateAndCancelledFalse(userId, shipId, date);
+    }
+
+    @Override
+    public void updateBooking() throws ForbiddenException {
+        LocalDate startDate = LocalDate.of(2020, 10, 01);
+        LocalDate endDate = LocalDate.of(2021, 04, 01);
+        List<LocalDate> dateList = DateUtil.getLocalDatesBetween(startDate, endDate);
+        List<Seat> seatList = this.seatService.getAll();
+        for (Seat seat : seatList) {
+            for (LocalDate date : dateList) {
+                Long bookingId = seat.getBookingIdMap().get(date);
+                if (bookingId != null) {
+                    SubBooking subBooking = new SubBooking(date, seat.getSeatNumber(), seat.getCategory().getFare(), 150, seat.getCategory().getFare() - 150);
+                    Booking booking = this.getOne(bookingId);
+                    if(!this.existBooking(booking, seat.getId())) {
+                        booking.getSubBookingList().add(subBooking);
+                        this.bookingRepository.save(booking);
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean existBooking(Booking booking, Long seatId){
+        List<SubBooking> subBookings = booking.getSubBookingList();
+        for(SubBooking subBooking: subBookings){
+            if(subBooking.getSeat().getId().equals(seatId))
+                return  true;
+        }
+        return false;
     }
 
     /*Remove sold booking seats from booking for SERVICE_ADMIN

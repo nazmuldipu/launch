@@ -65,6 +65,4 @@ public class SeatAdminController {
         seat.setId(seatId);
         return ResponseEntity.ok(this.seatService.save(shipId, seat));
     }
-
-
 }

@@ -66,4 +66,6 @@ public interface BookingService {
     List<Booking> getBookingListByCreatedIdAndShipIdAndDate(Long userId, Long shipId, Date date);
 
     List<Booking> getReservationListByUserIdShipIdAndDate(Long userId, Long shipId, LocalDate date);
+
+    void updateBooking() throws ForbiddenException;
 }
