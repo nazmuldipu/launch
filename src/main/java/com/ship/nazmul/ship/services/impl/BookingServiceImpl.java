@@ -435,7 +435,6 @@ public class BookingServiceImpl implements BookingService {
         // 2) Add subBookingList to booking and Calculate Booking
         booking.setSubBookingList(this.calculateSubBookingList(booking.getSubBookingList()));
         booking = this.calculateBooking(booking);
-        System.out.println("DD1>" + booking.toString());
         booking.setShip(this.shipService.getOne(booking.getShip().getId()));
         booking.setShipName(booking.getShip().getName());
 //        booking.setCategoryName(booking.getSubBookingList().get(0).getSeat().getCategory().getName());
