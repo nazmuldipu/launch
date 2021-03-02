@@ -32,6 +32,12 @@ public class BookingAdminAgentController {
         return ResponseEntity.ok(this.bookingService.getMySells(page));
     }
 
+    @GetMapping("/{bookingId}")
+    private ResponseEntity getBookingById(@PathVariable("bookingId")Long bookingId){
+        TicketDto ticketDto = ticketMapper.toTicket(this.bookingService.getAdminBooking(bookingId));
+        return ResponseEntity.ok(ticketDto);
+    }
+
     @PostMapping("/sell")
     private ResponseEntity createAdminAgentBooking(@RequestBody Booking booking) throws ParseException, NotFoundException, ForbiddenException, UserAlreadyExistsException, NullPasswordException, UserInvalidException, javassist.NotFoundException {
         TicketDto ticketDto = ticketMapper.toTicket(this.bookingService.createAdminAgentBooking(booking));
